@@ -75,22 +75,23 @@
               </template>
             </nk-form-item>
             <nk-form-item term="授权限制">
-                            <span v-for="limit in itemLimitIds" :key="limit" >
-                                {{ limit }}
-                            </span>
-              <a-select
-                  slot="edit"
-                  mode="multiple"
-                  :value="itemLimitIds"
-                  placeholder="请选择限制"
-                  style="width: 100%"
-                  :filter-option="false"
-                  @change="itemLimitChange"
-              >
-                <a-select-option v-for="limit in limits" :key="limit.limitId" >
-                  {{ limit.limitDesc }}
-                </a-select-option>
-              </a-select>
+                <span v-for="limit in itemLimitIds" :key="limit" >
+                    {{ limit | nkFromList(limits,'limitDesc','limitId') }}
+                </span>
+                <span style="color: #aa2222;font-style: italic;">注意：授权限制已调整，请前往用户组配置</span>
+<!--              <a-select-->
+<!--                  slot="edit"-->
+<!--                  mode="multiple"-->
+<!--                  :value="itemLimitIds"-->
+<!--                  placeholder="请选择限制"-->
+<!--                  style="width: 100%"-->
+<!--                  :filter-option="false"-->
+<!--                  @change="itemLimitChange"-->
+<!--              >-->
+<!--                <a-select-option v-for="limit in limits" :key="limit.limitId" >-->
+<!--                  {{ limit.limitDesc }}-->
+<!--                </a-select-option>-->
+<!--              </a-select>-->
             </nk-form-item>
             <nk-form-item term="Level">
               {{itemLevel}}
