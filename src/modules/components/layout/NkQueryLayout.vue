@@ -86,9 +86,14 @@
                                 <a-icon type="rollback" />
                             </a-button>
                         </a-button-group>
-                        <a-button v-if="saveAsSource" class="nk-button" type="default" @click="saveAs.visible=true" style="width: 56px;">
-                            <a-icon type="save" />...
-                        </a-button>
+                        <a-button-group class="nk-button">
+                            <a-button type="default" @click="$refs.grid.print()">
+                                <a-icon type="printer" />
+                            </a-button>
+                            <a-button v-if="saveAsSource" type="default" @click="saveAs.visible=true" style="width: 56px;">
+                                <a-icon type="save" />...
+                            </a-button>
+                        </a-button-group>
                     </nk-search-item>
                 </nk-search-box>
             </a-form>
