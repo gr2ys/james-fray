@@ -76,6 +76,14 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
+::v-deep .empty{
+    color:#bbb;
+    user-select: none;
+    font-style: italic;
 
+}
+::v-deep .empty::before{
+    content: '-'
+}
 </style>
