@@ -135,7 +135,7 @@
                                 {{selectedItem.spELControl}}
                                 <nk-sp-el-editor slot="edit" v-model="selectedItem.spELControl"></nk-sp-el-editor>
                             </nk-form-item>
-                            <nk-form-item title="值条件 SpEL ">
+                            <nk-form-item title="值条件 SpEL">
                                 {{selectedItem.spELTriggers}}
                                 <a-select slot="edit" size="small" v-model="selectedItem.spELTriggers" mode="multiple" >
                                     <a-select-option key="ALWAYS">ALWAYS</a-select-option>
