@@ -97,6 +97,7 @@
                            :key="item.docState"
                            :title="`确定${item.operatorName || item.docStateDesc}?`"
                            @confirm="doSave(item.docState)"
+                           placement="bottomRight"
                            :disabled="editCheckFailed"
             >
                 <a-button type="primary" :disabled="editCheckFailed">
