@@ -55,7 +55,8 @@ import NkPagePreview from "./NkPagePreview";
 
 const classifies = [
     {value:'TRANSACTION',label:'交易'},
-    {value:'PARTNER',label:'交易伙伴'}
+    {value:'PARTNER',label:'交易伙伴'},
+    {value:'PIPELINE',label:'流水线'}
 ];
 
 export default {
