@@ -97,6 +97,7 @@ export default {
 
                 {key:'beforeUpdate',        name:'[更新]beforeUpdate',        ref:'docCycleInterceptor'},
                 {key:'afterUpdated',        name:'[更新]afterUpdated',        ref:'docCycleInterceptor'},
+                {key:'stateChanged',        name:'[更新]stateChanged',        ref:'docCycleInterceptor'},
                 {key:'afterUpdateCommit',   name:'[更新]afterUpdateCommit',   ref:'docCycleInterceptor'},
 
                 {key:'beforeDelete',        name:'[删除]beforeDelete',        ref:'docCycleInterceptor'},
