@@ -85,7 +85,7 @@
                                 {{ transition.name }}
                             </a-button>
                         </a-button-group>
-                        <a-button v-if="!row.endTime" size="small" type="default" style="margin-left: 5px;" disabled>
+                        <a-button v-if="!row.endTime" size="small" type="default" style="margin-left: 5px;" @click="assignOpen(row)">
                             Assign
                         </a-button>
                     </template>
@@ -96,8 +96,9 @@
         <nk-card title="BPMN" v-if="processInstance.processDefinitionId">
             <div slot="extra">
                 <a-button-group size="small">
-                    <a-button @click="$refs.bpmn.zoom( 1)">+</a-button>
-                    <a-button @click="$refs.bpmn.zoom(-1)">-</a-button>
+                    <a-button @click="$refs.bpmn.zoom( 1)"><a-icon type="plus" /></a-button>
+                    <a-button @click="$refs.bpmn.zoom(-1)"><a-icon type="minus" /></a-button>
+                    <a-button @click="$refs.bpmn.fit()"><a-icon type="sync" /></a-button>
                 </a-button-group>
             </div>
             <nk-bpmn-view ref="bpmn"
@@ -106,8 +107,24 @@
             />
         </nk-card>
 
-        <a-modal v-model="completeVisible" :title="completeTask.title" ok-text="Ok" cancel-text="Cancel" @ok="completeTaskOk">
+        <a-modal v-model="completeVisible" :title="completeTask.title" ok-text="Ok" cancel-text="Cancel" @ok="completeTaskOk" centerd>
             <a-textarea v-model="completeTask.comment" placeholder="Comment"></a-textarea>
+        </a-modal>
+
+
+        <a-modal v-model="assignVisible" title="Select" centered @ok="assignOk" :ok-button-props="{ props: { disabled: okButtonDisabled } }">
+            <nk-form-item title="用户" :width="80">
+                <a-auto-complete
+                    size="small"
+                    v-model="assignAccountIdInput"
+                    :data-source="assignAccounts"
+                    style="width: 200px"
+                    placeholder="请输入用户名称选择"
+                    @select="accountSelected"
+                    @search="accountSearch"
+                    @change="accountChange"
+                />
+            </nk-form-item>
         </a-modal>
 
     </nk-page-layout>
@@ -129,6 +146,12 @@ export default {
             completeVisible:false,
             completeTask: {},
 
+            assignVisible:false,
+            assignTaskId:undefined,
+            assignAccountIdInput: undefined,
+            assignAccountId: undefined,
+            assignAccounts:[],
+
             currentTask: undefined,
 
             processDefinition: {},
@@ -147,7 +170,10 @@ export default {
                     array.push({key,value:map[key]});
             }
             return array.sort((a,b)=>a.key>b.key?1:-1)
-        }
+        },
+        okButtonDisabled(){
+            return !this.assignAccountId;
+        },
     },
     created() {
         this.init(true);
@@ -200,7 +226,38 @@ export default {
                         .finally(()=>this.loading=false);
                 }
             }
-        }
+        },
+        accountSearch(e){
+            if(e){
+                this.$http.post(`/api/task/accounts?keyword=${e}`)
+                    .then(res=>{
+                        this.assignAccounts = res.data.map(item=>{return {value:item.id,text:item.username}});
+                    });
+            }
+        },
+        accountChange(){
+            this.assignAccountId = undefined
+        },
+        accountSelected(e){
+            this.assignAccountId = e
+        },
+        assignOpen(task){
+            this.assignTaskId = task.id;
+            this.assignVisible = true;
+        },
+        assignOk(){
+            this.assignVisible = false;
+            this.loading = true;
+            this.$http.post(`/api/ops/bpm/instance/assignee?taskId=${this.assignTaskId}&userId=${this.assignAccountId}`)
+                .then(()=>{
+                    this.assignAccountId = undefined;
+                    this.assignAccountIdInput = undefined;
+                    this.init();
+                }).catch(()=>{
+                    this.loading = false;
+                    this.assignVisible = true;
+                });
+        },
     }
 }
 </script>
