@@ -118,7 +118,16 @@
                 </template>
             </vxe-grid>
             <vxe-pager
-                v-if="page.page"
+                v-if="page.cursor||cursors.length>1"
+                perfect
+                size="mini"
+                :current-page="cursors.length"
+                :page-size="page.rows"
+                :total="page.cursor && page.list.length >= params.rows?10000:page.rows"
+                :layouts="['PrevPage', 'NextPage', 'Sizes']"
+                @page-change="cursorNext"/>
+            <vxe-pager
+                v-else-if="page.page"
                 perfect
                 size="mini"
                 :current-page="page.page"
@@ -220,7 +229,9 @@ export default {
             },
 
             suggest: [],
-            exportLoading:false
+            exportLoading:false,
+
+            cursors:[null]// 第一页游标是null
         }
     },
     mounted(){
@@ -343,6 +354,8 @@ export default {
             this.params.orderField = null;
             this.params.order = null;
             this.params.from = 0;
+            this.params.cursor = undefined;
+            this.cursors = [null];
             this.emitChange();
             return false;
         },
@@ -504,6 +517,24 @@ export default {
 
                 this.emitChange()
             }
+        },
+        cursorNext(e){
+
+            if(e.pageSize===this.page.rows){
+                if(this.cursors.length<e.currentPage){
+                    this.cursors.push(this.page.cursor);
+                }else{
+                    this.cursors.pop();
+                }
+            }else{
+                // 重置第一页
+                this.cursors=[null];
+            }
+
+            this.params.cursor=this.cursors[this.cursors.length-1];
+            this.params.rows = e.pageSize;
+            this.params.sqlColumns = this.page.columns;
+            this.emitChange()
         },
         // 保存搜索
         saveAsGet(){

@@ -166,7 +166,7 @@ export default {
             this.params = params;
 
             if(this.custom.postSql){
-                this.$http.postJSON(`/api/data/analyse/query`,Object.assign({
+                this.$http.postJSON(`/api/data/analyse/export`,Object.assign({
                         sqlList: (this.custom.postSql instanceof Array) ? this.custom.postSql : [this.custom.postSql],
                         $debug: this.custom.$debug,
                         columns: this.custom.columns
@@ -178,7 +178,7 @@ export default {
                         message: '提示',
                         description:`准备下载"${fileName}.xlsx"`
                     })
-                    this.$refs.download.setAttribute("src",`/api/doc/download/${res.data}/${fileName}?${new Date().getTime()}`);
+                    this.$refs.download.setAttribute("src",`/api/data/analyse/download/${res.data}/${fileName}?${new Date().getTime()}`);
                 }).finally(()=>{
                     if(this.$refs.layout)
                         this.$refs.layout.setExportDown()
