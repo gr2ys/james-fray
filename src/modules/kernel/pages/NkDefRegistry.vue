@@ -203,7 +203,10 @@ export default {
 
                 this.$http.get(`/api/platform/registry/def/value/${e[0]}`).then((res)=>{
                     if(res.data&&res.data.content){
-                        res.data.content = JSON.parse(res.data.content);
+                        try{
+                            res.data.content = JSON.parse(res.data.content);
+                        }catch (e){//
+                        }
                     }
                     this.selectedNode = Object.assign(this.selectedNode,res.data);
                     // 数据类型
