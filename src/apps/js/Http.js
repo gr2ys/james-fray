@@ -79,9 +79,13 @@ export default (Vue) => {
   // 设置响应配置
   let errorTime = 0;
   let errorMsg = null;
+  const onResponseSuccessAuthed = res => {
+    AuthUtils.expandToken();
+    return onResponseSuccess(res)
+
+  }
   const onResponseSuccess = res => {
 
-    AuthUtils.expandToken();
 
     // 解码返回的数据
     if(res.data && typeof res.data === 'string' && res.data.startsWith("H4s")){
@@ -184,9 +188,9 @@ export default (Vue) => {
   const instanceNone = axios.create(Object.assign({headers: {'Content-Type': 'application/json; charset=utf-8'}},defaultConfig));
 
   instanceForm.interceptors.request.use(onRequestFulfilled, onRequestRejected);
-  instanceForm.interceptors.response.use(onResponseSuccess, onResponseError);
+  instanceForm.interceptors.response.use(onResponseSuccessAuthed, onResponseError);
   instanceJSON.interceptors.request.use(onRequestFulfilled, onRequestRejected);
-  instanceJSON.interceptors.response.use(onResponseSuccess, onResponseError);
+  instanceJSON.interceptors.response.use(onResponseSuccessAuthed, onResponseError);
   instanceNone.interceptors.request.use(onRequestNoneToken, onRequestRejected);
   instanceNone.interceptors.response.use(onResponseSuccess, onResponseError);
 
