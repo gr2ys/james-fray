@@ -229,11 +229,11 @@ export default {
                 this.itemCalc(item.key);
             }
         },
-        itemCalc(triggerKey){
+        itemCalc(key){
             this.confirmLoading = true;
             this.nk$call({
-                selectedItem:this.selectedItem,
-                triggerKey
+                triggerKey:key,
+                selectedItem:this.selectedItem
             }).then(res=>{
                 this.selectedItem=res.selectedItem;
                 this.modalFields =res.fieldsDef;
