@@ -23,10 +23,21 @@
 
         <a-input type="textarea" v-model="completeTask.comment" :auto-size="{ minRows: 4, maxRows: 6 }" placeholder="请输入办理意见"></a-input>
 
-        <nk-form  ref="form"  v-for="(item,index) in task.formFields" :key="index" >
-            <nk-form-item :term="item.label" :required="true"
-                          :validateFor="item.id">
-                <a-input size="small" v-model="param[item.id]"></a-input>
+        <nk-form  ref="form"  v-for="(item,index) in this.task.formFields" :key="index" >
+            <nk-form-item :term="item.label">
+                <a-input
+                        v-if            ="item.typeName=='string'"
+                        size            ="small"
+                        :default-value  ="item.defaultValue"
+                        style           ="max-width: 300px;"
+                        v-model         ="param[item.id]"/>
+
+                <a-select       v-if          ="item.typeName=='SelectFormType'"
+                                :default-value  ="item.defaultValue"
+                                v-model         ="param[item.id]"
+                                size            ="small"
+                                :options        ="userIdsOp">
+                </a-select>
             </nk-form-item>
         </nk-form>
 
@@ -96,6 +107,7 @@ export default {
     },
     data(){
         return {
+            userIdsOp:[],
             param:{},
             bpmnVisible: false,
             completeTask: {},
@@ -107,6 +119,19 @@ export default {
                 accountId:undefined,
                 comment:undefined
             }
+        }
+    },
+    created(){
+        if(this.task.userIds.length>0){
+                this.task.userIds.forEach(item=>{
+                    let op = {
+                        label:"",
+                        value:""
+                    };
+                    op.label = item.realname;
+                    op.value = item.id;
+                    this.userIdsOp.push(op);
+                })
         }
     },
     computed:{
