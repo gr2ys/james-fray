@@ -86,7 +86,7 @@ export default {
                 return {
                     title:'选择',
                     width:"60%",
-                    postConditions:null,
+                    postCondition:null,
                     index:'document',
                     searchItems:[
                         {

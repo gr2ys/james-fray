@@ -43,7 +43,8 @@
             <!--增加一行空列，避免宽度不够不能自适应-->
             <vxe-column v-if="def.seq" type="seq" title="#" width="5%"></vxe-column>
 
-            <vxe-column v-for="(item) in def.items" :key="item.key"
+            <!--避免配置更新后不重新渲染，所以要使用item.inputOptions作为key-->
+            <vxe-column v-for="(item) in def.items" :key="item.key+JSON.stringify(item.inputOptions)"
                       :width="(item.col||10) + '%'"
                       :title="item.name"
                       :field="item.key"
