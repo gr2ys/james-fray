@@ -32,6 +32,7 @@
             :data="data"
             :loading="loading"
             :edit-rules="tableValidRules"
+            :row-config="{useKey:def.sortable}"
             :edit-config="{trigger: 'click', mode: 'row', showIcon: editMode, activeMethod: xTableActiveMethod, showStatus: true}"
             :sort-config="{trigger: 'cell', remote: false,showIcon: !editMode, orders: ['desc', 'asc', null]}"
             :class="editMode&&'edit-table'"
