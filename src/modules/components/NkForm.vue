@@ -41,11 +41,6 @@ export default {
             default: false
         },
     },
-    provide () {
-        return {
-            col: this.col > 4 ? 4 : this.col
-        }
-    },
     mounted(){
     },
     methods:{
