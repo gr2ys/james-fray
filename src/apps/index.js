@@ -12,7 +12,7 @@
  *	along with ELCube.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'default-passive-events'
+//import 'default-passive-events'
 import Vue from 'vue';
 import Vuex from "vuex";
 import VueI18n from "vue-i18n";
@@ -22,6 +22,7 @@ import VXETable from "./js/VXETable";
 
 import mavonEditor from 'mavon-editor';
 import 'mavon-editor/dist/css/index.css';
+import JsonViewer from 'vue-json-viewer';
 
 // export to sfc
 import * as g2plot from "@antv/g2plot";
@@ -85,6 +86,7 @@ Vue.use(LayoutComponent);
 Vue.use(Kernel);
 Vue.component("nk-error-modal", NkErrorModal);
 Vue.component("codemirror",codemirror);
+Vue.component("json-viewer",JsonViewer);
 
 Vue.mixin({
     beforeCreate: function () {

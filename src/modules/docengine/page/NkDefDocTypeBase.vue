@@ -12,25 +12,25 @@
 	along with ELCube.  If not, see <https://www.gnu.org/licenses/>.
 -->
 <template>
-    <a-card title="基本信息">
+    <a-card title="模型信息">
         <nk-form ref="form" size="small" :col="1" :edit="editMode">
-            <nk-form-item term="交易类型" :validateFor="docDef.docType" message="请输入4个字符的交易类型" required len :min="4" :max="4">
+            <nk-form-item term="类型" :validateFor="docDef.docType" message="请输入4个字符的模型类型" required len :min="4" :max="4">
                 {{docDef.docType}} | {{docDef.docClassify}}
                 <a-input v-if="routeParams.mode==='create'"
                          size="small"
                          v-model="docDef.docType"
-                         placeholder="请输入以X、Y、Z开头的4个字符的交易类型"
+                         placeholder="请输入以X、Y、Z开头的4个字符的模型类型"
                          slot="edit"
                          :maxLength="4"
                          allowClear
                          @blur="()=>{docDef.docType=docDef.docType && docDef.docType.toUpperCase()}"
                          style="width: 280px" />
             </nk-form-item>
-            <nk-form-item term="交易类型描述" :validateFor="docDef.docName" message="请输入交易类型描述" required len :max="20" lenMessage="交易类型描述1-20个字">
+            <nk-form-item term="描述" :validateFor="docDef.docName" message="请输入模型描述" required len :max="20" lenMessage="模型描述1-20个字">
                 {{docDef.docName}}
                 <a-input size="small"
                          v-model="docDef.docName"
-                         placeholder="请输入20字以内的交易类型描述"
+                         placeholder="请输入20字以内的模型描述"
                          slot="edit" allowClear
                          style="width: 300px"></a-input>
             </nk-form-item>
@@ -44,10 +44,10 @@
                     <a-button type="link" @click="validDateLongTerm">长期有效</a-button>
                 </div>
             </nk-form-item>
-            <nk-form-item term="单据处理程序" :validateFor="docDef.refObjectType" required message="请选择单据处理程序">
+            <nk-form-item term="模型程序" :validateFor="docDef.refObjectType" required message="请选择模型程序">
                 <nk-script-label :key="docDef.refObjectType" :value="docDef.refObjectType"></nk-script-label>
                 <a-select size="small" v-model="docDef.refObjectType"
-                          placeholder="请选择单据处理程序"
+                          placeholder="请选择模型程序"
                           style="width: 300px" slot="edit"
                           @change="refObjectTypeChange"
                 >

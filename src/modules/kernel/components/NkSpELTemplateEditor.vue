@@ -13,7 +13,7 @@
 -->
 <template>
     <div>
-        <component :is="inputComponent" @click="open" v-model="value" size="small" read-only class="readonly"></component>
+        <component :is="inputComponent" @click="open" v-model="value" size="small" read-only class="readonly" :placeholder="placeholder"></component>
         <component :is="component" v-model="visible" title="SpEL模版编辑器（严格JSON格式）" width="60%" centered :mask-closable="false" :esc-closable="true">
 
             <a-textarea v-model="el" :rows="10" placeholder="SpEL模版，必须为严格JSON格式"></a-textarea>
@@ -50,17 +50,16 @@
 <script>
 import qs from 'qs'
 import {mapState,mapMutations} from 'vuex'
-import JsonViewer from 'vue-json-viewer';
 
 export default {
     name: "NkSpELEditor",
-    components:{JsonViewer},
     props:{
         value : String,
         modalComponent:{
             type:String,
             default: 'a-modal'
-        }
+        },
+        placeholder: String
     },
     created() {
         this.component = this.modalComponent;

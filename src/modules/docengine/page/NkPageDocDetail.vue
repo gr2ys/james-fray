@@ -700,19 +700,21 @@ export default {
             this.$http.postJSON(`/api/doc/calculate`,{doc:this.doc,fromCard:card.cardKey,options})
                 .then(response=>{
                     this.doc = response.data;
+                    this.loading=false;
                     this.$nextTick(()=>{
                         this.nkChanged({
                             event:'nk-calc'
                         },card);
                     })
                 })
-                .finally(()=>{
+                .catch(()=>{
                     this.loading=false;
+                }).finally(()=>{
                     clearTimeout(timeout)
                 })
         },
         nkChanged(e,component){
-            Object.assign(e,{$source:component && component.component});
+            Object.assign(e,{$source:component && component.cardKey});
             this.$refs.components&&this.$refs.components.forEach(c=>c.docUpdate&&c.docUpdate(e));
         },
         nkEditModeChanged(editMode){
