@@ -12,7 +12,12 @@
 	along with ELCube.  If not, see <https://www.gnu.org/licenses/>.
 -->
 <template>
-    <div class="nk-form-item" :style="style">
+    <div class="nk-form-item" :style="style"
+         @dragover="$emit('nk-dragover',options)"
+         @drag="$emit('drag',$event)"
+         @dragend="$emit('dragend',$event)"
+         @click="$emit('click',$event)"
+         :draggable="draggable">
         <div class="term" :class="termClass" :style="{'width':width+'px'}">
             <nk-required-mark v-if="editMode && required" />
             {{term || title}}
@@ -30,6 +35,8 @@
 export default {
     name: "NkFormItem",
     props: {
+        draggable:String,
+        options:{},
         term: {
             type: String,
             required: false
@@ -139,9 +146,6 @@ export default {
         }
     },
     methods:{
-
-
-
         checkError(){
 
             if(this.$parent.$props.edit && this.$slots.edit){
@@ -204,6 +208,7 @@ export default {
 
     .term {
         line-height: 22px;
+        padding-top: 4px;
         padding-bottom: 8px;
         padding-right: 8px;
         color: rgba(0,0,0,.85);
@@ -237,7 +242,7 @@ export default {
         //display: flex;
         //flex-wrap: wrap;
         width: 100%;
-        padding: 0 32px 8px 0;
+        padding: 4px 32px 4px 0;
 
         & > {
             word-break:break-all;

@@ -12,7 +12,12 @@
 	along with ELCube.  If not, see <https://www.gnu.org/licenses/>.
 -->
 <template>
-    <div class="nk-form-divider">
+    <div class="nk-form-divider"
+         @dragover="$emit('nk-dragover',options)"
+         @drag="$emit('drag',$event)"
+         @dragend="$emit('dragend',$event)"
+         @click="$emit('click',$event)"
+         :draggable="draggable">
         <label v-if="term||title" class="l">
             <b>{{term||title}}</b>
         </label>
@@ -23,6 +28,8 @@
 export default {
     name: "NkFormDivider",
     props: {
+        draggable:String,
+        options:{},
         term: {
             type: String,
             required: false

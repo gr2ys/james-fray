@@ -12,126 +12,141 @@
 	along with ELCube.  If not, see <https://www.gnu.org/licenses/>.
 -->
 <template>
-    <nk-def-card>
-        <nk-form :col="1" :edit="editMode" style="width:300px;">
-            <nk-form-item title="列">
-                {{def.col}}
-                <a-input-number v-model="def.col" slot="edit" size="small" :min="1" :max="4" />
-            </nk-form-item>
-            <nk-form-item title="标题宽">
-                {{def.titleWidth}}
-                <a-input-number v-model="def.titleWidth" slot="edit" size="small" :min="20" :max="300" />
-            </nk-form-item>
-            <slot name="header"></slot>
-        </nk-form>
-        <vxe-toolbar v-if="editMode">
-            <template v-slot:buttons>
-                <vxe-button status="perfect" size="mini" @click="add()">新增</vxe-button>
-                <vxe-button status="perfect" size="mini" @click="rowExpandClear()">收起</vxe-button>
-            </template>
-        </vxe-toolbar>
-        <vxe-table
-            ref="xTable"
-            row-key
-            auto-resize
-            size="mini"
-            border=inner
-            show-header-overflow="tooltip"
-            show-overflow="tooltip"
-            resizable
-            highlight-hover-row
-            :edit-config="{trigger: 'click', mode: 'row', showIcon: editMode, activeMethod}"
-            :data="def.items"
-            @edit-actived="rowEditActived"
-            @edit-closed="rowEditClosed"
-            @toggle-row-expand="rowExpand"
-        >
-            <vxe-table-column title="KEY"
-                              field="key"
-                              width="17%"
-                              :edit-render="{name:'$input',events:{change:keyChanged}}"></vxe-table-column>
-            <vxe-table-column title="描述"
-                              field="name"
-                              width="17%"
-                              :edit-render="{name:'$input'}"></vxe-table-column>
-            <vxe-table-column title="输入框"
-                              field="inputType"
-                              width="17%"
-                              :edit-render="{name:'$select',options:inputTypeDefs,events:{change:inputTypeChanged}}"></vxe-table-column>
-            <vxe-table-column title="触发计算"
-                              field="calcTrigger"
-                              width="12%"
-                              :edit-render="{name:'$switch',props: {'open-value':true,'close-value':false}}"
-                              :formatter="boolFormat"></vxe-table-column>
-            <vxe-table-column title="计算顺序"
-                              field="calcOrder"
-                              width="12%"
-                              :edit-render="{name:'$input', props: {type: 'number',min:1, max:4}}"></vxe-table-column>
-            <vxe-table-column title="列宽"
-                              field="col"
-                              width="10%"
-                              :edit-render="{name:'$input', props: {type: 'number',min:1, max:4}}"></vxe-table-column>
-            <vxe-table-column type="expand"
-                              field="">
-                <template v-slot="{seq,items}">
-                    <span v-if="editMode && sortable" class="drag-btn" style="margin-left: 10px;">
-                        <i class="vxe-icon--menu"></i>
-                    </span>
-                    <span v-if="editMode" style="margin-left: 10px;" @click="$nkSortableRemove(def.items,seq)">
-                        <i class="vxe-icon--remove"></i>
-                    </span>
-                </template>
-                <template #content="{ row }">
-                    <nk-form :edit="editMode" :col="2">
-                        <nk-form-item title="是否非空">
-                            {{row.required?'是':'否'}}
-                            <a-switch slot="edit" size="small" v-model="row.required" />
-                        </nk-form-item>
-                        <nk-form-item title="校验提示">
-                            {{row.message}}
-                            <a-input slot="edit" size="small" v-model="row.message"></a-input>
-                        </nk-form-item>
-                        <nk-form-item title="右对齐">
-                            {{row.alignRight?'是':'否'}}
-                            <a-switch slot="edit" size="small" v-model="row.alignRight" />
-                        </nk-form-item>
-                        <nk-form-item title="自定义样式">
-                            {{row.style}}
-                            <a-input slot="edit" size="small" v-model="row.style"></a-input>
-                        </nk-form-item>
-                        <nk-form-item title="控制">
-                            {{row.control===1 ?'读写':(row.control===0 ?'只读':'隐藏')}}
-                            <a-select slot="edit" size="small" v-model="row.control" >
-                                <a-select-option :key="1" >读写</a-select-option>
-                                <a-select-option :key="0" >只读</a-select-option>
-                                <a-select-option :key="-1">隐藏</a-select-option>
-                            </a-select>
-                        </nk-form-item>
-                        <nk-form-item title="控制 SpEL 表达式">
-                            {{row.spELControl}}
-                            <nk-sp-el-editor slot="edit" v-model="row.spELControl"></nk-sp-el-editor>
-                        </nk-form-item>
-                        <nk-form-item title="值 SpEL 条件">
-                            {{row.spELTriggers}}
-                            <a-select slot="edit" size="small" v-model="row.spELTriggers" mode="multiple" >
-                                <a-select-option key="ALWAYS">ALWAYS</a-select-option>
-                                <a-select-option key="INIT">INIT</a-select-option>
-                                <a-select-option key="BLANK">BLANK</a-select-option>
-                            </a-select>
-                        </nk-form-item>
-                        <nk-form-item title="值 SpEL 表达式">
-                            {{row.spELContent}}
-                            <nk-sp-el-editor slot="edit" v-model="row.spELContent"></nk-sp-el-editor>
-                        </nk-form-item>
-                    </nk-form>
-                    <component v-if="row===activeRow && fieldDefComponent"
-                               :is="fieldDefComponent"
-                               :edit-mode="editMode"
-                               v-model="row.inputOptions"
-                    ></component>
-                </template>
-            </vxe-table-column>
-        </vxe-table>
+    <nk-def-card :title="card.cardName+':卡片设计'">
+        <div style="display: flex;width: 100%;">
+            <div style="width: 100%;">
+                <a-card :title="card.cardName">
+                    <div ref="parent" class="parent" style="width: 100%;min-height: 300px;" @click="selectItem">
+                        <nk-form :col="def.col||2">
+                            <template v-for="(item,seq) in def.items">
+                                <nk-form-divider
+                                    v-if="item.control >= 0 && (item.inputType==='divider'||item.inputType==='-'||item.inputType==='--')"
+                                    :key="item.key"
+                                    :options="item" @nk-dragover="dragover" @drag="drag(item)" @dragend="dragend" @click="selectItem($event,item)"
+                                    :draggable="editMode?'true':'false'"
+                                    :class="{'b':true,'selected':item._selected,'drop':item._drop}"
+                                    :title="item.name"></nk-form-divider>
+                                <nk-form-item v-else
+                                              :key="item.key"
+                                              :options="item" @nk-dragover="dragover" @drag="drag(item)" @dragend="dragend" @click="selectItem($event,item)"
+                                              :draggable="editMode?'true':'false'"
+                                              :class="{'b':true,'selected':item._selected,'drop':item._drop}"
+                                              :title="item.name"
+                                              :col="item.col"
+                                              style="position: relative;"
+                                >
+                                    <component :is="item.inputType" :editMode="true"></component>
+                                    <a-icon type="close" v-if="editMode && item._selected" style="position: absolute;right: 2px;top:0;" @click="$nkSortableRemove(def.items,seq+1)" />
+                                </nk-form-item>
+                            </template>
+                        </nk-form>
+                    </div>
+                </a-card>
+            </div>
+
+            <div class="propertiesPanel" style="width: 350px;flex-shrink: 0;border: solid 1px #e8e8e8;">
+                <a-tabs v-model="activeKey">
+                    <a-tab-pane v-if="editMode" key="lab" tab="组件库" style="margin-top: -14px;">
+                        <div style="max-height: 500px;overflow-y: auto;">
+                            <div v-for="inputType in inputTypeDefs" :key="inputType.key"
+                                 @drag="drag(null,inputType)" @dragend="dragend" draggable="true"
+                                 style="border: dashed 1px #eee;width:100%;">
+                                <nk-form-item v-if="inputType.key" :title="inputType.name&&inputType.name.split('|')[1]">
+                                    <component :is="inputType.key" :editMode="true"></component>
+                                </nk-form-item>
+                                <div v-else style="padding-right: 50px;">
+                                    <nk-form-divider title="分隔符">
+                                    </nk-form-divider>
+                                </div>
+                            </div>
+                        </div>
+                    </a-tab-pane>
+                    <a-tab-pane key="card" tab="卡片">
+                        <nk-form :col="1" :edit="editMode" style="width:100%;">
+                            <nk-form-item title="列">
+                                {{def.col}}
+                                <a-input-number v-model="def.col" slot="edit" size="small" :min="1" :max="24" />
+                            </nk-form-item>
+                            <nk-form-item title="标题宽">
+                                {{def.titleWidth}}
+                                <a-input-number v-model="def.titleWidth" slot="edit" size="small" :min="20" :max="300" />
+                            </nk-form-item>
+                            <slot name="header"></slot>
+                        </nk-form>
+                    </a-tab-pane>
+                    <a-tab-pane v-if="selectedItem" key="field" :tab="selectedItem.name">
+                        <nk-form :edit="editMode" :col="1">
+                            <nk-form-item title="KEY">
+                                {{selectedItem.key}}
+                                <a-input slot="edit" size="small" v-model="selectedItem.key" @change="keyChanged" />
+                            </nk-form-item>
+                            <nk-form-item title="描述">
+                                {{selectedItem.name}}
+                                <a-input slot="edit" size="small" v-model="selectedItem.name" />
+                            </nk-form-item>
+                            <nk-form-item title="触发计算">
+                                {{selectedItem.calcTrigger?'是':'否'}}
+                                <a-switch slot="edit" size="small" v-model="selectedItem.calcTrigger" />
+                            </nk-form-item>
+                            <nk-form-item title="计算顺序">
+                                {{selectedItem.calcOrder}}
+                                <a-input-number slot="edit" size="small" v-model="selectedItem.calcOrder" :min="1" :max="4" />
+                            </nk-form-item>
+                            <nk-form-item title="列宽">
+                                {{selectedItem.col}}
+                                <a-input-number slot="edit" size="small" v-model="selectedItem.col" :min="1" :max="24" />
+                            </nk-form-item>
+                            <nk-form-item title="是否非空">
+                                {{selectedItem.required?'是':'否'}}
+                                <a-switch slot="edit" size="small" v-model="selectedItem.required" />
+                            </nk-form-item>
+                            <nk-form-item title="校验提示">
+                                {{selectedItem.message}}
+                                <a-input slot="edit" size="small" v-model="selectedItem.message"></a-input>
+                            </nk-form-item>
+                            <nk-form-item title="右对齐">
+                                {{selectedItem.alignRight?'是':'否'}}
+                                <a-switch slot="edit" size="small" v-model="selectedItem.alignRight" />
+                            </nk-form-item>
+                            <nk-form-item title="自定义样式">
+                                {{selectedItem.style}}
+                                <a-input slot="edit" size="small" v-model="selectedItem.style"></a-input>
+                            </nk-form-item>
+                            <nk-form-item title="控制">
+                                {{selectedItem.control===1 ?'读写':(selectedItem.control===0 ?'只读':'隐藏')}}
+                                <a-select slot="edit" size="small" v-model="selectedItem.control" >
+                                    <a-select-option :key="1" >读写</a-select-option>
+                                    <a-select-option :key="0" >只读</a-select-option>
+                                    <a-select-option :key="-1">隐藏</a-select-option>
+                                </a-select>
+                            </nk-form-item>
+                            <nk-form-item title="控制 SpEL 表达式">
+                                {{selectedItem.spELControl}}
+                                <nk-sp-el-editor slot="edit" v-model="selectedItem.spELControl"></nk-sp-el-editor>
+                            </nk-form-item>
+                            <nk-form-item title="值 SpEL 条件">
+                                {{selectedItem.spELTriggers}}
+                                <a-select slot="edit" size="small" v-model="selectedItem.spELTriggers" mode="multiple" >
+                                    <a-select-option key="ALWAYS">ALWAYS</a-select-option>
+                                    <a-select-option key="INIT">INIT</a-select-option>
+                                    <a-select-option key="BLANK">BLANK</a-select-option>
+                                </a-select>
+                            </nk-form-item>
+                            <nk-form-item title="值 SpEL 表达式">
+                                {{selectedItem.spELContent}}
+                                <nk-sp-el-editor slot="edit" v-model="selectedItem.spELContent"></nk-sp-el-editor>
+                            </nk-form-item>
+                        </nk-form>
+                        <component v-if="fieldDefComponent"
+                                   :is="fieldDefComponent"
+                                   :edit-mode="editMode"
+                                   :col="1"
+                                   v-model="selectedItem.inputOptions"
+                        ></component>
+                    </a-tab-pane>
+                </a-tabs>
+            </div>
+        </div>
     </nk-def-card>
 </template>
 
@@ -140,10 +155,20 @@ import MixinDef from "./MixinDef";
 import MixinSortable from "../../../utils/MixinSortable";
 import MixinDynamicDef from "./MixinDynamicDef";
 
+let mouseXY = {"x": null, "y": null};
+
+function dragover(e) {
+    mouseXY.x = e.clientX;
+    mouseXY.y = e.clientY;
+}
+
 export default {
     mixins:[new MixinDef({}),MixinSortable(),MixinDynamicDef],
     data(){
         return {
+            dropItem: undefined,
+            selectedItem: undefined,
+            activeKey: this.editMode ? 'lab' : 'card'
         }
     },
     mounted() {
@@ -152,31 +177,121 @@ export default {
                 this.inputTypeDefs = res;
                 this.inputTypeDefs.push({value:'-',label:'-- | 分隔'})
             });
+        document.addEventListener("dragover", dragover, false);
+    },
+    destroyed() {
+        document.removeEventListener("dragover", dragover, false)
+    },
+    computed:{
+        fieldDefComponent(){
+            if(this.selectedItem && this.selectedItem.inputType){
+                const defName = this.selectedItem.inputType + 'Def';
+                if(this.$options.components[defName]){
+                    return defName;
+                }
+            }
+            return undefined;
+        }
     },
     methods:{
-
-        add(){
-            const index = this.def.items.length||'';
-            let newItem = {
-                key : 'key'+index,
-                name: '字段'+index,
-                col:1,
-                inputType: this.inputTypeDefs[0].value,
-                calcTrigger:'',
-                calcOrder:1,
-                required:false,
-                control:1,
-                spELContent:'',
-                spELTriggers:[],
-                eval:''
-            };
-            this.def.items.push(newItem);
-            this.$refs.xTable.loadData(this.def.items).then(() => this.$refs.xTable.setActiveRow(newItem));
+        isMouseInRect(){
+            // 目标容器
+            let parentRect = this.$refs.parent.getBoundingClientRect();
+            return mouseXY.x > parentRect.left
+                && mouseXY.x < parentRect.right
+                && mouseXY.y > parentRect.top
+                && mouseXY.y < parentRect.bottom;
         },
+        drag: function (item,inputType) {
+            if(item){
+                this.dropItem = item;
+                this.$set(this.dropItem,'_drop',true);
+            }else if(this.isMouseInRect()){
+                if(!this.def.items.find(item => item===this.dropItem)){
+                    this.dropItem = {
+                        key : 'key'+this.def.items.length,
+                        name: '字段'+this.def.items.length,
+                        col:1,
+                        inputType: inputType.value,
+                        calcTrigger:'',
+                        calcOrder:1,
+                        required:false,
+                        control:1,
+                        spELContent:'',
+                        spELTriggers:[],
+                        eval:'',
+                        _drop:true
+                    };
+                    this.def.items.push(this.dropItem);
+                }
+            }else{
+                this.def.items = this.def.items.filter(item => item!==this.dropItem);
+            }
+        },
+        dragend: function () {
+            let dropItem = this.dropItem;
+            if(this.dropItem){
+                this.$set(this.dropItem,'_drop',undefined);
+                this.dropItem = undefined;
+            }
+            this.selectItem(undefined, dropItem);
+        },
+        dragover(target){
+            if(!target._drop && target!==this.dropItem){
+                let si = this.def.items.indexOf(this.dropItem);
+                if(si!==-1){
+                    let ti = this.def.items.indexOf(target);
+                    if(si>ti){
+                        // 往前移动
+                        this.def.items.splice(si,1);
+                        this.def.items.splice(ti,0,this.dropItem);
+                    }else{
+                        // 往后移动
+                        this.def.items.splice(si,1);
+                        this.def.items.splice(ti,0,this.dropItem);
+                    }
+                }
+            }
+        },
+        selectItem(e,item){
+            if(this.selectedItem){
+                this.selectedItem._selected=undefined;
+            }
+            this.selectedItem=item;
+            if(this.selectedItem){
+                this.selectedItem._selected=true;
+                this.activeKey='field';
+                if(!this.selectedItem.inputOptions){
+                    this.$set(this.selectedItem,'inputOptions',{});
+                }
+            }else{
+                this.activeKey=this.editMode ? 'lab' : 'card';
+            }
+            if(e)e.stopPropagation();
+
+        },
+        keyChanged(){
+            let find = this.def.items.find(i=>{
+                if(i!==this.selectedItem && i.key===this.selectedItem.key)
+                    return true;
+            })
+            if(find){
+                this.$message.warn(`Key:${this.selectedItem.key}已存在`)
+                this.selectedItem.key = this.selectedItem.key+'1';
+            }
+        }
     }
 }
 </script>
 
 <style scoped>
-
+    .b{
+        border: dashed 1px #eee;
+    }
+    .drop{
+        border: dashed 1px red !important;
+    }
+    .selected{
+        border: dashed 1px green;
+    }
 </style>
