@@ -22,7 +22,11 @@
                                  slot-scope="i"
                                  @click="itemClick(i)"
                                  :class="i===item?'selected':''">
-                        {{i.group}}{{i.name}}
+
+                        <div>
+                            <label style="display: block;font-size: 12px;margin-bottom: 5px;">{{i.name}}</label>
+                            <span style="color: #aaa">{{i.group}}</span>
+                        </div>
                     </a-list-item>
                 </a-list>
             </a-layout-sider>
