@@ -25,7 +25,12 @@
                                     :options="item" @nk-dragover="dragover" @drag="drag(item)" @dragend="dragend" @click="selectItem($event,item)"
                                     :draggable="editMode?'true':'false'"
                                     :class="{'b':true,'selected':item._selected,'drop':item._drop}"
-                                    :title="item.name"></nk-form-divider>
+                                    style="cursor: move"
+                                    :title="item.name">
+                                    <a-popconfirm @confirm="$nkSortableRemove(def.items,seq+1)" :title="`移除[${item.name}]?`">
+                                        <a-icon type="close" v-if="editMode && item._selected" style="position: absolute;right: 2px;top:-15px;cursor: pointer;"/>
+                                    </a-popconfirm>
+                                </nk-form-divider>
                                 <nk-form-item v-else
                                               :key="item.key"
                                               :options="item" @nk-dragover="dragover" @drag="drag(item)" @dragend="dragend" @click="selectItem($event,item)"
@@ -33,10 +38,12 @@
                                               :class="{'b':true,'selected':item._selected,'drop':item._drop}"
                                               :title="item.name"
                                               :col="item.col"
-                                              style="position: relative;"
+                                              style="position: relative;cursor: move"
                                 >
                                     <component :is="item.inputType" :editMode="true"></component>
-                                    <a-icon type="close" v-if="editMode && item._selected" style="position: absolute;right: 2px;top:0;" @click="$nkSortableRemove(def.items,seq+1)" />
+                                    <a-popconfirm @confirm="$nkSortableRemove(def.items,seq+1)" :title="`移除[${item.name}]?`">
+                                        <a-icon type="close" v-if="editMode && item._selected" style="position: absolute;right: 2px;top:0;cursor: pointer;"/>
+                                    </a-popconfirm>
                                 </nk-form-item>
                             </template>
                         </nk-form>
@@ -50,7 +57,7 @@
                         <div style="max-height: 500px;overflow-y: auto;">
                             <div v-for="inputType in inputTypeDefs" :key="inputType.key"
                                  @drag="drag(null,inputType)" @dragend="dragend" draggable="true"
-                                 style="border: dashed 1px #eee;width:100%;">
+                                 style="border: dashed 1px #eee;width:100%;cursor: move;">
                                 <nk-form-item v-if="inputType.key" :title="inputType.name&&inputType.name.split('|')[1]">
                                     <component :is="inputType.key" :editMode="true"></component>
                                 </nk-form-item>

@@ -21,6 +21,7 @@
         <label v-if="term||title" class="l">
             <b>{{term||title}}</b>
         </label>
+        <slot></slot>
     </div>
 </template>
 

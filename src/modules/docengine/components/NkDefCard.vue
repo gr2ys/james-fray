@@ -20,6 +20,7 @@
             :headStyle="headStyle"
             :bodyStyle="bodyStyle"
             :bordered="true"
+            style="cursor: default;"
     >
 
         <slot slot="title" name="title"></slot>
