@@ -61,7 +61,7 @@
                                                         'searched': keyword && ((item.key&&item.key.indexOf(keyword) > -1) || (item.name&&item.name.indexOf(keyword) > -1))
                                                    }"
                                                  :title="item.name"
-                                                 :width="def.titleWidth"
+                                                 :width="def.titleWidth||undefined"
                                                  :ellipsis="def.titleEllipsis"
                                                  :col="item.col||1"
                                                  :edit="reviewEditMode && item.control > 0"
