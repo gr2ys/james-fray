@@ -43,12 +43,12 @@ export default (Vue) => {
       let timestamp = Math.floor(new Date().getTime()/1000);
 
       const str = config.url.split('?');
-      const array = str[1] ? str[1].split('&') : [];
+      const array = str[1] ? str[1].split('&').map(i=>decodeURIComponent(i)) : [];
 
       if(config.headers['Content-Type']){
         if(config.headers['Content-Type'].indexOf('application/x-www-form-urlencoded;')>-1){
           if(config.data){
-            decodeURIComponent(config.data).split('&').forEach(item=>array.push(item))
+            config.data.split('&').forEach(item=>array.push(decodeURIComponent(item)))
           }
         }
       }

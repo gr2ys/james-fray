@@ -185,7 +185,7 @@
             </a-tooltip>
 
             <!-- 源码修改 -->
-            <a-tooltip v-if="!doc.newCreate && hasAuthority(['DEVOPS:*','DEVOPS:DOC'])" title="编辑源数据">
+            <a-tooltip v-if="!editMode && !doc.newCreate && hasAuthority(['DEVOPS:*','DEVOPS:DOC'])" title="编辑源数据">
                 <a-button @click="sourceVisible = true">
                     <a-icon type="code" />
                 </a-button>
@@ -295,7 +295,7 @@
             />
         </div>
 
-        <nk-doc-source-editor v-model="sourceVisible" v-if="doc.docId" :doc="doc" @change="onSourceChanged"></nk-doc-source-editor>
+        <nk-doc-source-editor v-model="sourceVisible" v-if="doc.docId && !editMode" :doc="doc" @change="onSourceChanged"></nk-doc-source-editor>
 
     </nk-page-layout>
 </template>
