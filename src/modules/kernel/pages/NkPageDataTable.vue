@@ -47,7 +47,7 @@
             </a-dropdown>
         </a-button-group>
 
-        <transition name="slide-fade">
+        <transition name="slide-fade" v-if="custom.preview">
             <nk-page-preview :params="previewParams" v-if="previewVisible" @close="previewClose" @to="to"></nk-page-preview>
         </transition>
         <iframe ref="download" style="display: none"></iframe>
