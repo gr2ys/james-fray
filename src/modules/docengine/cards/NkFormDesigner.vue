@@ -202,7 +202,7 @@ export default {
                     name: (inputType.name&&inputType.name.split('|')[1])+(--index),
                     col:1,
                     inputType: inputType.value,
-                    calcTrigger:'',
+                    calcTrigger:undefined,
                     calcOrder:1,
                     required:false,
                     control:1,
