@@ -27,13 +27,11 @@
             <nk-form-item :term="item.label">
                 <a-input
                         v-if            ="item.typeName=='string'"
+                        v-model         ="param[item.id]"
                         size            ="small"
-                        :default-value  ="item.defaultValue"
-                        style           ="width: 150px;"
-                        v-model         ="param[item.id]"/>
+                        style           ="width: 150px;"/>
 
                 <a-select       v-if          ="item.typeName=='SelectFormType'"
-                                :default-value  ="item.defaultValue"
                                 v-model         ="param[item.id]"
                                 style           ="width: 150px;"
                                 size            ="small"
@@ -134,6 +132,11 @@ export default {
                     this.userIdsOp.push(op);
                 })
         }
+        if(this.task.formFields.length>0){
+            this.task.formFields.forEach(item=>{
+                this.$set(this.param,item.id,item.defaultValue);
+            })
+        }
     },
     computed:{
         ...mapGetters('User',[
@@ -148,9 +151,16 @@ export default {
     },
     methods:{
         completeTaskOk(transition){
-            if(this.task.formFields && Object.keys(this.param).length != this.task.formFields.length){
-                this.$message.error('请填写参数');
-                return false;
+            for (const key in this.param) {
+                if (this.param[key] === '' || !this.param[key]) {
+                    if(key =='userName'){
+                        this.$message.error('请选择指派办理人员');
+                        return false;
+                    }else{
+                        this.$message.error('请填写参数');
+                        return false;
+                    }
+                }
             }
             this.$emit("input",true);
 
