@@ -24,6 +24,7 @@
             auto-resize
             keep-source
             resizable
+            row-key
             highlight-hover-row
             show-header-overflow="tooltip"
             show-overflow="tooltip"
