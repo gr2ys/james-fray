@@ -122,6 +122,10 @@
                                     {{def.titleEllipsis}}
                                     <a-switch v-model="def.titleEllipsis" slot="edit" size="small" />
                                 </nk-form-item>
+                                <nk-form-item title="文件批量下载">
+                                    {{def.downLoadFile}}
+                                    <a-switch v-model="def.downLoadFile" slot="edit" size="small" />
+                                </nk-form-item>
                                 <slot name="header"></slot>
                             </nk-form>
                         </div>
