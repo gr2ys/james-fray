@@ -16,7 +16,7 @@
     <div class="nk-page-layout-header">
       <slot name="top"></slot>
       <slot name="tips"></slot>
-      <nk-sticky :stickyTop="-11" :z-index="11">
+      <nk-sticky :stickyTop="-11" :z-index="11" class="layout-print-hide">
         <div class="nk-page-layout-stick" :class="{'show-right':headerIndent && rightBar && !layoutConfig.helperVisible}" style="padding-top: 20px;align-items: center;">
           <div style="flex-shrink: 0">
             <span v-if="showStickyTitle" class="ant-page-header-heading-title">{{title}}</span>
@@ -250,5 +250,19 @@ export default {
       display: none;
     }
   }
+}
+
+@media print{
+    ::v-deep.nk-page-layout-header .ant-page-header{
+        padding-right: 32px !important;
+    }
+    .nk-page-layout-stick{
+        padding-right: 32px !important;
+    }
+    .nk-page-layout-content {
+        .right {
+            display: none;
+        }
+    }
 }
 </style>

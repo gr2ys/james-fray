@@ -592,6 +592,11 @@ export default {
         z-index: 1;
     }
 }
+@media print{
+    .nk-layout-sider{
+        display: none;
+    }
+}
 
 </style>
 

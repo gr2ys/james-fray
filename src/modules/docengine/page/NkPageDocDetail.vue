@@ -12,7 +12,7 @@
 	along with ELCube.  If not, see <https://www.gnu.org/licenses/>.
 -->
 <template>
-    <nk-page-layout class="mini"
+    <nk-page-layout class="layout mini"
                     :title="'单据详情'"
                     ref="nav"
                     :sub-title="doc.docName||'未命名单据'"
@@ -83,7 +83,7 @@
         </div>
         <a-statistic slot="extra" title="状态" :value="doc.docState | nkFromList(doc.def&&doc.def.status,'docStateDesc','docState')"/>
 
-        <a-button-group v-if="!doc.historyVersion && !loading" slot="action">
+        <a-button-group v-if="!doc.historyVersion && !loading" slot="action" class="layout-print-hide">
             <slot       v-if="!editMode" name="buttons"></slot>
 
             <!--编辑-->
@@ -162,6 +162,12 @@
                     <a-icon type="copy" />
                 </a-button>
             </a-tooltip> -->
+            <!--历史-->
+            <a-tooltip v-if="!editMode" title="打印">
+                <a-button type="default" @click="print">
+                    <a-icon type="printer" />
+                </a-button>
+            </a-tooltip>
 
             <!--历史-->
             <a-tooltip v-if="!editMode" title="变更历史">
@@ -194,7 +200,7 @@
 
         </a-button-group>
 
-        <nk-sticky slot="default-top" v-if="groups && groups.length" :stickyTop="0" :z-index="12" @changed="showStickyTitle=!$event">
+        <nk-sticky slot="default-top" v-if="groups && groups.length" :stickyTop="0" :z-index="12" @changed="showStickyTitle=!$event" class="layout-print-hide">
             <span class="card-groups">
                 <a-button-group v-if="groups && groups.length">
                     <a-button value="large"
@@ -208,7 +214,7 @@
                 </a-button-group>
             </span>
         </nk-sticky>
-        <a-button-group v-if="groups && groups.length" style="margin-bottom: 24px;">
+        <a-button-group v-if="groups && groups.length" style="margin-bottom: 24px;" class="layout-print-hide">
             <a-button value="large"
                       :type="selectedGroup===index?'primary':'dashed'"
                       v-for="(item,index) in groups"
@@ -233,7 +239,7 @@
         <template v-for="(c) in availableCards">
             <component ref="components"
                        v-if="c.position==='default' && c.dataComponentName"
-                       :class="`nk-page-layout-card ${historyClass(c.cardKey)} ${debugClass(c.debug)}`"
+                       :class="`layout-print nk-page-layout-card ${historyClass(c.cardKey)} ${debugClass(c.debug)}` "
                        :is="c.dataComponentName"
                        :id="buildAnchorLink(c.cardKey)"
                        :key="c.cardKey"
@@ -807,6 +813,9 @@ export default {
                 this.editCheckState = undefined;
                 this.editCheckFailed = false;
             }
+        },
+        print(){
+            window.print();
         }
     },
     beforeDestroy() {
@@ -865,5 +874,27 @@ export default {
   100%{
     opacity: 1;
   }
+}
+
+@media print{
+    .layout{
+        position: absolute;
+        left: 0;
+        right: 0;
+        top:0;
+        z-index: 999999;
+        background-color: #fff;
+        min-height: 100%;
+
+        ::v-deep .layout-print-hide,
+        .layout-print-hide{
+            display: none;
+        }
+        ::v-deep .nk-page-layout-card{
+            page-break-inside: avoid;
+            box-shadow: none;
+            -webkit-box-shadow:none;
+        }
+    }
 }
 </style>

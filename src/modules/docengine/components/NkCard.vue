@@ -13,6 +13,7 @@
 -->
 <template>
     <a-card :class="{'nk-page-layout-card':true,'no-expand':!expand}"
+            style="page-break-before:always;"
             size="default"
             :extra="extra"
             :loading="loading"
@@ -30,15 +31,15 @@
             {{(card.cardName)||title}}
         </div>
         <slot v-else slot="title" name="title"></slot>
-        <slot slot="actions" name="actions"></slot>
-        <slot slot="cover" name="cover"></slot>
+        <slot slot="actions" name="actions" class="layout-print-hide"></slot>
+        <slot slot="cover" name="cover" class="layout-print-hide"></slot>
 
-        <div slot="tabBarExtraContent">
+        <div slot="tabBarExtraContent" class="layout-print-hide">
             <a-icon v-if="card.cardKey && tabList" v-show="!expand" class="expand" type="caret-up"    @click="switchExpand"></a-icon>
             <a-icon v-if="card.cardKey && tabList" v-show=" expand" class="expand" type="caret-down"  @click="switchExpand"></a-icon>
             <slot name="tabBarExtraContent"></slot>
         </div>
-        <div slot="extra">
+        <div slot="extra" class="layout-print-hide">
             <slot name="extra" v-if="expand"></slot>
             <nk-script-label v-if="card.debug" :value="card.beanName"></nk-script-label>
             <nk-help-link v-if="card.markdown" @click="autoShowDocHelper" />
