@@ -53,11 +53,8 @@
                         <a-menu-item key="doCopy" :disabled="isCreate">
                             <a-icon type="copy" /> 复制为新类型
                         </a-menu-item>
-                        <a-menu-item key="doDelete" :disabled="isCreate || def.state==='Active'">
+                        <a-menu-item key="doDelete" :disabled="isCreate">
                             <a-icon type="delete" /> 删除
-                        </a-menu-item>
-                        <a-menu-item key="doDeleteForce" :disabled="isCreate">
-                            <a-icon type="delete" /> 强制删除
                         </a-menu-item>
                         <a-menu-item key="doRandom" :disabled="!(def.debug || def.state==='Active')">
                             <a-icon type="robot" /> 生成随机数据
@@ -164,23 +161,48 @@
         <a-modal v-model="visibleCreateRandom" centered title="请输入生成的单据数量" @ok="doRandom" width="320px" :confirm-loading="createRandomLoading">
             <a-input-number v-model="createRandomCount" placeholder="请输入生成的单据数量" style="width:100%"></a-input-number>
         </a-modal>
-        <a-modal v-model="visibleDiff" centered title="版本对比" width="80%">
-            <div style="text-align: right;margin-bottom: 10px;margin-top: -10px;">
-                <a-radio-group v-model="diffMode" size="small" button-style="solid">
-                    <a-radio-button value="unified">
-                        Unified
-                    </a-radio-button>
-                    <a-radio-button value="split">
-                        Split
-                    </a-radio-button>
-                </a-radio-group>
-            </div>
-            <nk-diff :data="diff" :mode="diffMode" />
+
+        <a-modal v-model="visibleDiff" centered width="80%" :dialogStyle="{'margin-top':'20px','max-height':'100%'}"
+                 :destroyOnClose="true">
+            <template slot="title">
+                <div style="display: flex; justify-content: space-between">
+                    <span>版本对比</span>
+                    <a-radio-group v-model="diffMode" size="small" button-style="solid" style="margin-right: 20px;">
+                        <a-radio-button value="unified">
+                            Unified
+                        </a-radio-button>
+                        <a-radio-button value="split">
+                            Split
+                        </a-radio-button>
+                    </a-radio-group>
+                </div>
+            </template>
+            <a-skeleton :loading="!diff">
+                <nk-diff v-if="diff"  :data="diff" :mode="diffMode" style="height: calc(100vh - 190px)" />
+            </a-skeleton>
             <template slot="footer">
                 <a-button key="back" type="primary" @click="visibleDiff=false">
                     关闭
                 </a-button>
             </template>
+        </a-modal>
+
+        <a-modal v-model="visibleActiveDiff" centered width="80%"
+                 :closable="false"
+                 :destroyOnClose="true"
+                 :maskClosable="false"
+                 ok-text="确认无误，继续激活"
+                 @ok="doConfirmActive"
+                 :confirm-loading="confirmLoadingActive"
+                 :cancelButtonProps="{props:{disabled:confirmLoadingActive}}"
+        >
+            <template slot="title">
+                <a-icon type="exclamation-circle" />
+                版本冲突，请确认
+            </template>
+            <a-skeleton :loading="!diff">
+                <nk-diff v-if="diff" :data="diff" mode="split" :mergeable="true" @change="diffChange" style="height: calc(100vh - 190px)"  />
+            </a-skeleton>
         </a-modal>
     </nk-page-layout>
 </template>
@@ -197,7 +219,7 @@ import NkDefDocTypeDataSyncs from "./NkDefDocTypeDataSyncs";
 import NkDefDocTypeBPM from "./NkDefDocTypeBPM";
 import NkDefDocTypeCards from "./NkDefDocTypeCards";
 import NkUtil from "../../../utils/NkUtil";
-import {mapState} from "vuex";
+import {mapMutations, mapState} from "vuex";
 
 import {diffJson} from "diff";
 
@@ -205,7 +227,7 @@ const defaultCards = [
     {key:"doc",     name:"基本信息",    defComponentNames: [NkDefDocTypeBase,    NkDefDocTypeStatus,NkDefDocTypeHelpDoc]},
     {key:"cycle",   name:"业务逻辑",    defComponentNames: [NkDefDocTypeBizFlow, NkDefDocTypeCycle, NkDefDocTypeIndex]},
     {key:"bpm",     name:"审批流程",    defComponentNames: [NkDefDocTypeBPM,                        ]},
-    {key:"cloud",   name:"云Cloud",      defComponentNames: [NkDefDocTypeCloud, NkDefDocTypeDataSyncs                      ]},
+    {key:"cloud",   name:"云Cloud",    defComponentNames: [NkDefDocTypeCloud, NkDefDocTypeDataSyncs                      ]},
     {key:"cards",   name:"功能卡片",    defComponentNames: [NkDefDocTypeCards,                      ]},
 ];
 
@@ -317,6 +339,10 @@ export default {
             visibleDiff:false,
             diff:undefined,
             diffMode: 'unified',
+            diffMerged: undefined,
+
+            visibleActiveDiff:false,
+            confirmLoadingActive:false,
         }
     },
     computed:{
@@ -355,6 +381,7 @@ export default {
                         this.def.docName = this.def.docName+'-副本';
                         this.def.docType = undefined;
                         this.def.version = undefined;
+                        this.def.pervVersion = undefined;
                         this.def.updatedTime = undefined;
                         this.def.state = 'InActive';
                     }
@@ -373,6 +400,9 @@ export default {
             })
     },
     methods:{
+        ...mapMutations('User',[
+            'setReLogin'
+        ]),
         init(){
         },
         menuClick(menu){
@@ -409,24 +439,78 @@ export default {
             this.loading = true;
             this.$http.postJSON(`/api/def/doc/type/delete${force&&'?force=true'||''}`,this.def)
                 .then(()=>{
-                    this.$emit("close");
+                    if(this.def.state==='Active'){
+                        this.$emit("close");
+                    }else{
+                        this.$http.get(`/api/def/doc/type/detail/${this.def.docType}/@`)
+                            .then(res=>{
+                                this.$emit('replace',`/apps/def/doc/detail/${res.data.docType}/${res.data.version}`);
+                                this.loading = false;
+                            });
+                    }
                 })
-                .finally(()=>{
+                .catch(()=>{
                     this.loading = false;
                 })
         },
-        doActive(){
+        doForceDelete(){
+            if(this.def.state==='Active'){
+                let self = this;
+                this.setReLogin({
+                    callback(){
+                        self.doDelete(true);
+                    },
+                    message:'请注意，删除单据配置后不可恢复，需进行二次身份验证',
+                    reLoginTime:undefined
+                })
+            }else{
+                this.doDelete();
+            }
+        },
+        diffChange(value){
+            this.diffMerged = JSON.parse(value);
+        },
+        doConfirmActive(){
             this.valid().then(()=>{
-                this.loading = true;
-                this.$http.postJSON(`/api/def/doc/type/active`,this.def)
+                this.confirmLoadingActive=true;
+                this.$http.postJSON(`/api/def/doc/type/active`,this.diffMerged)
                     .then((res)=>{
                         this.editMode = false;
                         this.def = res.data;
+                        this.visibleActiveDiff = false;
+                        this.$message.info("配置已激活");
+                        this.loadHistories(true);
                     })
                     .finally(()=>{
                         this.loading = false;
+                        this.confirmLoadingActive=false;
                     })
             });
+        },
+        doActive(){
+            let self = this;
+            this.loading = true;
+            // 获取当前激活版本
+            this.$http.get(`/api/def/doc/type/detail/${this.def.docType}/@`)
+                .then(res=>{
+                    if(res.data && res.data.version!==this.def.prevVersion){ // 如果激活的版本存在 且 父版本不一致
+                        this.visibleActiveDiff = true;
+                        this.diff = diffJson(res.data,this.def,{});
+                        this.loading = false;
+                    }else{
+                        this.$confirm({
+                            title: '确认激活当前版本?',
+                            centered : true,
+                            onOk() {
+                                self.diffMerged=self.def;
+                                self.doConfirmActive();
+                            },
+                            onCancel(){
+                                self.loading = false;
+                            }
+                        });
+                    }
+                });
         },
         doBreach(){
             this.valid().then(()=>{
@@ -473,9 +557,6 @@ export default {
             this.$http.get(`/api/def/doc/type/detail/${i.docType}/${i.version}`)
                 .then(res=>{
                     this.diff = diffJson(res.data,this.def,{});
-                    // diff.forEach(item=>{
-                    //     console.log(item.value)
-                    // });
                 });
         },
         valid(){
@@ -515,7 +596,10 @@ export default {
                     this.createRandomLoading = false;
                 });
         },
-        loadHistories(){
+        loadHistories(clear){
+            if(clear){
+                this.histories = [];
+            }
             let page = Math.ceil(this.histories.length / 10);
             this.$http.get(`/api/def/doc/type/list/${this.routeParams.type}/${page + 1}`)
                 .then(res=>{
@@ -525,8 +609,7 @@ export default {
         },
         handleMenuClick({key}){
             switch (key){
-                case "doDelete":this.doDelete();break;
-                case "doDeleteForce":this.doDelete(true);break;
+                case "doDelete":this.doForceDelete();break;
                 case "doBreach":this.doBreach();break;
                 case "doCopy":this.$emit('replace',`/apps/def/doc/create?fromType=${this.def.docType}&fromVersion=${this.def.version}`);break;
                 case "doRandom":this.visibleCreateRandom = true;break;

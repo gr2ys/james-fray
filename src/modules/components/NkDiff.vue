@@ -1,49 +1,50 @@
 <template>
-    <a-skeleton :loading="!(data && data.length)">
-        <div class="container">
-            <template v-if="mode.toLowerCase()==='unified'">
-                <div v-for="(line,index) in list" :key="index" class="line" :class="{unified:mode.toLowerCase()==='unified'}">
+    <div class="container">
+        <template v-if="mode.toLowerCase()==='unified'">
+            <div v-for="(line,index) in list" :key="index" class="line" :class="{unified:mode.toLowerCase()==='unified'}">
 
-                    <template v-if="line.added || line.removed">
-                        <div class="code" v-if="line.removed" :class="{removed:line.removed}">
-                            <pre class="lineNumber">{{line.lLineNum}}</pre>
-                            <pre class="lineNumber"></pre>
-                            <pre>{{line.lValue}}</pre>
-                        </div>
-
-                        <div class="code" v-if="line.added" :class="{added:line.added}">
-                            <pre class="lineNumber"></pre>
-                            <pre class="lineNumber">{{line.rLineNum}}</pre>
-                            <pre>{{line.rValue}}</pre>
-                        </div>
-                    </template>
-
-                    <div class="code" v-else>
+                <template v-if="line.added || line.removed">
+                    <div class="code" v-if="line.removed" :class="{removed:line.removed}">
                         <pre class="lineNumber">{{line.lLineNum}}</pre>
-                        <pre class="lineNumber">{{line.rLineNum}}</pre>
+                        <pre class="lineNumber"></pre>
                         <pre>{{line.lValue}}</pre>
                     </div>
 
-
-                </div>
-            </template>
-            <template v-else>
-                <div v-for="(line,index) in list" :key="index" class="line">
-                    <div class="code l" :class="{removed:line.removed}">
-                        <pre>{{line.lValue}}</pre>
-                        <pre class="lineNumber">{{line.lLineNum}}</pre>
-                        <div class="opt" v-if="mergeable">
-                            <a-icon v-if="line.removed" type="double-right" />
-                        </div>
-                    </div>
-                    <div class="code r" :class="{added  :line.added}">
+                    <div class="code" v-if="line.added" :class="{added:line.added}">
+                        <pre class="lineNumber"></pre>
                         <pre class="lineNumber">{{line.rLineNum}}</pre>
                         <pre>{{line.rValue}}</pre>
                     </div>
+                </template>
+
+                <div class="code" v-else>
+                    <pre class="lineNumber">{{line.lLineNum}}</pre>
+                    <pre class="lineNumber">{{line.rLineNum}}</pre>
+                    <pre>{{line.lValue}}</pre>
                 </div>
-            </template>
-        </div>
-    </a-skeleton>
+
+
+            </div>
+        </template>
+        <template v-else>
+            <div v-for="(line,index) in list" :key="index" class="line">
+                <div class="code l" :class="{removed:line.removed}">
+                    <pre>{{line.lValue}}</pre>
+                    <pre class="lineNumber">{{line.lLineNum}}</pre>
+                    <div class="opt" v-if="mergeable && !line.rValueOld" @click="merge(line,index)">
+                        <a-icon v-if="line.removed" type="double-right" />
+                    </div>
+                    <div class="opt" v-if="mergeable &&  line.rValueOld" @click="undoMerge(line,index)">
+                        <a-icon type="undo" />
+                    </div>
+                </div>
+                <div class="code r" :class="{added  :line.added}">
+                    <pre class="lineNumber">{{line.rLineNum}}</pre>
+                    <pre>{{line.rValue}}</pre>
+                </div>
+            </div>
+        </template>
+    </div>
 </template>
 
 <script>
@@ -58,54 +59,51 @@ export default {
     },
     data(){
         return {
-            l:{
-                count:0
-            },
-            r:{
-                count:0
-            }
+            list: undefined,
         }
     },
-    computed:{
-        list(){
-            const ret = [];
-            let lCount = 0;
-            let rCount = 0;
-            let removedPrev = undefined;
+    created() {
+        const ret = [];
+        let lCount = 0;
+        let rCount = 0;
+        let removedPrev = undefined;
 
-            this.data && this.data.forEach(line=>{
-                let item = {};
-                if(line.added){
-                    item = removedPrev||item;
-                    item.rValue   = line.value;
-                    item.rLineNum = this.lineNumber(line.count,rCount)
-                    item.added    = true;
-                    item.removed  = true;
-                    rCount       += line.count;
-                    if(removedPrev){
-                        removedPrev   = undefined;
-                        return;
-                    }
-                }else if(line.removed){
-                    item.lValue   = line.value;
-                    item.lLineNum = this.lineNumber(line.count,lCount)
-                    item.removed  = true;
-                    lCount       += line.count;
-                    removedPrev   = item;
-                }else{
-                    item.lValue   = line.value;
-                    item.lLineNum = this.lineNumber(line.count,lCount)
-                    lCount       += line.count;
-
-                    item.rValue   = line.value;
-                    item.rLineNum = this.lineNumber(line.count,rCount)
-                    rCount       += line.count;
+        this.data && this.data.forEach(line=>{
+            let item = {};
+            if(line.added){
+                item = removedPrev||item;
+                item.rValue   = line.value;
+                item.rLineNum = this.lineNumber(line.count,rCount)
+                item.rValueOld= undefined;
+                item.added    = true;
+                item.removed  = true;
+                rCount       += line.count;
+                if(removedPrev){
                     removedPrev   = undefined;
+                    return;
                 }
-                ret.push(item);
-            })
-            return ret;
-        }
+            }else if(line.removed){
+                item.lValue   = line.value;
+                item.lLineNum = this.lineNumber(line.count,lCount)
+                item.rValueOld= undefined;
+                item.removed  = true;
+                lCount       += line.count;
+                removedPrev   = item;
+            }else{
+                item.lValue   = line.value;
+                item.lLineNum = this.lineNumber(line.count,lCount)
+                lCount       += line.count;
+
+                item.rValue   = line.value;
+                item.rLineNum = this.lineNumber(line.count,rCount)
+                rCount       += line.count;
+                removedPrev   = undefined;
+            }
+            ret.push(item);
+        })
+
+        this.list = ret;
+        this.$emit("change",this.list.map(item=>item.rValue).join(''));
     },
     methods:{
         lineNumber(count, from){
@@ -114,6 +112,20 @@ export default {
                 nums.push(from+i+1);
             }
             return nums.join('\n');
+        },
+        merge(line){
+            line.rValueOld = line.rValue;
+            line.rValue    = line.lValue;
+            line.added     = false;
+            line.removed   = false;
+            this.$emit("change",this.list.map(item=>item.rValue).join(''));
+        },
+        undoMerge(line){
+            line.rValue    = line.rValueOld;
+            line.added     = true;
+            line.removed   = true;
+            line.rValueOld = undefined;
+            this.$emit("change",this.list.map(item=>item.rValue).join(''));
         }
     }
 }
@@ -122,6 +134,7 @@ export default {
 <style scoped lang="less">
     .container{
         border: solid 1px #ddd;
+        overflow-y: auto;
     }
     .line{
         display: flex;
@@ -140,6 +153,7 @@ export default {
                 align-items: center;
                 background-color: #eee;
                 user-select: none;
+                cursor: pointer;
             }
 
             pre{
