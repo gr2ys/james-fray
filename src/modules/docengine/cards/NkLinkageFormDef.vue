@@ -13,116 +13,108 @@
 -->
 <template>
     <nk-def-card>
-        <nk-form :col="1" :edit="editMode" style="width:300px;">
-            <nk-form-item title="列">
-                {{def.col}}
-                <a-input v-model="def.col" slot="edit" size="small" />
-            </nk-form-item>
-            <nk-form-item title="标题宽">
-                {{def.titleWidth}}
-                <a-input-number v-model="def.titleWidth" slot="edit" size="small" :min="20" :max="300" />
-            </nk-form-item>
-        </nk-form>
-        <vxe-toolbar v-if="editMode">
-            <template v-slot:buttons>
-                <vxe-button status="perfect" size="mini" @click="add()">新增</vxe-button>
-                <vxe-button status="perfect" size="mini" @click="rowExpandClear()">收起</vxe-button>
-            </template>
-        </vxe-toolbar>
-        <vxe-table
-            ref="xTable"
-            row-key
-            auto-resize
-            size="mini"
-            border=inner
-            show-header-overflow="tooltip"
-            show-overflow="tooltip"
-            resizable
-            highlight-hover-row
-            :edit-config="{trigger: 'click', mode: 'row', showIcon: editMode, activeMethod}"
-            :data="def.items"
-            @edit-actived="rowEditActived"
-            @edit-closed="rowEditClosed"
-            @toggle-row-expand="rowExpand"
+        <div slot="title" style="display: flex;align-items: center;justify-content: space-between;padding: 0 10px 0 0;">
+            {{card.cardName+':卡片设计'}}
+            <a-input placeholder="搜索字段Key、描述" size="small" style="width: 40%;" v-model="filter" allow-clear></a-input>
+        </div>
+        <span slot="extra">
+            <a-button-group size="small" style="margin-right: 10px;">
+                <a-button @click="reviewEditMode=false"           :type="reviewEditMode?'default':'primary'">显示</a-button>
+                <a-button @click="reviewEditMode=true"            :type="reviewEditMode?'primary':'default'">编辑</a-button>
+            </a-button-group>
+            <a-button size="small" @click="showHideFiled=!showHideFiled"   :type="showHideFiled?'primary':'default'">展示全部</a-button>
+        </span>
+
+        <nk-form-designer :title="card.cardName"
+                          :edit-mode="editMode"
+                          :def="def"
+                          :input-type-defs="inputTypeDefs"
+                          :filter="filter"
+                          :review-edit-mode="reviewEditMode"
+                          :show-hide-filed="showHideFiled"
         >
-            <vxe-table-column title="KEY"
-                              field="key"
-                              width="17%"
-                              :edit-render="{name:'$input',events:{change:keyChanged}}"></vxe-table-column>
-            <vxe-table-column title="描述"
-                              field="name"
-                              width="17%"
-                              :edit-render="{name:'$input'}"></vxe-table-column>
-            <vxe-table-column title="输入框"
-                              field="inputType"
-                              width="17%"
-                              :edit-render="{name:'$select',options:inputTypeDefs,events:{change:inputTypeChanged}}"></vxe-table-column>
-            <vxe-table-column title="触发计算"
-                              field="calcTrigger"
-                              width="12%"
-                              :edit-render="{name:'$switch',props: {'open-value':true,'close-value':false}}"
-                              :formatter="boolFormat"></vxe-table-column>
-            <vxe-table-column title="计算顺序"
-                              field="calcOrder"
-                              width="12%"
-                              :edit-render="{name:'$input', props: {type: 'number',min:1, max:4}}"></vxe-table-column>
-            <vxe-table-column title="列宽"
-                              field="col"
-                              width="10%"
-                              :edit-render="{name:'$input', props: {type: 'number',min:1, max:4}}"></vxe-table-column>
-            <vxe-table-column type="expand"
-                              field="">
-                <template v-slot="{seq,items}">
-                    <span v-if="editMode && sortable" class="drag-btn" style="margin-left: 10px;">
-                        <i class="vxe-icon--menu"></i>
-                    </span>
-                    <span v-if="editMode" style="margin-left: 10px;" @click="$nkSortableRemove(def.items,seq)">
-                        <i class="vxe-icon--remove"></i>
-                    </span>
-                </template>
-                <template #content="{ row }">
-                    <nk-form :edit="editMode" :col="2">
+            <template v-slot:card="{def}">
+                <nk-form :col="1" :edit="editMode" style="width:100%;">
+                    <nk-form-item title="列数量">
+                        {{def.col}}
+                        <a-input-number v-model="def.col" slot="edit" size="small" :min="1" :max="24" />
+                    </nk-form-item>
+                    <nk-form-item title="标题宽度">
+                        {{def.titleWidth}}
+                        <a-input-number v-model="def.titleWidth" slot="edit" size="small" :min="60" :max="300" />
+                    </nk-form-item>
+                    <nk-form-item title="标题省略号">
+                        {{def.titleEllipsis}}
+                        <a-switch v-model="def.titleEllipsis" slot="edit" size="small" />
+                    </nk-form-item>
+                    <slot name="header"></slot>
+                </nk-form>
+            </template>
+            <template v-slot:field="{selectedItem}">
+                <nk-form :edit="editMode" :col="1">
+
+                    <nk-form-item title="字段类型">
+                        {{selectedItem.inputType | formatInputType(inputTypeDefs)}}
+                    </nk-form-item>
+                    <nk-form-item title="KEY">
+                        {{selectedItem.key}}
+                        <a-input slot="edit" size="small" v-model="selectedItem.key" @change="keyChanged" />
+                    </nk-form-item>
+                    <nk-form-item title="描述">
+                        {{selectedItem.name}}
+                        <a-input slot="edit" size="small" v-model="selectedItem.name" />
+                    </nk-form-item>
+
+                    <template v-if="selectedItem.inputType!=='-'">
+                        <nk-form-item title="触发计算">
+                            {{selectedItem.calcTrigger?'是':'否'}}
+                            <a-switch slot="edit" size="small" v-model="selectedItem.calcTrigger" />
+                        </nk-form-item>
+                        <nk-form-item title="计算顺序">
+                            {{selectedItem.calcOrder}}
+                            <a-input-number slot="edit" size="small" v-model="selectedItem.calcOrder" :min="1" :max="4" />
+                        </nk-form-item>
+                        <nk-form-item title="列宽">
+                            {{selectedItem.col}}
+                            <a-input-number slot="edit" size="small" v-model="selectedItem.col" :min="1" :max="24" />
+                        </nk-form-item>
+
                         <nk-form-item title="校验提示">
-                            {{row.message}}
-                            <a-input slot="edit" size="small" v-model="row.message"></a-input>
+                            {{selectedItem.message}}
+                            <a-input slot="edit" size="small" v-model="selectedItem.message"></a-input>
                         </nk-form-item>
                         <nk-form-item title="控制">
-                            {{row.control===1 ?'读写':(row.control===0 ?'只读':'隐藏')}}
-                            <a-select slot="edit" size="small" v-model="row.control" >
+                            {{selectedItem.control===1 ?'读写':(selectedItem.control===0 ?'只读':'隐藏')}}
+                            <a-select slot="edit" size="small" v-model="selectedItem.control" >
                                 <a-select-option :key="1" >读写</a-select-option>
                                 <a-select-option :key="0" >只读</a-select-option>
                                 <a-select-option :key="-1">隐藏</a-select-option>
                             </a-select>
                         </nk-form-item>
-                        <nk-form-item title="控制 SpEL 表达式">
-                            {{row.spELControl}}
-                            <nk-sp-el-editor slot="edit" v-model="row.spELControl"></nk-sp-el-editor>
+                        <nk-form-item title="控制 SpEL">
+                            {{selectedItem.spELControl}}
+                            <nk-sp-el-editor slot="edit" v-model="selectedItem.spELControl"></nk-sp-el-editor>
                         </nk-form-item>
                         <nk-form-item title="右对齐">
-                            {{row.alignRight?'是':'否'}}
-                            <a-switch slot="edit" size="small" v-model="row.alignRight" />
+                            {{selectedItem.alignRight?'是':'否'}}
+                            <a-switch slot="edit" size="small" v-model="selectedItem.alignRight" />
                         </nk-form-item>
                         <nk-form-item title="自定义样式">
-                            {{row.style}}
-                            <a-input slot="edit" size="small" v-model="row.style"></a-input>
+                            {{selectedItem.style}}
+                            <a-input slot="edit" size="small" v-model="selectedItem.style"></a-input>
                         </nk-form-item>
                         <nk-form-item title="值 SpEL">
-                            {{row.spELContent}}
-                            <nk-sp-el-editor slot="edit" v-model="row.spELContent"></nk-sp-el-editor>
+                            {{selectedItem.spELContent}}
+                            <nk-sp-el-editor slot="edit" v-model="selectedItem.spELContent"></nk-sp-el-editor>
                         </nk-form-item>
                         <nk-form-item title="映射 SpEL">
-                            {{row.spELMapping}}
-                            <nk-sp-el-template-editor slot="edit" v-model="row.spELMapping"></nk-sp-el-template-editor>
+                            {{selectedItem.spELMapping}}
+                            <nk-sp-el-template-editor slot="edit" v-model="selectedItem.spELMapping"></nk-sp-el-template-editor>
                         </nk-form-item>
-                    </nk-form>
-                    <component v-if="row===activeRow && fieldDefComponent"
-                               :is="fieldDefComponent"
-                               :edit-mode="editMode"
-                               v-model="row.inputOptions"
-                    ></component>
-                </template>
-            </vxe-table-column>
-        </vxe-table>
+                    </template>
+                </nk-form>
+            </template>
+        </nk-form-designer>
     </nk-def-card>
 </template>
 
@@ -130,43 +122,42 @@
 import MixinDef from "./MixinDef";
 import MixinSortable from "../../../utils/MixinSortable";
 import MixinDynamicDef from "./MixinDynamicDef";
+import NkFormDesigner from "./NkFormDesigner"
+
 
 export default {
-    mixins:[new MixinDef({}),MixinSortable(),MixinDynamicDef],
+    mixins:[new MixinDef({
+        col:2,
+        titleWidth:120
+    }),MixinSortable(),MixinDynamicDef],
+    components:{
+        NkFormDesigner
+    },
+    filters:{
+        formatInputType(value,inputTypeDefs){
+            if(inputTypeDefs){
+                let d = inputTypeDefs.find(i=>i.value===value);
+                if(d){
+                    return d.name.split('|')[1];
+                }
+            }
+            return value;
+        }
+    },
     data(){
         return {
+            inputTypeDefs:undefined,
+            filter:undefined,
+            reviewEditMode: true,
+            showHideFiled: false,
         }
     },
     mounted() {
         this.nk$callDef()
             .then(res=>{
                 this.inputTypeDefs = res;
+                this.inputTypeDefs.push({value:'-',name:'-- | 分隔'})
             });
     },
-    methods:{
-
-        add(){
-            const index = this.def.items.length||'';
-            let newItem = {
-                key : 'key'+index,
-                name: '字段'+index,
-                col:1,
-                inputType: this.inputTypeDefs[0].value,
-                calcTrigger:'',
-                calcOrder:1,
-                required:true,
-                control:1,
-                spELContent:'',
-                spELTriggers:[],
-                eval:''
-            };
-            this.def.items.push(newItem);
-            this.$refs.xTable.loadData(this.def.items).then(() => this.$refs.xTable.setActiveRow(newItem));
-        },
-    }
 }
 </script>
-
-<style scoped>
-
-</style>

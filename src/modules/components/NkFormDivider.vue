@@ -13,11 +13,12 @@
 -->
 <template>
     <div class="border"
-        @dragover="$emit('nk-dragover',options)"
-        @drag="$emit('drag',$event)"
-        @dragend="$emit('dragend',$event)"
-        @click="$emit('click',$event)"
-        :draggable="draggable">
+         @dragstart="$emit('dragstart',$event)"
+         @drag="$emit('drag',$event)"
+         @dragover="$emit('dragover',$event)"
+         @dragend="$emit('dragend',$event)"
+         @click="$emit('click',$event)"
+         :draggable="draggable">
         <div class="nk-form-divider">
             <label v-if="term||title" class="l">
                 <b>{{term||title}}</b>

@@ -13,8 +13,9 @@
 -->
 <template>
     <div class="nk-form-item" :style="style"
-         @dragover="$emit('nk-dragover',options)"
+         @dragstart="$emit('dragstart',$event)"
          @drag="$emit('drag',$event)"
+         @dragover="$emit('dragover',$event)"
          @dragend="$emit('dragend',$event)"
          @click="$emit('click',$event)"
          :draggable="draggable">
