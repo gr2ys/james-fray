@@ -599,7 +599,8 @@ export default {
                         const old = res.data;
                         this.visibleActiveDiff = true;
                         this.versionConflict = old.version!==this.def.prevVersion
-                        this.diff = diffJson(old,this.def,diffOptions).map(diffClear);
+                        this.diff = diffJson(old,this.def).map(diffClear);
+                        console.log(this.diff.filter(i=>i.value.indexOf('金融负债收入比')>-1))
                         this.loading = false;
                     }else{
                         this.$confirm({

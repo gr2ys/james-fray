@@ -35,7 +35,7 @@ jsonDiff.castInput = function (value) {
     var _this$options = this.options,
         _this$options$stringi = _this$options.stringifyReplacer,
         stringifyReplacer = _this$options$stringi === void 0 ? function (k, v) {
-            if(k.startsWith('_X_')){
+            if(k&&k.startsWith('_X_')){
                 return undefined;
             }
             return v;
