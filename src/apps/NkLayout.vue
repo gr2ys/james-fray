@@ -444,7 +444,7 @@ export default {
 
     ::v-deep .nk-menu{
         overflow-y: auto;
-        height: calc(100vh - 80px);
+        height: calc(100vh - 91px);
 
         &::-webkit-scrollbar {
             display: none; /* Chrome Safari */
