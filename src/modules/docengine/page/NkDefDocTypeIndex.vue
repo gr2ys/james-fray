@@ -13,7 +13,7 @@
 -->
 <template>
     <nk-card card-key="nk-card-doc-type-state" class="nk-page-layout-card" title="索引字段">
-        <nk-help-link slot="extra" url="http://cwiki.nkpro.cn/pages/viewpage.action?pageId=23789596" />
+        <nk-help-link slot="extra" url="http://docs.elcube.cn/guide/def-doc-type.html#索引规则" />
         <vxe-toolbar v-if="editMode">
             <template v-slot:buttons>
                 <vxe-button icon="fa fa-plus" status="perfect" size="mini" @click="add()">新增</vxe-button>

@@ -133,7 +133,7 @@ export default {
                 arr.push('edit')
             if(this.align)
                 arr.push(this.align)
-            if(this.term || this.title)
+            if(this.term || this.title || this.$slots.term)
                 arr.push('hasContent')
             if(this.ellipsis){
                 arr.push('ellipsis')
@@ -213,6 +213,8 @@ export default {
 
 <style scoped lang="less">
 
+
+
 ::v-deep.nk-form-item{
     display: flex;
     align-items: flex-start;
@@ -280,6 +282,12 @@ export default {
     }
     .ant-form-explain{
         margin-top: 1px;
+    }
+}
+@media screen and (max-width: 768px) {
+    .nk-form-item{
+        width: 100% !important;
+        align-items: center;
     }
 }
 

@@ -162,18 +162,32 @@
                     <a-icon type="copy" />
                 </a-button>
             </a-tooltip> -->
-            <!--历史-->
-            <a-tooltip v-if="!editMode" title="打印">
+            <!--打印-->
+            <a-tooltip v-if="!editMode" title="打印" class="hide-when-mini">
                 <a-button type="default" @click="print">
                     <a-icon type="printer" />
                 </a-button>
             </a-tooltip>
 
             <!--历史-->
-            <a-tooltip v-if="!editMode" title="变更历史">
+            <a-tooltip v-if="!editMode" title="变更历史" class="hide-when-mini">
                 <a-button :type="histories?'primary':'default'"
                           @click="histories = !histories">
                     <a-icon type="clock-circle" />
+                </a-button>
+            </a-tooltip>
+
+            <!-- 源码修改 -->
+            <a-tooltip v-if="!editMode && !doc.newCreate && hasAuthority(['DEVOPS:*','DEVOPS:DOC'])" title="编辑源数据" class="hide-when-mini">
+                <a-button @click="sourceVisible = true">
+                    <a-icon type="code" />
+                </a-button>
+            </a-tooltip>
+
+            <!-- 配置 -->
+            <a-tooltip  v-if="hasAuthority(['DEF:*','DEF:*'])" title="查看配置" class="hide-when-mini">
+                <a-button @click="$router.push(`/apps/def/doc/detail/${doc.docType}/${doc.def.version}`)">
+                    <a-icon type="deployment-unit" />
                 </a-button>
             </a-tooltip>
 
@@ -181,20 +195,6 @@
             <a-tooltip v-if="!preview" title="查看文档">
                 <a-button :type="'default'" @click="autoShowDocHelper">
                     <nk-help-link/>
-                </a-button>
-            </a-tooltip>
-
-            <!-- 源码修改 -->
-            <a-tooltip v-if="!editMode && !doc.newCreate && hasAuthority(['DEVOPS:*','DEVOPS:DOC'])" title="编辑源数据">
-                <a-button @click="sourceVisible = true">
-                    <a-icon type="code" />
-                </a-button>
-            </a-tooltip>
-
-            <!-- 配置 -->
-            <a-tooltip  v-if="hasAuthority(['DEF:*','DEF:*'])" title="查看配置">
-                <a-button @click="$router.push(`/apps/def/doc/detail/${doc.docType}/${doc.def.version}`)">
-                    <a-icon type="deployment-unit" />
                 </a-button>
             </a-tooltip>
 

@@ -94,6 +94,15 @@
                             <a-input slot="edit" size="small" v-model="selectedItem.style"></a-input>
                         </nk-form-item>
                     </template>
+                    <template v-else>
+                        <nk-form-item title="分隔器样式">
+                            {{selectedItem.inputOptions.dividerStyle}}
+                            <a-select slot="edit" size="small" v-model="selectedItem.inputOptions.dividerStyle" >
+                                <a-select-option key="separator" >分隔符</a-select-option>
+                                <a-select-option key="tips" >文字提示</a-select-option>
+                            </a-select>
+                        </nk-form-item>
+                    </template>
                     <nk-form-item title="控制">
                         {{selectedItem.control===1 ?'读写':(selectedItem.control===0 ?'只读':'隐藏')}}
                         <a-select slot="edit" size="small" v-model="selectedItem.control" >

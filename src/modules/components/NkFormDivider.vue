@@ -19,7 +19,10 @@
          @dragend="$emit('dragend',$event)"
          @click="$emit('click',$event)"
          :draggable="draggable">
-        <div class="nk-form-divider">
+        <div v-if="options.dividerStyle==='tips'" class="nk-form-tips">
+            {{term||title}}
+        </div>
+        <div v-else class="nk-form-separator">
             <label v-if="term||title" class="l">
                 <b>{{term||title}}</b>
             </label>
@@ -33,7 +36,11 @@ export default {
     name: "NkFormDivider",
     props: {
         draggable:String,
-        options:{},
+        options:{
+            default(){
+                return {}
+            }
+        },
         term: {
             type: String,
             required: false
@@ -42,6 +49,10 @@ export default {
             type: String,
             required: false
         },
+        dividerStyle: {
+            type: String,
+            default: 'separator'
+        }
     }
 }
 </script>
@@ -50,12 +61,19 @@ export default {
 div.border{
     width: 100%;
 }
-div.nk-form-divider{
+div.nk-form-separator{
     position:relative;height:1px;background-color: rgba(0, 0, 0, 0.2);margin:20px 30px 20px 30px;
 
     label.l{
         position: absolute;top:-10px;left: 80px;background-color: #fff;padding: 0 10px;font-size: 12px;
     }
+}
+div.nk-form-tips{
+    min-height: 40px;
+    padding: 10px 20px;
+    margin-left: 10px;
+    border-left: solid 4px #eee;
+    color: #a2a2a2;
 }
 
 </style>

@@ -12,7 +12,7 @@
 	along with ELCube.  If not, see <https://www.gnu.org/licenses/>.
 -->
 <template>
-    <nk-dashboard-card :title="title||'欢迎使用ELCube'">
+    <nk-dashboard-card :title="title||'欢迎使用ELCube'" :editable="editable">
         <a-menu-item slot="menu" key="0">
             <a-icon type="edit" /> 编辑
         </a-menu-item>
@@ -36,6 +36,7 @@ export default {
     props:{
         title:String,
         config:Object,
+        editable:Boolean
     },
     data(){
         return {

@@ -14,7 +14,7 @@
 <template>
     <nk-card card-key="nk-card-doc-type-component" class="nk-page-layout-card" title="自定义组件">
         <a-alert v-if="!docDef.version" message="请先保存单据配置" style="margin-bottom:10px;" banner/>
-        <nk-help-link slot="extra" url="http://cwiki.nkpro.cn/pages/viewpage.action?pageId=23789596" />
+        <nk-help-link slot="extra" url="http://docs.elcube.cn/guide/def-doc-cards.html" />
         <vxe-toolbar v-if="editMode && docDef.version">
             <template v-slot:buttons>
                 <vxe-button icon="fa fa-plus" status="perfect" size="mini" @click="addComponent()">新增</vxe-button>

@@ -10,9 +10,14 @@
                             <template v-for="(item,seq) in def.items">
                                 <nk-form-divider v-if="(showHideFiled || item.control >= 0) && (item.inputType==='divider'||item.inputType==='-'||item.inputType==='--')"
                                                  :key="item.key"
-                                                 :options="item" @dragover="dragover(item)" @dragstart="dragstart(item)" @dragend="dragend" @click="selectItem($event,item)"
+                                                 :options="item.inputOptions"
+                                                 @dragover="dragover(item)"
+                                                 @dragstart="dragstart(item)"
+                                                 @dragend="dragend"
+                                                 @click="selectItem($event,item)"
                                                  :draggable="editMode?'true':'false'"
                                                  :class="{
+                                                         dropable:editMode,
                                                          'b':true,
                                                          'selected':item._selected,
                                                          'nk-primary-border-color-important':item._selected,
@@ -20,7 +25,6 @@
                                                          'hide':item.control < 0,
                                                          'searched': filter && ((item.key&&item.key.indexOf(filter) > -1) || (item.name&&item.name.indexOf(filter) > -1))
                                                      }"
-                                                 style="cursor: move"
                                                  :title="item.name">
                                     <a-popconfirm @confirm="remove(def.items,seq+1)" :title="`移除[${item.name}]?`">
                                         <a-icon type="close" v-if="editMode && item._selected" style="position: absolute;right: -25px;top:-15px;cursor: pointer;"/>
@@ -31,6 +35,7 @@
                                                  :options="item" @dragover="dragover(item)" @dragstart="dragstart(item)" @dragend="dragend" @click="selectItem($event,item)"
                                                  :draggable="editMode?'true':'false'"
                                                  :class="{
+                                                         dropable:editMode,
                                                             'b':true,
                                                             'selected':item._selected,
                                                             'nk-primary-border-color-important':item._selected,
@@ -43,7 +48,7 @@
                                                  :ellipsis="def.titleEllipsis"
                                                  :col="item.col||1"
                                                  :edit="reviewEditMode && item.control > 0"
-                                                 style="position: relative;cursor: move"
+                                                 style="position: relative;"
                                                  :required="item.required"
                                                  :content-align="item.alignRight?'right':''"
                                                  :ignoreValidate="true"
@@ -326,5 +331,8 @@ export default {
 }
 ::v-deep .empty::before{
     content: '-'
+}
+.dropable{
+    cursor: move;
 }
 </style>
