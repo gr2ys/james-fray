@@ -12,7 +12,9 @@
 	along with ELCube.  If not, see <https://www.gnu.org/licenses/>.
 -->
 <template>
-    <a-textarea v-model="text" :auto-size="{minRows:5,maxRows:20}"></a-textarea>
+    <nk-form-item title="值">
+        <a-textarea slot="edit" v-model="text" :auto-size="{minRows:5,maxRows:20}"></a-textarea>
+    </nk-form-item>
 </template>
 
 <script>
