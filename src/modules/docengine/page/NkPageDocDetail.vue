@@ -88,7 +88,7 @@
 
             <!--编辑-->
             <a-tooltip   v-if="!editMode" title="编辑">
-                <a-button :type="preview?'default':'primary'" :disabled="!docEditable" @click="doEdit">
+                <a-button type="primary" :disabled="!docEditable" @click="doEdit">
                     <a-icon type="edit" />
                 </a-button>
             </a-tooltip>
