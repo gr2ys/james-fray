@@ -38,11 +38,11 @@
                           width="8%"
                           :edit-render="{name:'$switch',props: {'open-value':true,'close-value':false}}"
                           :formatter="boolFormat"></vxe-table-column>
-        <vxe-table-column title="SpEL"
+        <vxe-table-column title="值EL条件"
                           field="spELTriggers"
                           width="12%"
                           :edit-render="{name:'$select',props:{multiple:true},options:inputTriggers}"></vxe-table-column>
-        <vxe-table-column title="SpEL值"
+        <vxe-table-column title="值EL"
                           field="spELContent"
                           width="12%"
                           :edit-render="{}">
@@ -53,7 +53,7 @@
                 <nk-sp-el-editor slot="edit" v-model="row.spELContent"></nk-sp-el-editor>
             </template>
         </vxe-table-column>
-        <vxe-table-column title="SpEL顺序"
+        <vxe-table-column title="计算顺序"
                           field="calcOrder"
                           width="12%"
                           :edit-render="{name:'$input', props: {type: 'number',min:1, max:4}}"></vxe-table-column>

@@ -105,12 +105,12 @@
                             <a-select-option :key="0" >只读</a-select-option>
                         </a-select>
                     </nk-form-item>
-                    <nk-form-item title="控制 SpEL">
+                    <nk-form-item title="控制EL">
                         {{selectedItem.spELControl}}
                         <nk-sp-el-editor slot="edit" v-model="selectedItem.spELControl"></nk-sp-el-editor>
                     </nk-form-item>
                     <template v-if="selectedItem.inputType!=='-'">
-                        <nk-form-item title="值 SpEL 条件">
+                        <nk-form-item title="值EL条件">
                             {{selectedItem.spELTriggers}}
                             <a-select slot="edit" size="small" v-model="selectedItem.spELTriggers" mode="multiple" >
                                 <a-select-option key="ALWAYS">ALWAYS</a-select-option>
@@ -118,7 +118,7 @@
                                 <a-select-option key="BLANK">BLANK</a-select-option>
                             </a-select>
                         </nk-form-item>
-                        <nk-form-item title="值 SpEL">
+                        <nk-form-item title="值EL">
                             {{selectedItem.spELContent}}
                             <nk-sp-el-editor slot="edit" v-model="selectedItem.spELContent"></nk-sp-el-editor>
                         </nk-form-item>

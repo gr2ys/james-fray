@@ -49,10 +49,16 @@
                                 :edit-render="{name:'$input',props:{type:'integer',min:0}}"/>
             <vxe-table-column   title="计算次数"      field="calcTimes"         width="10%"
                                 :edit-render="{name:'$input',props:{type:'integer',min:1,max:5}}"/>
-            <vxe-table-column   title="编辑"  field="editableSpEL"             width="8%"
-                                :edit-render="{name:'$input',props:{placeholder:'{\'S001\',\'S002\'}.contains(docState)'}}"/>
-            <vxe-table-column   title="显示"  field="visibleSpEL"             width="8%"
-                                :edit-render="{name:'$input',props:{placeholder:'{\'S001\',\'S002\'}.contains(docState)'}}"/>
+            <vxe-table-column   title="编辑"  field="editableSpEL"             width="8%" :edit-render="{}">
+                <template v-slot:edit="{seq,row}">
+                    <nk-sp-el-editor v-model="row.editableSpEL" placeholder="true 可编辑"></nk-sp-el-editor>
+                </template>
+            </vxe-table-column>
+            <vxe-table-column   title="显示"  field="visibleSpEL"             width="8%" :edit-render="{}">
+                <template v-slot:edit="{seq,row}">
+                    <nk-sp-el-editor v-model="row.visibleSpEL" placeholder="true 显示"></nk-sp-el-editor>
+                </template>
+            </vxe-table-column>
             <vxe-table-column   title="数据复制"  field="copyFromRef"           width="10%"
                                 :formatter="boolFormat"
                                 :edit-render="{name:'$switch',props: {'open-value':1,'close-value':0}}"

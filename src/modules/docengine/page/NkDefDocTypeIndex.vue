@@ -51,7 +51,7 @@
                     {value:'serial$', label:'serial$ | 序列号文本(全文检索)'},
                 ]
             }"/>
-            <vxe-table-column   title="SpEL"      field="ruleSpEL" width="50%" :edit-render="{}">
+            <vxe-table-column   title="EL"      field="ruleSpEL" width="50%" :edit-render="{}">
                 <template v-slot:edit="{row}">
                     <nk-sp-el-editor v-model="row.ruleSpEL"></nk-sp-el-editor>
                 </template>

@@ -22,7 +22,7 @@
                 {{def.sortable | boolFormat}}
                 <a-switch size="small" slot="edit" v-model="def.sortable"></a-switch>
             </nk-form-item>
-            <nk-form-item title="初始化SpEL">
+            <nk-form-item title="初始化EL">
                 {{def.preSpEL}}
                 <nk-sp-el-template-editor slot="edit" size="small" v-model="def.preSpEL"></nk-sp-el-template-editor>
             </nk-form-item>
@@ -118,11 +118,11 @@
                                 <a-select-option :key="0" >只读</a-select-option>
                             </a-select>
                         </nk-form-item>
-                        <nk-form-item title="控制 SpEL 表达式">
+                        <nk-form-item title="控制EL">
                             {{row.spELControl}}
                             <nk-sp-el-editor slot="edit" v-model="row.spELControl"></nk-sp-el-editor>
                         </nk-form-item>
-                        <nk-form-item title="值 SpEL 条件">
+                        <nk-form-item title="值EL条件">
                             {{row.spELTriggers}}
                             <a-select slot="edit" size="small" v-model="row.spELTriggers" mode="multiple" >
                                 <a-select-option key="ALWAYS">ALWAYS</a-select-option>
@@ -130,7 +130,7 @@
                                 <a-select-option key="BLANK">BLANK</a-select-option>
                             </a-select>
                         </nk-form-item>
-                        <nk-form-item title="值 SpEL 表达式">
+                        <nk-form-item title="值EL">
                             {{row.spELContent}}
                             <nk-sp-el-editor slot="edit" v-model="row.spELContent"></nk-sp-el-editor>
                         </nk-form-item>
