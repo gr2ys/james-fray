@@ -122,7 +122,7 @@ export default {
     },
     methods:{
         completeTaskOk(transition){
-            if(Object.keys(this.param).length != this.task.formFields.length){
+            if(this.task.formFields && Object.keys(this.param).length != this.task.formFields.length){
                 this.$message.error('请填写参数');
                 return false;
             }
