@@ -98,22 +98,13 @@ export default {
         open(){
             this.visible = true;
             this.result = undefined;
-            try{
-                this.el = this.parse(this.value,2);
-                this.error = undefined;
-            }catch (e){
-                this.el = this.value;
-                this.error = undefined;
-            }
+            this.el = this.value;
+            this.error = undefined;
         },
         submit(){
-            try{
-                this.$emit("input", this.validate(this.el));
-                this.visible = false;
-                this.error = undefined;
-            }catch (e){
-                this.error = e;
-            }
+            this.$emit("input", this.el);
+            this.visible = false;
+            this.error = undefined;
         },
         test(){
             this.$http.post("/api/debug/spel/test",qs.stringify({
@@ -126,30 +117,6 @@ export default {
                     this.result = res.data.result;
                 }
             })
-        },
-        parse(value,space){
-            const v = value && value.replace(/\s/g,'');
-            if(!v)
-                return v;
-            return JSON.stringify(JSON.parse(value),null,space)
-        },
-        validate(value){
-            value = value && value.trim();
-            try{
-                return JSON.stringify(JSON.parse(value));
-            }catch (e){
-                if(typeof value==='string'){
-                    if(value.startsWith('{')&&value.endsWith('}')){
-                        return value;
-                    }
-                    try{
-                        JSON.stringify(JSON.parse(`"${value}"`));
-                        return value;
-                    }catch (e){
-                        throw e;
-                    }
-                }
-            }
         }
     }
 }
