@@ -35,6 +35,8 @@
 
                     <a-button slot="extra" size="small" type="primary" @click="execute">运行</a-button>
 
+                    <a-textarea v-model="options" placeholder="运行参数" :rows="3"></a-textarea>
+
                     <nk-form v-if="jobDetail" :col="1">
                         <template v-for="(trigger,index) in jobDetail.triggers">
                             <nk-form-divider :key="'a'+index" :title="trigger.key.name" ></nk-form-divider>
@@ -61,7 +63,8 @@
                 filter:undefined,
                 jobs:[],
                 item:{},
-                jobDetail:undefined
+                jobDetail:undefined,
+                options:undefined
             }
         },
         created() {
@@ -82,9 +85,13 @@
                     })
             },
             execute(){
-                this.$http.get(`/api/ops/scheduled/execute/${this.item.group}/${this.item.name}`)
+                this.$http.postJSON(`/api/ops/scheduled/execute/${this.item.group}/${this.item.name}`,this.options||'')
                     .then(()=>{
-                        console.log("执行");
+                        this.options = undefined;
+                        this.$notification.info({
+                            message:"提示",
+                            description:"任务已提交"
+                        });
                     })
             }
         }
