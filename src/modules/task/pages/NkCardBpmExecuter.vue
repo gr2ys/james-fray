@@ -26,13 +26,17 @@
             <nk-form-item v-for="(item,index) in this.task.formFields"
                           :key="index"
                           :term="item.label"
-                          :validate-for="completeTask.form[item.id]" :required="!!(formValidations[item.id].required)">
+                          :validate-for="completeTask.form[item.id]"
+                          :required="!!(formValidations[item.id].required)"
+                          :message="item.properties&&item.properties.errorMessage"
+                          :validator="(toFunction(formValidations[item.id].validator,item.properties))"
+            >
                 <a-input             v-if="item.typeName==='string'"  slot="edit" size="small" style="width: 70%;" v-model="completeTask.form[item.id]"/>
                 <a-input-number v-else-if="item.typeName==='long'"    slot="edit" size="small" style="width: 30%;" v-model="completeTask.form[item.id]"/>
                 <a-switch       v-else-if="item.typeName==='boolean'" slot="edit" size="small" v-model="completeTask.form[item.id]"/>
                 <a-date-picker  v-else-if="item.typeName==='date'"    slot="edit" size="small" v-model="completeTask.form[item.id]" valueFormat="DD/MM/YYYY"></a-date-picker>
                 <a-select       v-else-if="item.typeName==='enum'"    slot="edit" size="small" style="width: 30%;" v-model="completeTask.form[item.id]" :options="item.options"></a-select>
-                <component     v-else :is="item.typeName"             :editMode=true v-model="completeTask.form[item.id]" :properties="item.properties" :options="item.options"></component>
+                <component     v-else :is="item.typeName"             slot="edit" :editMode=true v-model="completeTask.form[item.id]" :properties="item.properties" :options="item.options"></component>
             </nk-form-item>
             <nk-form-item title="办理意见" :required="true" :validate-for="completeTask.comment">
                 <a-input slot="edit" type="textarea" v-model="completeTask.comment" :auto-size="{ minRows: 4, maxRows: 6 }" placeholder="请输入办理意见"></a-input>
@@ -94,6 +98,8 @@
 <script>
 import NkBpmnView from "./NkBpmnView";
 import {mapGetters} from "vuex";
+import { Interpreter } from "eval5";
+
 
 export default {
     components: {NkBpmnView},
@@ -247,6 +253,13 @@ export default {
         modalOk(){
             this.modal.visible = false;
             this.modal.callback();
+        },
+        toFunction(script,props){
+            if(script){
+                const interpreter = new Interpreter({props});
+                return interpreter.evaluate(`(${script})`);
+            }
+            return undefined;
         }
     },
     mounted() {
