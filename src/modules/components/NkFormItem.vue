@@ -13,12 +13,12 @@
 -->
 <template>
     <div class="nk-form-item" :style="style">
-        <div class="term" :class="termClass" :style="{'min-width':width+'px'}">
+        <div class="term" :class="termClass" :style="{'width':width+'px'}">
             <nk-required-mark v-if="editMode && required" />
             {{term || title}}
             <slot name="term"></slot>
         </div>
-        <div class="content" :class="contentClass" :style="{'max-width': 'calc(100% - '+width+'px)'}">
+        <div class="content" :class="contentClass" :style="{'width': 'calc(100% - '+width+'px)'}">
             <slot v-if="!editMode"></slot>
             <slot v-if="editMode" name="edit"></slot>
             <div v-if="editMode && error" class="ant-form-explain" style="color: #ff6068">{{error}}</div>
@@ -207,11 +207,16 @@ export default {
         padding-bottom: 8px;
         padding-right: 8px;
         color: rgba(0,0,0,.85);
-        white-space: nowrap;
-        display: table-cell;
+        display: flex;
+        justify-content: flex-end;
         text-align: right;
         flex-shrink: 0;
         font-size: 12px;
+        & > {
+            word-break:break-all;
+            white-space: pre-wrap;
+            overflow: hidden;
+        }
 
         &.left{
             text-align: left;
