@@ -290,15 +290,8 @@ const markdownOption = {
     preview: false, // 预览
 };
 
-const diffOptions = {
-    stringifyReplacer(k,v){
-        if(k==='_X_ROW_KEY'){
-            return undefined;
-        }
-        return v;
-    }
-};
 const diffDisabledPrefixes = [
+    '  "updatedAccount"',
     '  "prevVersion"',
     '  "state"',
     '    "state"',
@@ -667,7 +660,7 @@ export default {
             this.diff = undefined;
             this.$http.get(`/api/def/doc/type/detail/${i.docType}/${i.version}`)
                 .then(res=>{
-                    this.diff = diffJson(res.data,this.def,diffOptions).map(diffClear);
+                    this.diff = diffJson(res.data,this.def).map(diffClear);
                 });
         },
         valid(){

@@ -35,7 +35,7 @@ jsonDiff.castInput = function (value) {
     var _this$options = this.options,
         _this$options$stringi = _this$options.stringifyReplacer,
         stringifyReplacer = _this$options$stringi === void 0 ? function (k, v) {
-            if(k==='_X_ROW_KEY'){
+            if(k.startsWith('_X_')){
                 return undefined;
             }
             return v;
@@ -44,7 +44,7 @@ jsonDiff.castInput = function (value) {
 };
 
 jsonDiff.equals = function (left, right) {
-    return Diff.prototype.equals.call(jsonDiff, left.replace(/,([\r\n])/g, '$1'), right.replace(/,([\r\n])/g, '$1'));
+    return Diff.prototype.equals.call(jsonDiff, left.replace(/([\r\n])/g, '$1'), right.replace(/([\r\n])/g, '$1'));
 };
 
 function diffDocDef(oldObj, newObj, options) {
