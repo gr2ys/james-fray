@@ -565,7 +565,7 @@ export default {
     /*内容页*/
     .nk-layout-content{
         min-height: calc(100vh - 64px);
-        ::v-deep.nk-page-layout-card {
+        ::v-deep .nk-page-layout-card {
             margin-bottom: 24px;
         }
     }
