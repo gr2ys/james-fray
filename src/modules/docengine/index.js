@@ -20,6 +20,8 @@ import NkDynamicForm from "./cards/NkDynamicForm";
 import NkDynamicFormDef from "./cards/NkDynamicFormDef";
 import NkDynamicGrid from "./cards/NkDynamicGrid";
 import NkDynamicGridDef from "./cards/NkDynamicGridDef";
+import NkDynamicGridForm from "./cards/NkDynamicGridForm";
+import NkDynamicGridFormDef from "./cards/NkDynamicGridFormDef";
 import NkLinkageForm from "./cards/NkLinkageForm";
 import NkLinkageFormDef from "./cards/NkLinkageFormDef";
 
@@ -80,6 +82,8 @@ module.install = function (Vue) {
   Vue.component('NkDynamicFormDef',NkDynamicFormDef);
   Vue.component('NkDynamicGrid',NkDynamicGrid);
   Vue.component('NkDynamicGridDef',NkDynamicGridDef);
+  Vue.component('NkDynamicGridForm',NkDynamicGridForm);
+  Vue.component('NkDynamicGridFormDef',NkDynamicGridFormDef);
   Vue.component('NkLinkageForm',NkLinkageForm);
   Vue.component('NkLinkageFormDef',NkLinkageFormDef);
   Vue.component('nk-doc-select-editor',NkDocSelectEditor);
