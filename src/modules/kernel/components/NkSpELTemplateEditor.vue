@@ -63,10 +63,10 @@ export default {
     },
     created() {
         this.component = this.modalComponent;
-        // if(this.$parent.$options._componentTag==="vxe-table-body"){
-        //     this.component = 'vxe-modal';
-        //     this.inputComponent = 'vxe-input';
-        // }
+        if(this.$parent.$options._componentTag==="vxe-table-body"){
+            this.component = 'vxe-modal';
+            // this.inputComponent = 'vxe-input';
+        }
     },
     data(){
         return {
