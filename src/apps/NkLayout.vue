@@ -445,7 +445,7 @@ export default {
             localStorage.setItem("$NK-Layout-collapsed",this.collapsed?"true":"false");
         },
         naved(){
-            if(this.$refs.bg){
+            if(document.body.clientWidth<768){
                 this.doCollapsed();
             }
         }
