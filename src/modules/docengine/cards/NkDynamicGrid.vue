@@ -69,7 +69,7 @@
                     <span v-if="editMode && def.sortable" class="drag-btn" style="margin-left: 10px;">
                         <i class="vxe-icon--menu"></i>
                     </span>
-                    <span v-if="editMode&&!def.disabledRemove" style="margin-left: 10px;" @click="$nkSortableRemove(data,seq)">
+                    <span v-if="editMode&&!def.disabledRemove" style="margin-left: 10px;" @click="xTableRemove(data,seq)">
                         <i class="vxe-icon--remove"></i>
                     </span>
                 </template>
@@ -95,6 +95,7 @@ export default {
         return {
             loading: false,
             trigger: false,
+            calcLock: false
         }
     },
     computed:{
@@ -134,6 +135,9 @@ export default {
         }
     },
     methods:{
+        docUpdate(){
+            this.calcLock = false;
+        },
         nk$editModeChanged(editMode){
             this.$refs.xTable.clearSort();
             this.$refs.items && this.$refs.items.forEach(c=>{
@@ -156,9 +160,17 @@ export default {
         xTableEditActived(){
         },
         xTableEditClosed(){
-            if(this.trigger){
+            if(this.trigger&&!this.calcLock){
                 this.trigger = false;
+                this.calcLock = true;
                 this.nk$calc();
+            }
+        },
+        xTableRemove(data,seq){
+            this.$nkSortableRemove(data,seq);
+            if(this.def.items.find(item=>item.calcTrigger)){
+                this.trigger = true;
+                this.xTableEditClosed();
             }
         },
         itemChange(e,item,scope){
