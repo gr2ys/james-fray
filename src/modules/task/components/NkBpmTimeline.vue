@@ -48,7 +48,7 @@ export default {
     computed:{
         list(){
             if(this.task){
-                return this.histories.filter((item,index)=>index<this.histories.length-1);
+                return this.histories.filter((item,index)=>index<this.histories.length);
             }
             return this.histories;
         }
