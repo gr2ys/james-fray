@@ -61,8 +61,6 @@ export default (Vue) => {
 
       const unsign = str[0].substr(4)+'?'+array.sort().join('&');
 
-      console.log(unsign)
-
       const signature = crypto.createHash('sha1')
           .update(unsign)
           .digest('hex');
