@@ -80,7 +80,6 @@ export default {
     created() {
         this.$http.get("/api/wsdoc/controllers")
             .then(res=>{
-                console.log(res.data);
                 this.list = res.data;
                 this.spinning = false;
             });

@@ -93,19 +93,15 @@
                 </a-button>
             </a-tooltip>
 
-            <a-tooltip v-if="availablePrimaryStatus.length" title="保存为">
-                <a-popconfirm v-for="item in availablePrimaryStatus"
-                              :key="item.docState"
-                              :title="`确定${item.operatorName || item.docStateDesc}?`"
-                              @confirm="doSave(item.docState)"
+            <a-popconfirm  v-for="item in availablePrimaryStatus" :key="item.docState" :title="`确定${item.operatorName || item.docStateDesc}?`"
+                          @confirm="doSave(item.docState)"
+            >
+                <a-button type="primary"
+                          :disabled="editCheckFailed"
                 >
-                    <a-button type="primary"
-                              :disabled="editCheckFailed"
-                    >
-                        <a-icon type="step-forward" /> {{item.operatorName || item.docStateDesc}}
-                    </a-button>
-                </a-popconfirm>
-            </a-tooltip>
+                    <a-icon type="step-forward" /> {{item.operatorName || item.docStateDesc}}
+                </a-button>
+            </a-popconfirm>
 
             <!--保存-->
             <template v-if="editMode">

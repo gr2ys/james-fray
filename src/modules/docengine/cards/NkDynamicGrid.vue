@@ -40,10 +40,10 @@
             @edit-closed="xTableEditClosed"
         >
             <!--增加一行空列，避免宽度不够不能自适应-->
-            <vxe-column v-if="def.seq" type="seq" title="#"></vxe-column>
+            <vxe-column v-if="def.seq" type="seq" title="#" width="5%"></vxe-column>
 
             <vxe-column v-for="(item) in def.items" :key="item.key"
-                      :min-width="(item.col||10) + '%'"
+                      :width="(item.col||10) + '%'"
                       :title="item.name"
                       :field="item.key"
                       :sortable="item.sortable"
@@ -65,12 +65,12 @@
                 </template>
             </vxe-column>
             <!--增加一行空列，避免宽度不够不能自适应-->
-            <vxe-column v-if="editMode" title="" :min-width="def.sortable?80:50">
+            <vxe-column title="">
                 <template v-slot="{seq,items}">
                     <span v-if="editMode && def.sortable" class="drag-btn" style="margin-left: 10px;">
                         <i class="vxe-icon--menu"></i>
                     </span>
-                    <span v-if="editMode&&!def.disabledRemove" style="margin-left: 10px;" @click="$nkSortableRemove(data,seq)">
+                    <span v-if="editMode&&!def.disabledRemove" style="margin-left: 10px;" @click="xTableRemove(data,seq)">
                         <i class="vxe-icon--remove"></i>
                     </span>
                 </template>
@@ -96,6 +96,7 @@ export default {
         return {
             loading: false,
             trigger: false,
+            calcLock: false
         }
     },
     computed:{
@@ -135,6 +136,9 @@ export default {
         }
     },
     methods:{
+        docUpdate(){
+            this.calcLock = false;
+        },
         nk$editModeChanged(editMode){
             this.$refs.xTable.clearSort();
             this.$refs.items && this.$refs.items.forEach(c=>{
@@ -157,9 +161,17 @@ export default {
         xTableEditActived(){
         },
         xTableEditClosed(){
-            if(this.trigger){
+            if(this.trigger&&!this.calcLock){
                 this.trigger = false;
+                this.calcLock = true;
                 this.nk$calc();
+            }
+        },
+        xTableRemove(data,seq){
+            this.$nkSortableRemove(data,seq);
+            if(this.def.items.find(item=>item.calcTrigger)){
+                this.trigger = true;
+                this.xTableEditClosed();
             }
         },
         itemChange(e,item,scope){
@@ -211,5 +223,14 @@ export default {
                 }
             }
         }
+    }
+    ::v-deep .empty{
+        color:#bbb;
+        user-select: none;
+        font-style: italic;
+
+    }
+    ::v-deep .empty::before{
+        content: '-'
     }
 </style>

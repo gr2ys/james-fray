@@ -79,8 +79,8 @@
                             <a-button type="primary" html-type="submit" style="width: 46px;">
                                 <a-icon type="search" />
                             </a-button>
-                            <a-button v-if="exportConfig && exportConfig.enable" type="default" @click="doExport" style="width: 46px;">
-                                <a-icon type="export" />
+                            <a-button v-if="exportConfig && exportConfig.enable" type="default" @click="doExport" style="width: 46px;" :loading="exportLoading">
+                                <a-icon type="export" v-if="!exportLoading" />
                             </a-button>
                             <a-button type="default" @click="reset({})" style="width: 46px;">
                                 <a-icon type="rollback" />
@@ -102,7 +102,7 @@
                 show-overflow="tooltip"
                 size="mini"
                 :border="border"
-                :columns="dataTableColumns"
+                :columns="availableDataTableColumns"
                 :data="page.list"
                 :loading="loading"
                 @cell-click="vxeCellClick"
@@ -118,7 +118,16 @@
                 </template>
             </vxe-grid>
             <vxe-pager
-                v-if="page.page"
+                v-if="page.cursor||cursors.length>1"
+                perfect
+                size="mini"
+                :current-page="cursors.length"
+                :page-size="page.rows"
+                :total="page.cursor && page.list.length >= params.rows?10000:page.rows"
+                :layouts="['PrevPage', 'NextPage', 'Sizes']"
+                @page-change="cursorNext"/>
+            <vxe-pager
+                v-else-if="page.page"
                 perfect
                 size="mini"
                 :current-page="page.page"
@@ -188,6 +197,14 @@ export default {
         },
         exportConfig:Object
     },
+    computed:{
+        aggs(){
+            return this.page.aggs || {}
+        },
+        availableDataTableColumns(){
+            return this.dataTableColumns && this.dataTableColumns.filter(item=>item.ignore!==true);
+        }
+    },
     data(){
         return {
             loading: true,
@@ -211,17 +228,15 @@ export default {
                 list: []
             },
 
-            suggest: []
+            suggest: [],
+            exportLoading:false,
+
+            cursors:[null]// 第一页游标是null
         }
     },
     mounted(){
         if(!this.lazy) {
             this.init()
-        }
-    },
-    computed:{
-        aggs(){
-            return this.page.aggs || {}
         }
     },
     methods:{
@@ -247,19 +262,7 @@ export default {
 
             this.page.rows = this.initRows;
             this.params.rows = this.initRows;
-
-            // 设置索引的返回字段
-            const fields = this.dataIncludeFields;
-            if(fields.indexOf("docId")===-1){fields.push("docId")}
-            if(fields.indexOf("classify")===-1){fields.push("classify")}
-            if(fields.indexOf("itemType")===-1){fields.push("itemType")}
-            this.dataTableColumns.forEach(item=>{
-                if(item.field && fields.indexOf(item.field)===-1){
-                    fields.push(item.field);
-                }
-            })
-            this.params.source=fields;
-
+            this.params.source=this.buildFields(false);
 
             this.searchMoreDefUpdate();
             this.searchItemsDefault
@@ -274,6 +277,23 @@ export default {
             if(this.saveAsSource){
                 this.saveAsGet();
             }
+        },
+        buildFields(includeIgnore){
+            // 设置索引的返回字段
+            const fields = this.dataIncludeFields;
+            if(fields.indexOf("docId")===-1){fields.push("docId")}
+            if(fields.indexOf("classify")===-1){fields.push("classify")}
+            if(fields.indexOf("itemType")===-1){fields.push("itemType")}
+            this.dataTableColumns
+                .filter(item=>{
+                    return includeIgnore || item.ignore!==true
+                })
+                .forEach(item=>{
+                    if(item.field && fields.indexOf(item.field)===-1){
+                        fields.push(item.field);
+                    }
+                })
+            return fields;
         },
         reset(params){
 
@@ -334,6 +354,8 @@ export default {
             this.params.orderField = null;
             this.params.order = null;
             this.params.from = 0;
+            this.params.cursor = undefined;
+            this.cursors = [null];
             this.emitChange();
             return false;
         },
@@ -377,7 +399,10 @@ export default {
         },
 
         doExport(){
-            this.$emit("exportExcel", this.params)
+            this.exportLoading = true;
+            let params = Object.assign({},this.params);
+            params.source = this.buildFields(true);
+            this.$emit("exportExcel", params)
         },
         /**
          * 执行参数更新，并通知父组件，由父组件执行搜索
@@ -493,6 +518,24 @@ export default {
                 this.emitChange()
             }
         },
+        cursorNext(e){
+
+            if(e.pageSize===this.page.rows){
+                if(this.cursors.length<e.currentPage){
+                    this.cursors.push(this.page.cursor);
+                }else{
+                    this.cursors.pop();
+                }
+            }else{
+                // 重置第一页
+                this.cursors=[null];
+            }
+
+            this.params.cursor=this.cursors[this.cursors.length-1];
+            this.params.rows = e.pageSize;
+            this.params.sqlColumns = this.page.columns;
+            this.emitChange()
+        },
         // 保存搜索
         saveAsGet(){
             this.$http.get("/api/webapp/user/saved/query/list?source="+this.saveAsSource)
@@ -525,6 +568,9 @@ export default {
         },
         grid(){
             return this.$refs.grid;
+        },
+        setExportDown(){
+            this.exportLoading=false;
         }
     }
 }

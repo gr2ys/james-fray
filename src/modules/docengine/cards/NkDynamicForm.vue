@@ -77,12 +77,12 @@ export default {
 
 <style scoped lang="less">
   ::v-deep .empty{
-    color:#ddd;
+    color:#bbb;
     user-select: none;
     font-style: italic;
 
   }
   ::v-deep .empty::before{
-    content: '<暂无内容>'
+    content: '-'
   }
 </style>

@@ -33,13 +33,13 @@
             :edit-config="{trigger: 'dblclick', mode: 'row', showIcon: editMode, activeMethod: ()=>{return editMode}}"
             :data="docDef.lifeCycles"
             @edit-actived="editActive">
-            <vxe-table-column   title="事件"         field="docCycle"        width="30%"  :edit-render="{
+            <vxe-table-column   title="事件"         field="docCycle"        width="20%"  :edit-render="{
                     name: '$select',
                     options: eventOptions,
                     optionProps: {value: 'key', label: 'name'},
                     events: {change: eventChanged}
             }" />
-            <vxe-table-column   title="处理程序"         field="refObjectType"  width="50%"  :edit-render="{
+            <vxe-table-column   title="处理程序"         field="refObjectType"  width="25%"  :edit-render="{
                     name: '$select',
                     options: valueOptions,
                     optionProps: {value: 'key', label: 'name'}
@@ -48,7 +48,12 @@
                     <nk-script-label v-if="row.refObjectType" :value="row.refObjectType"></nk-script-label>
                 </template>
             </vxe-table-column>
-            <vxe-table-column   title=""            field=""                   width="20%">
+            <vxe-table-column field="refObjectParams"   width="40%" :edit-render="{}" title="参数" >
+                <template v-slot:edit="{row}">
+                    <nk-sp-el-template-editor v-model="row.refObjectParams"></nk-sp-el-template-editor>
+                </template>
+            </vxe-table-column>
+            <vxe-table-column   title="">
                 <template v-slot="{seq,row}">
                 <span v-if="editMode" class="drag-btn" style="margin-right: 10px;">
                         <i class="vxe-icon--menu"></i>

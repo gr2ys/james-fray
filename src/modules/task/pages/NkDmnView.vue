@@ -66,7 +66,7 @@ export default {
                         dmnFired(this.viewer,this.matchedRules)
                     }
 
-                }).catch((e) => {console.log(e)});
+                }).catch((e) => {console.error(e)});
         },
         zoom(flag) {
             this.viewer._viewers.drd.get('zoomScroll').stepZoom(flag)
