@@ -13,8 +13,9 @@
 -->
 <template>
     <nk-card card-key="nk-card-doc-type-component" class="nk-page-layout-card" title="自定义组件">
+        <a-alert v-if="!docDef.version" message="请先保存单据配置" style="margin-bottom:10px;" banner/>
         <nk-help-link slot="extra" url="http://cwiki.nkpro.cn/pages/viewpage.action?pageId=23789596" />
-        <vxe-toolbar v-if="editMode">
+        <vxe-toolbar v-if="editMode && docDef.version">
             <template v-slot:buttons>
                 <vxe-button icon="fa fa-plus" status="perfect" size="mini" @click="addComponent()">新增</vxe-button>
             </template>
@@ -34,7 +35,7 @@
             :data="docDef.cards">
             <vxe-table-column   title="卡片"         field="beanName"        width="20%"  :edit-render="{
                         name: '$select',
-                        options: docOptions.cards,
+                        options: cards,
                         optionProps: {value: 'key', label: 'name'},
                         events: {change: componentChange},
                 }" />
@@ -86,6 +87,12 @@ export default {
         }
     },
     computed:{
+        cards(){
+            if(this.docDef.docClassify){
+                return this.docOptions.cards;
+            }
+            return [];
+        }
     },
     created() {
         this.$nkSortableVxeTable(true);

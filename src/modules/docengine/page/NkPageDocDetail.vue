@@ -12,13 +12,14 @@
 	along with ELCube.  If not, see <https://www.gnu.org/licenses/>.
 -->
 <template>
-    <nk-page-layout class="mini"
-                    :title="doc.docName||'未命名单据'"
+    <nk-page-layout class="layout mini"
+                    :title="'单据详情'"
                     ref="nav"
-                    sub-title="单据详情"
+                    :sub-title="doc.docName||'未命名单据'"
                     :spinning="loading"
                     :right-bar="rightBar"
                     :header-indent="headerIndent"
+                    :show-sticky-title="showStickyTitle"
     >
 
         <div v-if="doc.historyVersion" slot="top" class="alert">
@@ -82,29 +83,27 @@
         </div>
         <a-statistic slot="extra" title="状态" :value="doc.docState | nkFromList(doc.def&&doc.def.status,'docStateDesc','docState')"/>
 
-        <a-button-group v-if="!doc.historyVersion && !loading" slot="action">
+        <a-button-group v-if="!doc.historyVersion && !loading" slot="action" class="layout-print-hide">
             <slot       v-if="!editMode" name="buttons"></slot>
 
             <!--编辑-->
             <a-tooltip   v-if="!editMode" title="编辑">
-                <a-button :type="preview?'default':'primary'" :disabled="!docEditable" @click="doEdit">
+                <a-button type="primary" :disabled="!docEditable" @click="doEdit">
                     <a-icon type="edit" />
                 </a-button>
             </a-tooltip>
 
-            <a-tooltip v-if="availablePrimaryStatus.length" title="保存为">
-                <a-popconfirm v-for="item in availablePrimaryStatus"
-                              :key="item.docState"
-                              :title="`确定${item.operatorName || item.docStateDesc}?`"
-                              @confirm="doSave(item.docState)"
-                >
-                    <a-button type="primary"
-                              :disabled="editCheckFailed"
-                    >
-                        <a-icon type="step-forward" /> {{item.operatorName || item.docStateDesc}}
-                    </a-button>
-                </a-popconfirm>
-            </a-tooltip>
+            <a-popconfirm  v-for="item in availablePrimaryStatus"
+                           :key="item.docState"
+                           :title="`确定${item.operatorName || item.docStateDesc}?`"
+                           @confirm="doSave(item.docState)"
+                           placement="bottomRight"
+                           :disabled="editCheckFailed"
+            >
+                <a-button type="primary" :disabled="editCheckFailed">
+                    <a-icon type="step-forward" /> {{item.operatorName || item.docStateDesc}}
+                </a-button>
+            </a-popconfirm>
 
             <!--保存-->
             <template v-if="editMode">
@@ -157,6 +156,19 @@
                 </a-dropdown>
             </a-tooltip>
 
+            <!--复制-->
+            <!-- <a-tooltip   v-if="!editMode && doc.refObjectId===doc.docId" title="复制">
+                <a-button type="default" @click="toCopy">
+                    <a-icon type="copy" />
+                </a-button>
+            </a-tooltip> -->
+            <!--历史-->
+            <a-tooltip v-if="!editMode" title="打印">
+                <a-button type="default" @click="print">
+                    <a-icon type="printer" />
+                </a-button>
+            </a-tooltip>
+
             <!--历史-->
             <a-tooltip v-if="!editMode" title="变更历史">
                 <a-button :type="histories?'primary':'default'"
@@ -166,7 +178,7 @@
             </a-tooltip>
 
             <!--文档-->
-            <a-tooltip title="查看文档">
+            <a-tooltip v-if="!preview" title="查看文档">
                 <a-button :type="'default'" @click="autoShowDocHelper">
                     <nk-help-link/>
                 </a-button>
@@ -174,8 +186,7 @@
 
             <!-- 源码修改 -->
             <a-tooltip v-if="!doc.newCreate && hasAuthority(['DEVOPS:*','DEVOPS:DOC'])" title="编辑源数据">
-                <a-button
-                          @click="sourceVisible = true">
+                <a-button @click="sourceVisible = true">
                     <a-icon type="code" />
                 </a-button>
             </a-tooltip>
@@ -189,7 +200,21 @@
 
         </a-button-group>
 
-        <a-button-group v-if="groups && groups.length" style="margin-bottom: 24px;">
+        <nk-sticky slot="default-top" v-if="groups && groups.length" :stickyTop="0" :z-index="12" @changed="showStickyTitle=!$event" class="layout-print-hide">
+            <span class="card-groups">
+                <a-button-group v-if="groups && groups.length">
+                    <a-button value="large"
+                              :type="selectedGroup===index?'primary':'dashed'"
+                              v-for="(item,index) in groups"
+                              :key="index"
+                              @click="selectedGroup = index"
+                    >
+                        {{ item.name }}
+                    </a-button>
+                </a-button-group>
+            </span>
+        </nk-sticky>
+        <a-button-group v-if="groups && groups.length" style="margin-bottom: 24px;" class="layout-print-hide">
             <a-button value="large"
                       :type="selectedGroup===index?'primary':'dashed'"
                       v-for="(item,index) in groups"
@@ -214,7 +239,7 @@
         <template v-for="(c) in availableCards">
             <component ref="components"
                        v-if="c.position==='default' && c.dataComponentName"
-                       :class="`nk-page-layout-card ${historyClass(c.cardKey)} ${debugClass(c.debug)}`"
+                       :class="`layout-print nk-page-layout-card ${historyClass(c.cardKey)} ${debugClass(c.debug)}` "
                        :is="c.dataComponentName"
                        :id="buildAnchorLink(c.cardKey)"
                        :key="c.cardKey"
@@ -281,11 +306,13 @@ import {mapGetters, mapMutations, mapState} from 'vuex';
 import NkCardBpmExecuter from "../../task/pages/NkCardBpmExecuter";
 import docMarkdown from "../components/docMarkdown";
 import NkDocSourceEditor from "../components/NkDocSourceEditor";
+import NkSticky from "../../components/NkSticky";
 
 export default {
     components:{
         NkCardBpmExecuter,
-        NkDocSourceEditor
+        NkDocSourceEditor,
+        NkSticky
     },
     props:{
         params: Object,
@@ -311,7 +338,8 @@ export default {
 
             selectedGroup: 0,
 
-            sourceVisible: false
+            sourceVisible: false,
+            showStickyTitle:true,
         }
     },
 
@@ -436,7 +464,7 @@ export default {
         availablePrimaryStatus(){
             return this.doc.def && this.doc.def.status.filter(
                 state => state.visible && (state.preDocState === this.doc.docState)
-                    && ((state.displayPrimary && this.statusEditable) || this.statusEditOnly)
+                    && ((state.displayPrimary && this.statusEditable && this.editMode) || this.statusEditOnly)
             );
         },
         contextParams(){
@@ -458,12 +486,14 @@ export default {
             })
         },
         initData(){
+            this.loading = true
             if(this.contextParams.mode==='create'){
                 this.createMode = true;
                 const req = {
                     docType:this.contextParams.docId,
                     refObjectId:this.$route.query.ref,
-                    preDocId:this.$route.query.pre||this.$route.query.ref
+                    preDocId:this.$route.query.pre||this.$route.query.ref,
+                    copyFromId:this.$route.query.copyFromId,
                 }
                 this.$http.post("/api/doc/pre/create",qs.stringify(req))
                     .then(response=>{
@@ -474,26 +504,38 @@ export default {
                         this.loading = false;
                         this.autoShowDocHelper();
                     }).catch(res=>{
-                    if(res.response.status===403){
-                        this.$emit("close")
-                    }
-                });
+                        if(res.response.status===403){
+                            this.$emit("close")
+                        }
+                    });
             }else if(this.contextParams.mode==='detail'){
                 this.$http.get("/api/doc/detail/"+this.contextParams.docId)
                     .then(response=>{
-                        this.doc = response.data;
-                        this.nkEditModeChanged(false);
-                        this.$emit('setTab',this.doc.docName||'未命名单据');
-                        this.loading = false
-                        this.autoShowDocHelper();
+                        if(response.data){
+                            this.doc = response.data;
+                            this.nkEditModeChanged(false);
+                            this.$emit('setTab',this.doc.docName||'未命名单据');
+                            this.loading = false
+                            this.autoShowDocHelper();
+                        }else{
+                            const self = this;
+                            this.$warning({
+                                centered:true,
+                                title: '提示',
+                                content: '单据不存在',
+                                onOk(){
+                                    self.$emit("close")
+                                }
+                            })
+                        }
                     }).catch(res=>{
-                    if(res.response.status===403){
-                        this.$emit("close")
-                    }
-                    if(res.response.data.msg==="单据不存在"){
-                        this.$emit("close")
-                    }
-                });
+                        if(res.response.status===403){
+                            this.$emit("close")
+                        }
+                        if(res.response.data.msg==="单据不存在"){
+                            this.$emit("close")
+                        }
+                    });
             }else if(this.contextParams.mode==='snapshot'){
                 this.$http.get("/api/doc/detail/snapshot/"+this.contextParams.docId)
                     .then(response=>{
@@ -542,6 +584,14 @@ export default {
                             });
                     },10*1000);
                 });
+        },
+        toCopy(){
+            this.$router.push({
+                path:`/apps/docs/create/${this.doc.def.docType}`,
+                query:{
+                    copyFromId:this.doc.docId
+                }
+            });
         },
         async doSave(state) {
 
@@ -610,7 +660,9 @@ export default {
             this.loading = true;
             this.docState = state;
             this.doc.docState = this.docState;
-            this.$http.postJSON(`/api/doc/update`, this.doc)
+            let reqData = Object.assign({},this.doc);
+            reqData.def = undefined;
+            this.$http.postJSON(`/api/doc/update`, reqData)
                 .then((response) => {
                     if(this.debugId){
                         this.$message.info("Tips: 调试模式下，单据未持久化")
@@ -670,19 +722,21 @@ export default {
             this.$http.postJSON(`/api/doc/calculate`,{doc:this.doc,fromCard:card.cardKey,options})
                 .then(response=>{
                     this.doc = response.data;
+                    this.loading=false;
                     this.$nextTick(()=>{
                         this.nkChanged({
                             event:'nk-calc'
                         },card);
                     })
                 })
-                .finally(()=>{
+                .catch(()=>{
                     this.loading=false;
+                }).finally(()=>{
                     clearTimeout(timeout)
                 })
         },
         nkChanged(e,component){
-            Object.assign(e,{$source:component && component.component});
+            Object.assign(e,{$source:component && component.cardKey});
             this.$refs.components&&this.$refs.components.forEach(c=>c.docUpdate&&c.docUpdate(e));
         },
         nkEditModeChanged(editMode){
@@ -690,10 +744,29 @@ export default {
                 this.editMode = editMode;
                 this.$emit("editModeChanged",this.editMode);
                 this.$nextTick(()=>{
-                    this.$refs.components&&this.$refs.components.forEach(c=> {
-                        c.docEditModeChanged && c.docEditModeChanged(this.editMode);
-                        c.nk$editModeChanged && c.nk$editModeChanged(this.editMode);
-                    });
+                    // 由于Vue组件挂载需要时间，所以这里保险期间，增加一个组件是否渲染完毕的检查
+                    if(this.$refs.components.length<this.availableCards.length){
+                        let counter = 0;
+                        let interval = setInterval(()=>{
+                            try{
+                                if(this.$refs.components.length>=this.availableCards.length || counter>=10){
+                                    this.$refs.components&&this.$refs.components.forEach(c=> {
+                                        c.docEditModeChanged && c.docEditModeChanged(this.editMode);
+                                        c.nk$editModeChanged && c.nk$editModeChanged(this.editMode);
+                                    });
+                                    clearInterval(interval)
+                                }
+                            }catch{
+                                clearInterval(interval)
+                            }
+                            counter ++;
+                        },10);
+                    }else{
+                        this.$refs.components&&this.$refs.components.forEach(c=> {
+                            c.docEditModeChanged && c.docEditModeChanged(this.editMode);
+                            c.nk$editModeChanged && c.nk$editModeChanged(this.editMode);
+                        });
+                    }
                 });
             }
         },
@@ -708,9 +781,9 @@ export default {
             this.histories=undefined;
             this.clearCheckTimer()
         },
-        toCreateDoc(defDoc){
+        toCreateDoc(def){
             this.$router.push({
-                path:`/apps/docs/create/${defDoc.docType}`,
+                path:`/apps/docs/create/${def.docType}`,
                 query:{
                     pre:this.doc.docId
                 }
@@ -740,6 +813,9 @@ export default {
                 this.editCheckState = undefined;
                 this.editCheckFailed = false;
             }
+        },
+        print(){
+            window.print();
         }
     },
     beforeDestroy() {
@@ -781,5 +857,44 @@ export default {
 }
 .alert{
     //padding: 10px 22px 0;
+}
+
+.card-groups{
+  background-color: #fff;
+  padding: 12px 0 12px 24px;
+  display: inline-block;
+  //min-width: 50%;
+  animation: card-groups-enter 0.5s;
+}
+
+@keyframes card-groups-enter{
+  0%{
+    opacity: 0;
+  }
+  100%{
+    opacity: 1;
+  }
+}
+
+@media print{
+    .layout{
+        position: absolute;
+        left: 0;
+        right: 0;
+        top:0;
+        z-index: 999999;
+        background-color: #fff;
+        min-height: 100%;
+
+        ::v-deep .layout-print-hide,
+        .layout-print-hide{
+            display: none;
+        }
+        ::v-deep .nk-page-layout-card{
+            page-break-inside: avoid;
+            box-shadow: none;
+            -webkit-box-shadow:none;
+        }
+    }
 }
 </style>

@@ -15,6 +15,7 @@ import AuthUtils from "./AuthUtils"
 import NkLayout from "../NkLayout";
 import NkNotFound from "../NkNotFound";
 import NkMe from "../NkMe";
+import NkAbout from "../NkAbout";
 import NkApi from "../NkApi";
 import StateUI from "../stores/StateUI";
 
@@ -46,6 +47,15 @@ export default function(VueRouter,moduleRoutes,loginPage,defaultPage) {
             closable :false,
             meta: {
               title: '欢迎页'
+            },
+          },
+          {
+            name: '关于',
+            path: '/apps/about',
+            component: NkAbout,
+            closable :false,
+            meta: {
+              title: '关于ELCube'
             },
           },
           {
@@ -98,30 +108,32 @@ export default function(VueRouter,moduleRoutes,loginPage,defaultPage) {
     }
 
     router.beforeEach((to, from, next) => {
-
-      if (to.meta.ignoreAuth){
-        // 跳转到登陆
-        next();
-        updateMeta(to);
+      let state = AuthUtils.state();
+      if(state.authed){
+        // 如果用户已登陆
+        if(to.path==='/'){
+          next({
+            path: '/apps'
+          })
+        }else{
+          next();
+          updateMeta(to);
+        }
       }else{
-        let state = AuthUtils.state();
-        if(state.authed){
-          // 如果用户已登陆
-          if(to.path==='/'){
-            next({
-              path: '/apps'
-            })
-          }else{
+        // 如果用户未登陆
+        if (to.meta.ignoreAuth){
+          // 跳转到登陆
+          next();
+          updateMeta(to);
+        }else if(from.path==='/'){
+          console.log(from.path)
+          console.log(to.path)
+          next({path: '/?redirect='+to.path})
+        }else{
+          router.app.$http.reLogin(()=>{
             next();
             updateMeta(to);
-          }
-        }else{
-          // 如果用户未登陆
-          router.app.$http.refreshToken(from,next)
-              .then(()=>{
-                next();
-                updateMeta(to);
-              })
+          })
         }
       }
     });

@@ -13,6 +13,10 @@
 -->
 <template>
     <nk-card>
+        <template v-slot:extra>
+            <a-button v-if="def.downLoadFile&&!editMode" type="primary" @click="selectDownAllContract()" size="small">打包下载</a-button>
+        </template>
+        <iframe ref="iframe" style="display: none"></iframe>
         <nk-form ref="form" :col="def.col||1" :edit="editMode">
 
             <template v-for="(item) in def.items" >
@@ -26,7 +30,9 @@
                                :default-if-edit-lost="false"
                                :col="item.col"
                                :edit="editMode && item.control > 0"
-                               :width="def.titleWidth"
+                               :width="def.titleWidth||undefined"
+                               :ellipsis="def.titleEllipsis"
+                               :content-align="item.alignRight?'right':''"
 
                                :validate-for="data[item.key]"
                                :required="item.required"
@@ -36,14 +42,17 @@
                                :pattern="item.inputOptions&&item.inputOptions.pattern"
                                :message="item.message||(item.name +'校验不通过')"
                 >
-                    <component ref="items"
-                               :is="item.inputType"
-                               :slot="editMode && item.control > 0?'edit':'default'"
-                               :editMode="editMode && item.control > 0"
-                               v-model="data[item.key]"
-                               :input-options="item.inputOptions"
-                               @change="itemChange($event,item)"
-                    ></component>
+                    <template #[obtainSlot(item)]>
+                        <component ref="items"
+                                   :is="item.inputType"
+                                   :editMode="editMode && item.control > 0"
+                                   v-model="data[item.key]"
+                                   :input-options="item.inputOptions"
+                                   :style="item.style"
+                                   @change="itemChange($event,item)"
+                                   @call="itemCall($event,item)"
+                        ></component>
+                    </template>
                 </nk-form-item>
             </template>
 
@@ -68,13 +77,40 @@ export default {
                 });
             }
         },
+        itemCall(e,item){
+            this.nk$call({
+                triggerKey:item.key
+            }).then(res=>{
+                console.log(res)
+            });
+        },
         hasError(){
             return this.$refs.form.hasError();
-        }
-    }
+        },
+        obtainSlot(item){
+            return this.editMode && item.control > 0?'edit':'default'
+        },
+        selectDownAllContract() {
+            this.nk$call().then(res=>{
+                this.$http.get("/api/fs/download?url="+res).then(res1 => {
+                    this.$refs.iframe.src = res1.data;
+                });
+            });
+
+        },
+
+    },
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
+  ::v-deep .empty{
+    color:#bbb;
+    user-select: none;
+    font-style: italic;
 
+  }
+  ::v-deep .empty::before{
+    content: '-'
+  }
 </style>

@@ -20,6 +20,8 @@ import NkDynamicForm from "./cards/NkDynamicForm";
 import NkDynamicFormDef from "./cards/NkDynamicFormDef";
 import NkDynamicGrid from "./cards/NkDynamicGrid";
 import NkDynamicGridDef from "./cards/NkDynamicGridDef";
+import NkDynamicGridForm from "./cards/NkDynamicGridForm";
+import NkDynamicGridFormDef from "./cards/NkDynamicGridFormDef";
 import NkLinkageForm from "./cards/NkLinkageForm";
 import NkLinkageFormDef from "./cards/NkLinkageFormDef";
 
@@ -80,6 +82,8 @@ module.install = function (Vue) {
   Vue.component('NkDynamicFormDef',NkDynamicFormDef);
   Vue.component('NkDynamicGrid',NkDynamicGrid);
   Vue.component('NkDynamicGridDef',NkDynamicGridDef);
+  Vue.component('NkDynamicGridForm',NkDynamicGridForm);
+  Vue.component('NkDynamicGridFormDef',NkDynamicGridFormDef);
   Vue.component('NkLinkageForm',NkLinkageForm);
   Vue.component('NkLinkageFormDef',NkLinkageFormDef);
   Vue.component('nk-doc-select-editor',NkDocSelectEditor);
@@ -110,24 +114,24 @@ module.routes = [
     ]
   },
   {
-    name: "单据类型",
+    name: "模型",
     path: 'def/doc',
     component: NkDefDocs,
     children: [
       {
-        name: "单据类型配置详情",
+        name: "模型详情",
         path: ':mode',
         component: NkDefDocType,
         meta:{
-          title: "配置详情",
+          title: "模型详情",
         }
       },
       {
-        name: "单据类型配置编辑",
+        name: "模型编辑",
         path: ':mode/:type/:version',
         component: NkDefDocType,
         meta:{
-          title: "配置详情",
+          title: "模型详情",
         }
       }
     ]

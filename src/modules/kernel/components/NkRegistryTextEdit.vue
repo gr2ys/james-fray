@@ -12,7 +12,9 @@
 	along with ELCube.  If not, see <https://www.gnu.org/licenses/>.
 -->
 <template>
-    <a-input v-model="text"></a-input>
+    <nk-form-item title="值">
+        <a-input v-model="text" size="small"></a-input>
+    </nk-form-item>
 </template>
 
 <script>

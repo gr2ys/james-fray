@@ -11,7 +11,11 @@ export default {
     computed:{
         value(){
             if(this.el && this.isJson){
-                return JSON.stringify(JSON.parse(this.el),null,4)
+                try{
+                    return JSON.stringify(JSON.parse(this.el),null,4)
+                }catch (e){
+                    console.warn(e);
+                }
             }
             return this.el;
         }
@@ -22,8 +26,10 @@ export default {
 <style scoped>
     pre{
         margin: 0;
-        background-color: #eee;
+        background-color: #f6f6f6;
         padding: 2px 5px;
         border-radius: 2px;
+        min-height: 26px;
+        max-height: 300px;
     }
 </style>

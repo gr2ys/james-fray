@@ -12,13 +12,19 @@
 	along with ELCube.  If not, see <https://www.gnu.org/licenses/>.
 -->
 <template>
-    <div class="nk-form-item" :style="style">
-        <div class="term" :class="termClass" :style="{'min-width':width+'px'}">
+    <div class="nk-form-item" :style="style"
+         @dragstart="$emit('dragstart',$event)"
+         @drag="$emit('drag',$event)"
+         @dragover="$emit('dragover',$event)"
+         @dragend="$emit('dragend',$event)"
+         @click="$emit('click',$event)"
+         :draggable="draggable">
+        <div class="term" :class="termClass" :style="{'width':(width||120)+'px'}">
             <nk-required-mark v-if="editMode && required" />
             {{term || title}}
             <slot name="term"></slot>
         </div>
-        <div class="content" :class="termClass+(error?' has-error':'')" :style="{'max-width': 'calc(100% - '+width+'px)'}">
+        <div class="content" :class="contentClass" :style="{'width': 'calc(100% - '+(width||120)+'px)'}">
             <slot v-if="!editMode"></slot>
             <slot v-if="editMode" name="edit"></slot>
             <div v-if="editMode && error" class="ant-form-explain" style="color: #ff6068">{{error}}</div>
@@ -30,6 +36,8 @@
 export default {
     name: "NkFormItem",
     props: {
+        draggable:String,
+        options:{},
         term: {
             type: String,
             required: false
@@ -38,11 +46,23 @@ export default {
             type: Number,
             default: 120
         },
+        ellipsis:{
+            type: Boolean,
+            default: false,
+        },
         title: {
             type: String,
             required: false
         },
         align: {
+            type: String,
+            default: ""
+        },
+        contentAlign: {
+            type: String,
+            default: ""
+        },
+        contentStyle: {
             type: String,
             default: ""
         },
@@ -76,6 +96,7 @@ export default {
         lenMessage: String,
         patternMessage: String,
         validatorMessage: String,
+        ignoreValidate: Boolean,
     },
     created(){
     },
@@ -107,20 +128,36 @@ export default {
 
         },
         termClass(){
-            return [
-                this.$parent.$props.edit?' edit':'',
-                this.align,
-                this.term || this.title ? ' hasContent':''
-            ]
+            const arr = [];
+            if(this.$parent.$props.edit)
+                arr.push('edit')
+            if(this.align)
+                arr.push(this.align)
+            if(this.term || this.title)
+                arr.push('hasContent')
+            if(this.ellipsis){
+                arr.push('ellipsis')
+            }
+            return arr;
+        },
+        contentClass(){
+            const arr = [];
+            if(this.$parent.$props.edit)
+                arr.push('edit')
+            if(!this.editMode && this.contentAlign)
+                arr.push(this.contentAlign)
+            if(this.error)
+                arr.push('has-error')
+            return arr;
         },
         error(){
+            if(this.ignoreValidate){
+                return undefined;
+            }
             return this.checkError()
         }
     },
     methods:{
-
-
-
         checkError(){
 
             if(this.$parent.$props.edit && this.$slots.edit){
@@ -183,14 +220,26 @@ export default {
 
     .term {
         line-height: 22px;
+        padding-top: 4px;
         padding-bottom: 8px;
         padding-right: 8px;
         color: rgba(0,0,0,.85);
-        white-space: nowrap;
-        display: table-cell;
+        display: flex;
+        justify-content: flex-end;
         text-align: right;
         flex-shrink: 0;
         font-size: 12px;
+        & > {
+            word-break:break-all;
+            white-space: pre-wrap;
+            overflow: hidden;
+        }
+
+        &.ellipsis > {
+            white-space: nowrap;
+            display: block;
+            text-overflow: ellipsis;
+        }
 
         &.left{
             text-align: left;
@@ -211,7 +260,7 @@ export default {
         //display: flex;
         //flex-wrap: wrap;
         width: 100%;
-        padding: 0 32px 8px 0;
+        padding: 4px 32px 4px 0;
 
         & > {
             word-break:break-all;
@@ -220,6 +269,10 @@ export default {
 
         .ant-select {
             width: 90%;
+        }
+
+        &.right{
+            text-align: right;
         }
     }
     .edit{

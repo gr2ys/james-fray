@@ -72,17 +72,28 @@
                         </a-select>
                     </nk-search-item>
                     <nk-search-item :min="10">
+                        <label class="nk-button" v-if="routeQuery&&routeQuery.length">
+                            隐藏条件[{{ routeQuery.length }}]
+                        </label>
                         <a-button-group class="nk-button">
                             <a-button type="primary" html-type="submit" style="width: 46px;">
                                 <a-icon type="search" />
+                            </a-button>
+                            <a-button v-if="exportConfig && exportConfig.enable" type="default" @click="doExport" style="width: 46px;" :loading="exportLoading">
+                                <a-icon type="export" v-if="!exportLoading" />
                             </a-button>
                             <a-button type="default" @click="reset({})" style="width: 46px;">
                                 <a-icon type="rollback" />
                             </a-button>
                         </a-button-group>
-                        <a-button v-if="saveAsSource" class="nk-button" type="default" @click="saveAs.visible=true" style="width: 56px;">
-                            <a-icon type="save" />...
-                        </a-button>
+                        <a-button-group class="nk-button">
+                            <a-button type="default" @click="$refs.grid.print()">
+                                <a-icon type="printer" />
+                            </a-button>
+                            <a-button v-if="saveAsSource" type="default" @click="saveAs.visible=true" style="width: 56px;">
+                                <a-icon type="save" />...
+                            </a-button>
+                        </a-button-group>
                     </nk-search-item>
                 </nk-search-box>
             </a-form>
@@ -96,13 +107,13 @@
                 show-overflow="tooltip"
                 size="mini"
                 :border="border"
-                :columns="dataTableColumns"
+                :columns="availableDataTableColumns"
                 :data="page.list"
                 :loading="loading"
                 @cell-click="vxeCellClick"
                 @current-change="vxeCurrentChanged"
                 @sort-change="vxeSortChanged"
-                :sort-config="sortConfig"
+                :sort-config="computedSortConfig"
             >
                 <template #tags="e">
                     <a-tag v-for="(item,index) in getRowCustomValue(e)"
@@ -112,7 +123,16 @@
                 </template>
             </vxe-grid>
             <vxe-pager
-                v-if="page.page"
+                v-if="page.cursor||cursors.length>1"
+                perfect
+                size="mini"
+                :current-page="cursors.length"
+                :page-size="page.rows"
+                :total="page.cursor && page.list.length >= params.rows?10000:page.rows"
+                :layouts="['PrevPage', 'NextPage', 'Sizes']"
+                @page-change="cursorNext"/>
+            <vxe-pager
+                v-else-if="page.page"
                 perfect
                 size="mini"
                 :current-page="page.page"
@@ -170,20 +190,32 @@ export default {
             default:"inner"
         },
         sortConfig:{
-            type: Object,
-            default(){
-                return {
-                    trigger: 'cell',
-                    remote: true,
-                    defaultSort: {field: 'age', order: 'desc'},
-                    orders: ['desc', 'asc', null]
-                };
-            }
+            type: Object
+        },
+        exportConfig:Object
+    },
+    computed:{
+        aggs(){
+            return this.page.aggs || {}
+        },
+        availableDataTableColumns(){
+            return this.dataTableColumns && this.dataTableColumns.filter(item=>item.ignore!==true);
+        },
+        computedSortConfig(){
+            return Object.assign({
+                trigger: 'cell',
+                remote: true,
+                //defaultSort: {field: 'age', order: 'desc'},
+                orders: ['desc', 'asc', null]
+            },this.sortConfig);
         }
     },
     data(){
         return {
             loading: true,
+
+            routeQuery:[],
+
             page: {},
             availableSearchItemsMoreDef:[],
             searchItemsMoreSelected:[],
@@ -201,17 +233,15 @@ export default {
                 list: []
             },
 
-            suggest: []
+            suggest: [],
+            exportLoading:false,
+
+            cursors:[null]// 第一页游标是null
         }
     },
     mounted(){
         if(!this.lazy) {
             this.init()
-        }
-    },
-    computed:{
-        aggs(){
-            return this.page.aggs || {}
         }
     },
     methods:{
@@ -234,27 +264,17 @@ export default {
             }
         },
         init(){
+
             this.page.rows = this.initRows;
             this.params.rows = this.initRows;
-
-            // 设置索引的返回字段
-            const fields = this.dataIncludeFields;
-            if(fields.indexOf("docId")===-1){fields.push("docId")}
-            if(fields.indexOf("classify")===-1){fields.push("classify")}
-            if(fields.indexOf("itemType")===-1){fields.push("itemType")}
-            this.dataTableColumns.forEach(item=>{
-                if(item.field && fields.indexOf(item.field)===-1){
-                    fields.push(item.field);
-                }
-            })
-            this.params.source=fields;
-
+            this.params.source=this.buildFields(false);
 
             this.searchMoreDefUpdate();
             this.searchItemsDefault
                 .forEach(item=>{
                     if(item.defaultValue){
-                        this.params[item.field]=item.defaultValue;
+                        this.params.conditions = this.params.conditions||{};
+                        this.params.conditions[item.field]=item.defaultValue;
                     }
                 });
             this.formSubmit();
@@ -262,6 +282,23 @@ export default {
             if(this.saveAsSource){
                 this.saveAsGet();
             }
+        },
+        buildFields(includeIgnore){
+            // 设置索引的返回字段
+            const fields = this.dataIncludeFields;
+            if(fields.indexOf("docId")===-1){fields.push("docId")}
+            if(fields.indexOf("classify")===-1){fields.push("classify")}
+            if(fields.indexOf("itemType")===-1){fields.push("itemType")}
+            this.dataTableColumns
+                .filter(item=>{
+                    return includeIgnore || item.ignore!==true
+                })
+                .forEach(item=>{
+                    if(item.field && fields.indexOf(item.field)===-1){
+                        fields.push(item.field);
+                    }
+                })
+            return fields;
         },
         reset(params){
 
@@ -312,15 +349,31 @@ export default {
         setSuggest(suggest){
             this.suggest = suggest;
         },
+
         /**
          * 表单提交
          */
         formSubmit(e){
             if(e)e.preventDefault();
+
             this.$refs.grid.clearSort();
-            this.params.orderField = null;
-            this.params.order = null;
+            this.params.order = undefined;
+            this.params.orderField = undefined;
+            if(this.computedSortConfig && this.computedSortConfig.remote && this.computedSortConfig.defaultSort && this.computedSortConfig.defaultSort.field){
+                const column = this.dataTableColumns.find(item=>item.field===this.computedSortConfig.defaultSort.field);
+                if(column){
+                    this.params.orderField = (column.params&&column.params.orderField)||column.field;
+                    this.params.order = this.computedSortConfig.defaultSort.order;
+                    this.$refs.grid.sort(this.computedSortConfig.defaultSort.field, this.params.order);
+                }
+            }
+
+            //this.$refs.grid.clearSort();
+            //this.params.orderField = null;
+            //this.params.order = null;
             this.params.from = 0;
+            this.params.cursor = undefined;
+            this.cursors = [null];
             this.emitChange();
             return false;
         },
@@ -362,11 +415,36 @@ export default {
                 }
             }
         },
+
+        doExport(){
+            this.exportLoading = true;
+            let params = Object.assign({},this.params);
+            params.source = this.buildFields(true);
+            this.$emit("exportExcel", params)
+        },
         /**
          * 执行参数更新，并通知父组件，由父组件执行搜索
          */
         emitChange(){
             this.loading = true;
+
+            // begin 处理查询字符串参数
+            try{
+                let q = this.$route.query.q && JSON.parse(this.$route.query.q);
+                if(q){
+                    q = q instanceof Array ? q : [q];
+                    const queryCond = {};
+                    q.forEach(value=>{
+                        queryCond['__NKQP__'+q.indexOf(value)]=value;
+                    })
+                    this.routeQuery = q;
+                    this.params.conditions = Object.assign(queryCond,this.params.conditions);
+                    this.$emit('setTab',{subName: this.$route.query.n || `Filter:${q.length}` });
+                }
+            }catch (e){
+                //
+            }
+            // end 处理查询字符串参数
 
             let aggs = [];
             this.searchItemsDefault.filter(i=>i.agg).forEach(i=>aggs.push(i.field))
@@ -436,7 +514,7 @@ export default {
         },
         // 排序跳转
         vxeSortChanged({column,property,order}){
-            if(this.sortConfig && this.sortConfig.remote){
+            if(this.computedSortConfig && this.computedSortConfig.remote){
                 this.params.orderField = order===null?null:((column.params&&column.params.orderField)||property);
                 this.params.order = order;
                 this.emitChange()
@@ -457,6 +535,24 @@ export default {
 
                 this.emitChange()
             }
+        },
+        cursorNext(e){
+
+            if(e.pageSize===this.page.rows){
+                if(this.cursors.length<e.currentPage){
+                    this.cursors.push(this.page.cursor);
+                }else{
+                    this.cursors.pop();
+                }
+            }else{
+                // 重置第一页
+                this.cursors=[null];
+            }
+
+            this.params.cursor=this.cursors[this.cursors.length-1];
+            this.params.rows = e.pageSize;
+            this.params.sqlColumns = this.page.columns;
+            this.emitChange()
         },
         // 保存搜索
         saveAsGet(){
@@ -490,6 +586,9 @@ export default {
         },
         grid(){
             return this.$refs.grid;
+        },
+        setExportDown(){
+            this.exportLoading=false;
         }
     }
 }

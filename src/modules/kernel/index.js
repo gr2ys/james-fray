@@ -22,10 +22,13 @@ import NkDashboardLost from "./components/NkDashboardLost";
 
 import NkDefRegistry from "./pages/NkDefRegistry";
 import NkDefScripts from "./pages/NkDefScripts";
+import NkDefScriptsIde from "./pages/NkDefScriptsIde";
 import NkDefScriptDetail from "./pages/NkDefScriptDetail";
 
 import NkDevOpsCache from "./pages/NkDevOpsCache";
 import NkDevOpsDeploy from "./pages/NkDevOpsDeploy";
+import NkDevOpsScheduled from "./pages/NkDevOpsScheduled";
+import NkDevOpsMQ from "./pages/NkDevOpsMQ";
 
 import NkSettingsAuthLimit from "./pages/NkSettingsAuthLimit";
 import NkSettingsAuthPerm from "./pages/NkSettingsAuthPerm";
@@ -39,6 +42,8 @@ import NkPageDataTable from "./pages/NkPageDataTable";
 
 import {GridItem, GridLayout} from "vue-grid-layout";
 
+import StateDict from "./stores/StateDict";
+
 const install = function (Vue) {
 
   Vue.component("grid-layout",                GridLayout);
@@ -51,6 +56,8 @@ const install = function (Vue) {
   Vue.component('nk-sp-el-template-editor',   NkSpELTemplateEditor);
   Vue.component('nk-sp-el-view',              NkSpELView);
 };
+
+const stores = {Dict:StateDict}
 
 const routes = [
   {
@@ -153,6 +160,11 @@ const routes = [
             path: ':mode',
             component: NkDefScriptDetail
           },
+          {
+            name: "原生组件",
+            path: 'ide/list',
+            component: NkDefScriptsIde
+          },
         ]
       },
       {
@@ -177,6 +189,22 @@ const routes = [
           title: "数据缓存",
         }
       },
+      {
+        name: "计划任务",
+        path: 'scheduled',
+        component: NkDevOpsScheduled,
+        meta:{
+          title: "计划任务",
+        }
+      },
+      {
+        name: "消息队列",
+        path: 'mq',
+        component: NkDevOpsMQ,
+        meta:{
+          title: "消息队列",
+        }
+      },
     ]
   }
 ];
@@ -184,6 +212,7 @@ const routes = [
 export default {
   install,
   routes,
+  stores,
   sfc: {}
 }
 

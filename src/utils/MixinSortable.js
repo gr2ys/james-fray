@@ -38,12 +38,15 @@ export default ()=>{
                     this.$nextTick(()=>{
                         for(let key in this.$refs){
                             const vxeTable = this.$refs[key];
-                            if(vxeTable.$options._componentTag==='vxe-table'||vxeTable.$options._componentTag==='vxe-grid'){
+                            if(vxeTable.$options && (vxeTable.$options._componentTag==='vxe-table'||vxeTable.$options._componentTag==='vxe-grid')){
                                 this.nk$SortableVxeTable.push(
                                     Sortable.create(vxeTable.$el.querySelector(".body--wrapper>.vxe-table--body tbody"), {
                                         handle: '.drag-btn',
                                         onEnd:({newIndex,oldIndex})=>{
-                                            vxeTable.data.splice(newIndex, 0, vxeTable.data.splice(oldIndex, 1)[0]);
+                                            if(newIndex!==oldIndex){
+                                                vxeTable.data.splice(newIndex, 0, vxeTable.data.splice(oldIndex, 1)[0]);
+                                                this.nk$Sortend && this.nk$Sortend(vxeTable);
+                                            }
                                         }
                                     })
                                 );

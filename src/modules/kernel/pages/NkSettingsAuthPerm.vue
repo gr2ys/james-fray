@@ -44,7 +44,7 @@
                   :data-source="dataSourceResource"
                   placeholder="系统资源"
                   @select="autoComplete(item,'permResource',$event)"
-                  @change="item.permResource=item.permResource&&item.permResource.toUpperCase()"
+                  @change="item.permResource=item.permResource&&(!item.permResource.startsWith('$')?item.permResource.toUpperCase():item.permResource)"
               />
             </nk-form-item>
             <nk-form-item term="操作">
@@ -75,22 +75,23 @@
               </template>
             </nk-form-item>
             <nk-form-item term="授权限制">
-                            <span v-for="limit in itemLimitIds" :key="limit" >
-                                {{ limit }}
-                            </span>
-              <a-select
-                  slot="edit"
-                  mode="multiple"
-                  :value="itemLimitIds"
-                  placeholder="请选择限制"
-                  style="width: 100%"
-                  :filter-option="false"
-                  @change="itemLimitChange"
-              >
-                <a-select-option v-for="limit in limits" :key="limit.limitId" >
-                  {{ limit.limitDesc }}
-                </a-select-option>
-              </a-select>
+                <span v-for="limit in itemLimitIds" :key="limit" >
+                    {{ limit | nkFromList(limits,'limitDesc','limitId') }}
+                </span>
+                <span style="color: #aa2222;font-style: italic;">注意：授权限制已调整，请前往用户组配置</span>
+<!--              <a-select-->
+<!--                  slot="edit"-->
+<!--                  mode="multiple"-->
+<!--                  :value="itemLimitIds"-->
+<!--                  placeholder="请选择限制"-->
+<!--                  style="width: 100%"-->
+<!--                  :filter-option="false"-->
+<!--                  @change="itemLimitChange"-->
+<!--              >-->
+<!--                <a-select-option v-for="limit in limits" :key="limit.limitId" >-->
+<!--                  {{ limit.limitDesc }}-->
+<!--                </a-select-option>-->
+<!--              </a-select>-->
             </nk-form-item>
             <nk-form-item term="Level">
               {{itemLevel}}
@@ -131,8 +132,8 @@ export default {
     dataSourceResource(){
       const list = [
         "*<所有资源>",
-        "@*<所有单据类型>",
-        "@<单据类型>",
+        "@*<所有模型>",
+        "@<模型类型>",
         "#*<所有数据源>",
         "#<数据源>",
         "DEF<配置>",
@@ -140,7 +141,7 @@ export default {
         "SETTINGS<设置>",
         "SYS<系统>",
       ]
-      let res = (this.item.permResource && this.item.permResource.trim().toUpperCase())||'';
+      let res = (this.item.permResource && (!this.item.permResource.startsWith('$')?this.item.permResource.trim().toUpperCase():this.item.permResource))||'';
       let ret = list.filter(i=>i.startsWith(res));
       if(res)
         ret.splice(0,0,res);
@@ -156,7 +157,7 @@ export default {
           list = ["*<查询>"];
         }else
         if(this.item.permResource.startsWith("DEF")){
-          list = ["*<全部操作>","REGISTRY<基础配置>","COMPONENT<组件开发>","BPM<工作流配置>","DMN<决策引擎配置>","DOCTYPE<单据类型配置>"];
+          list = ["*<全部操作>","REGISTRY<基础配置>","COMPONENT<组件开发>","BPM<工作流配置>","DMN<决策引擎配置>","DOCTYPE<模型配置>"];
         }else
         if(this.item.permResource.startsWith("DEVOPS")){
           list = ["*<全部操作>","DEPLOY<部署>","BPM<工作流实例管理>","DATASYNC<数据同步管理>","CACHE<缓存管理>"];

@@ -21,7 +21,7 @@
             size="mini"
             :loading="loading"
             border=inner
-            :data="joined">
+            :data="list">
             <vxe-table-column title="Ver."   field="version"       width="8%" >
                 <template v-slot="{row}">
                     {{row.version}}
@@ -39,28 +39,15 @@
                 </template>
             </vxe-table-column>
         </vxe-table>
-
-<!--        <a-list size="small" :data-source="joined" style="padding: 0 5px;">-->
-<!--            <a-list-item slot="renderItem" slot-scope="item">-->
-<!--                <a @click="to(item)">V{{ item.version }} | {{item.userRealname}}</a>-->
-<!--                <span slot="extra">-->
-<!--                    {{item.updatedTime | nkDatetimeFriendly}} |-->
-<!--                    <a @click="diff(item)">Diff </a>-->
-<!--                </span>-->
-
-<!--            </a-list-item>-->
-<!--            <div slot="footer" style="text-align: center" v-if="showMore">-->
-<!--                <a @click="more">More...</a>-->
-<!--            </div>-->
-<!--        </a-list>-->
+        <span slot="actions" v-if="hasMore">
+            <a-button type="link" @click="load">加载更多...</a-button>
+        </span>
     </a-card>
 </template>
 
 <script>
-// import Mixin from "../cards/Mixin";
 
 export default {
-    // mixins:[new Mixin()],
     props:{
         doc:Object
     },
@@ -71,23 +58,8 @@ export default {
             loading:true
         }
     },
-    computed:{
-        joined(){
-            const joined = [];
-            if(this.data){
-                joined.push(...(this.data.slice(0,5)));
-            }
-            if(this.list.length>1){
-                joined.push(...(this.list));
-            }
-            return joined;
-        },
-        showMore(){
-            return this.hasMore !== undefined ? this.hasMore : (this.data && this.data.length>5);
-        }
-    },
     mounted() {
-        this.vxePageChanged();
+        this.load();
     },
     methods:{
         to(item){
@@ -96,25 +68,13 @@ export default {
         diff(item){
             this.$router.push(`/apps/docs/diff/${this.doc.docId}/snapshot:${item.id}`)
         },
-        vxePageChanged(){
-            this.$http.get(`/api/doc/detail/snapshots/${this.doc.docId}/${this.joined.length}`)
+        load(){
+            this.$http.get(`/api/doc/detail/snapshots/${this.doc.docId}/${this.list.length}`)
                 .then(res=>{
-                    this.list = res.data;
+                    this.list.push(...res.data.slice(0,5));
                     this.hasMore = res.data.length > 5;
                     this.loading = false;
                 });
-        },
-        more(){
-            this.$http.get(`/api/doc/detail/snapshots/${this.doc.docId}/${this.joined.length}`)
-                .then(res=>{
-                    this.list.push(...(res.data.slice(0,5)));
-                    this.hasMore = res.data.length > 5;
-                });
-            // this.nk$call(this.joined.length)
-            //     .then(data=>{
-            //         this.list.push(...(data.slice(0,5)));
-            //         this.hasMore = data.length > 5;
-            //     });
         }
     }
 }

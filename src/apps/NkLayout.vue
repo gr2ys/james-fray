@@ -15,10 +15,16 @@
     <a-spin :spinning="loading" wrapperClassName="layout-spinning">
         <a-layout class="nk-layout-full">
             <a-layout-sider v-model="collapsed" :trigger="null" collapsible="collapsible" class="nk-layout-sider" width="256" :collapsed-width="60">
-                <component :is="logo"></component>
-                <nk-nav :active-page="activePage" :collapsed="collapsed"></nk-nav>
-                <div class="copyright" style="width: 256px;" v-if="!collapsed">
-                    elcube&trade; ver. {{version.version}} / {{(env&&env[1])||'0.0.0'}}
+                <div :class="{fixed:fixedMenu,collapsed}">
+                    <component :is="logo" class="logo"></component>
+                    <nk-nav :active-page="activePage" :collapsed="collapsed"></nk-nav>
+                    <transition  name="slide-fade">
+                        <div class="copyright nk-primary-background-color" v-if="!collapsed" :class="{
+                            'dev':version.version.toUpperCase().indexOf('BETA')>-1 || env&&env[1]&&env[1].toUpperCase().indexOf('SNAPSHOT')>-1
+                        }">
+                            elcube&trade; ver. {{version.version}} / {{(env&&env[1])||'0.0.0'}}
+                        </div>
+                    </transition>
                 </div>
             </a-layout-sider>
             <a-layout class="nk-layout-right">
@@ -27,7 +33,7 @@
                         <a-icon
                             class="trigger nk-hover-primary-color"
                             :type="collapsed ? 'menu-unfold' : 'menu-fold'"
-                            @click="() => (collapsed = !collapsed)"
+                            @click="doCollapsed"
                         ></a-icon>
                         <span v-if="env&&env[0]" class="env trigger nk-primary-color">{{env[0]}}</span>
                     </div>
@@ -49,11 +55,11 @@
                                 <a-menu-item key="1">
                                     <a @click="doSetDocumentPage('nkdn://')">文档中心</a>
                                 </a-menu-item>
-                                <a-menu-item key="3">
-                                    <router-link to="/apps/apidoc">系统API</router-link>
-                                </a-menu-item>
                                 <a-menu-item key="2">
                                     <a @click="logout()">安全退出</a>
+                                </a-menu-item>
+                                <a-menu-item key="4">
+                                    <router-link to="/apps/about">关于ELCube</router-link>
                                 </a-menu-item>
                             </a-menu>
                         </a-dropdown>
@@ -68,6 +74,7 @@
                              @closeOthers="tabCloseAll"
                              @sort="tabSort"
                              @item-refresh="tabItemRefresh"
+                             @item-force-refresh="tabItemRefresh($event,true)"
                     ></nk-tabs>
                     <component v-for="(item) in pages"
                                v-show="item.path===activePage"
@@ -88,15 +95,15 @@
 
         <a-modal :visible="reLogin"
                  centered
-                 title="安全验证"
-                 okText="确定"
+                 :title="reLoginTitle||'安全验证'"
                  :cancelText="logoutText"
                  width="350px"
                  :maskClosable="false"
                  :maskStyle="maskStyle"
                  :destroyOnClose="true"
                  @cancel="cancel()"
-                 :okButtonProps="{props: {disabled:!!loginInfo.error}}"
+                 :okButtonProps="{props: {disabled:!!loginInfo.error,type:reLoginOkType||'primary'}}"
+                 :okText="reLoginOkText||'确定'"
                  @ok="login"
                  :confirm-loading="loginInfo.logging"
         >
@@ -159,7 +166,7 @@ export default {
     },
     computed:{
         ...mapState('UI',[
-            'loading','logo','errors',
+            'loading','logo','errors','fixedMenu'
         ]),
         ...mapState('Debug',[
             'debugId'
@@ -168,7 +175,7 @@ export default {
             'layoutConfig'
         ]),
         ...mapState('User',[
-            'reLoginMessage'
+            'reLoginMessage','reLoginOkType','reLoginOkText','reLoginTitle'
         ]),
         ...mapGetters('User',[
             'user','reLogin','reLoginTime','hasAuthority'
@@ -192,6 +199,14 @@ export default {
         defaultPage.route = defaultPage.path
         this.pageCaches[defaultPage.path]=defaultPage;
         this.pages.push(defaultPage);
+
+        let collapsed = localStorage.getItem("$NK-Layout-collapsed");
+        if(!collapsed){
+            this.collapsed = screen.width < 1440;
+            localStorage.setItem("$NK-Layout-collapsed",this.collapsed?"true":"false");
+        }else{
+            this.collapsed = collapsed==='true';
+        }
     },
     mounted() {
         // 添加当前路由页面
@@ -356,15 +371,18 @@ export default {
                     if(options.confirm){
                         item.confirm = options.confirm;
                     }
+                    if(options.subName){
+                        this.$set(item,'subName',options.subName);
+                    }
                 }
             }
         },
         tabSort(items){
             this.pages = items;
         },
-        tabItemRefresh(item){
+        tabItemRefresh(item,force){
             new Promise((resolve)=>{
-                if(this.debugId){
+                if(this.debugId||force){
                     this.$sfc.reloadVueResources().then((e)=>{
                         this.$message.info(`Debug: 重新载入Vue组件${e.count}个`)
                         resolve();
@@ -416,17 +434,53 @@ export default {
             this.$refs.login.login();
         },
         loginFormSuccess(){
-            console.log('1232')
             this.submitLogin();
         },
         loginFormChanged(e){
             this.loginInfo = e;
+        },
+        doCollapsed() {
+            this.collapsed = !this.collapsed
+            localStorage.setItem("$NK-Layout-collapsed",this.collapsed?"true":"false");
         }
     }
 }
 </script>
 
 <style scoped lang="less">
+
+.fixed,.collapsed{
+    position: fixed;
+    height: 100%;
+    width: 256px;
+
+    ::v-deep .nk-menu{
+        overflow-y: auto;
+        height: calc(100vh - 91px);
+
+        &::-webkit-scrollbar {
+            display: none; /* Chrome Safari */
+        }
+    }
+
+    .logo{
+        position: relative;
+        box-shadow: -5px 1px 5px #001529;
+        min-height: 80px;
+        width:256px;
+        transition: width 0.2s;
+        -moz-transition: width 0.2s;
+        -webkit-transition: width 0.2s;
+        -o-transition: width 0.2s;
+    }
+}
+
+.collapsed.fixed{
+    width:60px;
+    .logo{
+        width:60px;
+    }
+}
 
 ::v-deep.layout-spinning{
     & > div > .ant-spin{
@@ -490,6 +544,8 @@ export default {
         box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
         display: flex;
         justify-content: space-between;
+        //width: calc(100% - 256px);
+        //z-index: 1;
 
         .nk-user{
             display: flex;
@@ -506,20 +562,25 @@ export default {
     /*内容页*/
     .nk-layout-content{
         min-height: calc(100vh - 64px);
-        ::v-deep.nk-page-layout-card {
+        ::v-deep .nk-page-layout-card {
             margin-bottom: 24px;
         }
     }
 
     /* 页脚 */
     .copyright{
+        width: 320px;
         text-align: center;
         position: fixed;
-        bottom: 0;
-        left: 0;
+        bottom: -2px;
+        left: -32px;
         color: #2a2a2a;
         user-select: none;
         transform: scale(0.8, 0.8);
+
+        &.dev{
+            background-color: #aa2222;
+        }
     }
 }
 @media screen and ( max-width: 1366px ){
@@ -529,6 +590,11 @@ export default {
         right: 160px;
         background-color: white;
         z-index: 1;
+    }
+}
+@media print{
+    .nk-layout-sider{
+        display: none;
     }
 }
 

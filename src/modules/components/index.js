@@ -17,6 +17,7 @@
 
 import NkLogo from "./NkLogo";
 import NkLoginForm from "./NkLoginForm";
+import NkLoginSMS from "./NkLoginSMS";
 import NkEditSlot from "./NkEditSlot";
 import NkForm from "./NkForm";
 import NkPageLayout from "./layout/NkPageLayout";
@@ -41,14 +42,20 @@ import NkEmpty from "./NkEmpty";
 import NkMeter from "./NkMeter";
 import VueHighlight from "./vue-highlight";
 import 'highlight.js/styles/github.css';
+import NkADatePicker from "./NkADatePicker";
+import NkARangePicker from "./NkARangePicker";
+import NkAInputPercent from "./NkAInputPercent";
+import NkDiff from "./NkDiff";
 
 function install(Vue){
   Vue.component("nk-logo", NkLogo);
   Vue.component("NkLoginForm", NkLoginForm);
+  Vue.component("NkLoginSMS", NkLoginSMS);
   Vue.component("nk-required-mark", NkRequiredMark);
   Vue.component("nk-empty", NkEmpty);
 
   Vue.component("nk-edit-slot", NkEditSlot);
+  Vue.component("nk-diff",NkDiff);
 
   Vue.component("nk-form", NkForm);
   Vue.component("nk-form-item", NkForm.Item[0]);
@@ -79,6 +86,10 @@ function install(Vue){
   Vue.component("nk-meter",NkMeter);
 
   Vue.component("NkDocException",NkDocException);
+
+  Vue.component("nk-a-date-picker",NkADatePicker);
+  Vue.component("nk-a-range-picker",NkARangePicker);
+  Vue.component("nk-a-input-percent",NkAInputPercent);
 
   Vue.use(VueHighlight);
 }

@@ -13,7 +13,7 @@
 -->
 <template>
     <div>
-        <component :is="inputComponent" @click="open" v-model="value" size="small" read-only class="readonly"></component>
+        <component :is="inputComponent" @click="open" v-model="value" size="small" read-only class="readonly" :placeholder="placeholder"></component>
         <component :is="component" v-model="visible" title="SpEL模版编辑器（严格JSON格式）" width="60%" centered :mask-closable="false" :esc-closable="true">
 
             <a-textarea v-model="el" :rows="10" placeholder="SpEL模版，必须为严格JSON格式"></a-textarea>
@@ -22,9 +22,9 @@
                 <a-button slot="enterButton">测试</a-button>
             </a-input-search>
             <div v-if="error" class="error">{{error}}</div>
-            <div v-if="result" class="result">
+            <div v-else-if="result!==undefined" class="result">
                 <label style="font-weight: bold;">Result:</label>
-                <div :class="{overflow:component==='vxe-modal'}">
+                <div v-if="result!==null" :class="{overflow:component==='vxe-modal'}">
                     <json-viewer
                         :value="result"
                         :expand-depth=5
@@ -34,6 +34,7 @@
                         boxed
                         sort />
                 </div>
+                <code v-else style="margin-left: 10px;">null</code>
             </div>
 
             <div v-if="component==='vxe-modal'" style="margin-top: 10px;text-align: right">
@@ -50,23 +51,22 @@
 <script>
 import qs from 'qs'
 import {mapState,mapMutations} from 'vuex'
-import JsonViewer from 'vue-json-viewer';
 
 export default {
     name: "NkSpELEditor",
-    components:{JsonViewer},
     props:{
         value : String,
         modalComponent:{
             type:String,
             default: 'a-modal'
-        }
+        },
+        placeholder: String
     },
     created() {
         this.component = this.modalComponent;
         if(this.$parent.$options._componentTag==="vxe-table-body"){
             this.component = 'vxe-modal';
-            this.inputComponent = 'vxe-input';
+            // this.inputComponent = 'vxe-input';
         }
     },
     data(){
@@ -117,17 +117,30 @@ export default {
             }
         },
         test(){
-            this.$http.post("/api/debug/spel/test",qs.stringify({
-                el: this.el,
-                docId : this.docId,
-                isTemplate : true
-            })).then(res=>{
-                this.error = res.data.errorMessage;
+            if(!this.el||!this.el.trim()){
+                this.error = '表达式不能为空';
                 this.result = undefined;
-                if(res.data.result){
-                    this.result = JSON.parse(res.data.result);
-                }
-            })
+                return;
+            }
+            try{
+                this.parse(this.el)
+                this.error = undefined;
+                this.$http.post("/api/debug/spel/test",qs.stringify({
+                    el: this.el,
+                    docId : this.docId,
+                    isTemplate : true
+                })).then(res=>{
+                    this.error = res.data.errorMessage;
+                    if(res.data.result){
+                        this.result = JSON.parse(res.data.result);
+                    }else{
+                        this.result = res.data.result;
+                    }
+                })
+            }catch (e){
+                this.error = e;
+                this.result = undefined;
+            }
         },
         parse(value,space){
             const v = value && value.replace(/\s/g,'');
@@ -150,7 +163,7 @@ export default {
         padding: 4px;
     }
     .overflow{
-        height: 300px;overflow: auto
+        max-height: 300px;overflow: auto
     }
     ::v-deep.readonly{
         cursor: pointer;

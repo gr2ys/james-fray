@@ -39,12 +39,7 @@ export default {
         edit:{
             type: Boolean,
             default: false
-        }
-    },
-    provide () {
-        return {
-            col: this.col > 4 ? 4 : this.col
-        }
+        },
     },
     mounted(){
     },

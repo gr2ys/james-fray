@@ -27,9 +27,11 @@
                                :col="item.col"
                                :edit="editMode && item.control > 0"
                                :width="def.titleWidth"
+                               :content-align="item.alignRight?'right':''"
+                               :content-style="item.style"
 
                                :validate-for="data[item.key]"
-                               :required="item.required"
+                               :required="true"
                                :len="item.inputOptions&&((!!item.inputOptions.maxLength)||(!!item.inputOptions.minLength))"
                                :min="item.inputOptions&&(item.inputOptions.min||item.inputOptions.minLength)"
                                :max="item.inputOptions&&(item.inputOptions.max||item.inputOptions.maxLength)"
@@ -76,6 +78,14 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
+::v-deep .empty{
+    color:#bbb;
+    user-select: none;
+    font-style: italic;
 
+}
+::v-deep .empty::before{
+    content: '-'
+}
 </style>

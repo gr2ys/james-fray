@@ -70,7 +70,12 @@ export default {
             error:undefined,
             verKey:undefined,
             hasErrors,
-            form: this.$form.createForm(this, {name: 'horizontal_login'}),
+            form: this.$form.createForm(this,
+                {
+                    name: 'horizontal_login',
+                    onValuesChange : this.onValuesChange
+                }
+            ),
             random:'',
             retryTimes:0,
             formError:undefined
@@ -120,6 +125,17 @@ export default {
                 verCode: this.form.getFieldValue("verCode"),
                 logging:false
             },e));
+        },
+        onValuesChange(){
+            this.$nextTick(()=>{
+                this.form.validateFields((err) => {
+                    if(err){
+                        this.change({error:err})
+                    }else{
+                        this.change({error:undefined})
+                    }
+                });
+            })
         },
         usernameBlur(){
             // 检查是否需要验证码

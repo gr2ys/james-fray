@@ -24,7 +24,8 @@ export default {
         }
     },
     created() {
-        this.$nkSortableVxeTable(true);
+        if(this.$nkSortableVxeTable)
+            this.$nkSortableVxeTable(true);
         if(!this.def.items){
             this.$set(this.def,'items',[]);
         }

@@ -12,6 +12,7 @@
  *	along with ELCube.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+//import 'default-passive-events'
 import Vue from 'vue';
 import Vuex from "vuex";
 import VueI18n from "vue-i18n";
@@ -21,6 +22,7 @@ import VXETable from "./js/VXETable";
 
 import mavonEditor from 'mavon-editor';
 import 'mavon-editor/dist/css/index.css';
+import JsonViewer from 'vue-json-viewer';
 
 // export to sfc
 import * as g2plot from "@antv/g2plot";
@@ -63,6 +65,7 @@ require("codemirror/mode/sql/sql.js");
 require("codemirror/mode/vue/vue.js");
 require("codemirror/mode/groovy/groovy.js");
 require("codemirror/mode/javascript/javascript.js");
+require("codemirror/mode/xml/xml.js");
 
 require("codemirror/addon/edit/matchbrackets");
 require("codemirror/addon/selection/active-line");
@@ -84,6 +87,7 @@ Vue.use(LayoutComponent);
 Vue.use(Kernel);
 Vue.component("nk-error-modal", NkErrorModal);
 Vue.component("codemirror",codemirror);
+Vue.component("json-viewer",JsonViewer);
 
 Vue.mixin({
     beforeCreate: function () {
@@ -115,7 +119,7 @@ let globalOptions = {
 
 // 加载各个模块，并将模块的routes和stores合并
 let routes      = Kernel.routes,
-    stores      = Stores,
+    stores      = {...Stores,...Kernel.stores},
     sfc         = {
         MixinSortable,
         NkFormat,
@@ -154,16 +158,29 @@ const run = (options)=>{
 
     globalOptions = Object.assign(globalOptions,options);
 
-    Stores.UI.state.logo = globalOptions.logo || 'nk-logo';
-    Stores.UI.state.appName = globalOptions.appName;
+    Stores.UI.state.logo        = globalOptions.logo || 'nk-logo';
+    Stores.UI.state.appName     = globalOptions.appName;
+    Stores.UI.state.fixedMenu   = globalOptions.fixedMenu === undefined || globalOptions.fixedMenu;
 
     const router = new Router(VueRouter,routes,globalOptions.loginPage,globalOptions.defaultPage);
     const store = new Vuex.Store({ modules:stores });
     const i18n = new VueI18n({
         locale: 'zh_CN', // 设置语言环境
     });
+
+    if(globalOptions.iconFont){
+        Object.keys(globalOptions.iconFont)
+            .forEach(key=>{
+                const IconFont = Antd.Icon.createFromIconfontCN({
+                    scriptUrl: globalOptions.iconFont[key],
+                });
+                Vue.component(key,IconFont);
+            })
+    }
+
     const sfcLoader = new SfcLoader(Vue, {
         'vue'             : Vue,
+        'vuex'            : Vuex,
         'ant-design-vue'  : Antd,
         '@antv/g2plot'    : g2plot,
         'eval5'           : eval5,

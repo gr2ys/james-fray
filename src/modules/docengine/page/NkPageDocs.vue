@@ -24,6 +24,7 @@
         @change="search"
         @suggest="suggest"
         @click="selected"
+        @setTab="$emit('setTab',$event)"
     >
         <a-button-group slot="action">
         </a-button-group>
@@ -42,7 +43,9 @@
             </a-dropdown>
         </a-button-group>
 
-        <nk-page-preview :params="previewParams" v-model="previewVisible"></nk-page-preview>
+        <transition name="slide-fade">
+            <nk-page-preview :params="previewParams" v-if="previewVisible" @close="previewClose" @to="to"></nk-page-preview>
+        </transition>
 
     </nk-query-layout>
 </template>
@@ -52,7 +55,8 @@ import NkPagePreview from "./NkPagePreview";
 
 const classifies = [
     {value:'TRANSACTION',label:'交易'},
-    {value:'PARTNER',label:'交易伙伴'}
+    {value:'PARTNER',label:'交易伙伴'},
+    {value:'PIPELINE',label:'流水线'}
 ];
 
 export default {
@@ -63,7 +67,7 @@ export default {
             columns:[
                 { type:  'seq',                         title: '#',         width: '5%'},
                 { field: 'classify',                    title: '分类',       width: '8%',  sortable:true,formatter:['nkFromList',classifies] },
-                { field: 'docTypeDesc',                 title: '单据类型',    width: '15%', sortable:true },
+                { field: 'docTypeDesc',                 title: '模型类型',    width: '15%', sortable:true },
                 { type:  'html', field: 'docName',       title: '名称',       width: '20%', sortable:true, params:{ orderField: 'docName.original' }},
                 { type:  'html', field: 'partnerName',   title: '交易伙伴',    width: '20%', sortable:true, params:{ orderField: 'partnerName.original' }},
                 { field: 'docStateDesc',                title: '状态',       width: '12%', sortable:true},
@@ -79,7 +83,7 @@ export default {
                     formatter: ['nkFromList',classifies]
                 },
                 {
-                    name:'单据类型',
+                    name:'模型类型',
                     field:'docTypeDesc',
                     component:'nk-search-options-multiple',
                     min:240,
@@ -138,6 +142,9 @@ export default {
             });
     },
     methods:{
+        nk$hide(){
+            this.previewVisible = false;
+        },
         suggest(params){
             this.$http.postJSON(`/api/doc/suggest/document`,params).then((res)=>{
                 if(this.$refs.layout){
@@ -157,18 +164,39 @@ export default {
             this.$router.push("/apps/docs/create/"+docType)
         },
         selected({row, $event}){
-            if($event.target.tagName!=='A') {
+            if(!$event.altKey && $event.target.tagName!=='A') {
                 this.previewVisible = true;
                 this.previewParams = {
                     mode: "detail",
-                    classify: row.classify,
                     docId: row.docId
                 }
             }
-        }
+        },
+        to(e){
+            let row = this.previewParams.row;
+            this.previewParams = undefined
+            this.$nextTick(()=>{
+                const index = this.$refs.layout.page.list.indexOf(row)
+                row   = this.$refs.layout.page.list[index+e]
+                if(row){
+                    this.previewParams = {
+                        mode: "detail",
+                        docId: row.docId,
+                        row
+                    }
+                }else{
+                    this.previewVisible = false;
+                }
+            })
+        },
+        previewClose(){
+            this.previewParams = undefined
+            this.$nextTick(()=>{
+                this.previewVisible = false;
+                this.$refs.layout.grid().clearCurrentRow();
+            })
+        },
     },
-    mounted() {
-    }
 }
 </script>
 

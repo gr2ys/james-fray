@@ -14,7 +14,7 @@
 <template>
     <nk-query-layout
         ref="layout"
-        title="单据类型"
+        title="模型"
         :search-items-default="searchItemsDefault"
         :dataTableColumns="columns"
         :selectable="false"
@@ -31,7 +31,7 @@
 import NkUtil from "@/utils/NkUtil";
 
 const formatVersion = ({cellValue})=>{
-    return cellValue.split('-')[0];
+  return cellValue.substring(cellValue.length-9,cellValue.length);
 }
 const classifies = [
     {label: "伙伴",value:"PARTNER"},
@@ -55,7 +55,7 @@ export default {
         searchItemsDefault(){
             return [
                 {
-                    name:'单据分类',
+                    name:'模型分类',
                     field:'docClassify',
                     component:'nk-search-options-single',
                     options:{
@@ -63,7 +63,7 @@ export default {
                     }
                 },
                 {
-                    name:'单据类型',
+                    name:'模型类型',
                     field:'docType',
                     component:'nk-search-options-single',
                     options:{
@@ -93,14 +93,14 @@ export default {
         columns(){
           return [
               { type: 'seq',            title: '#',       width: '4%', editRender: { name: 'input' } },
-              { field: 'docClassify',   title: '单据分类', width: '8%',editRender: { name: 'input' },sortable:true, params:{ orderField: 'DOC_CLASSIFY' },
+              { field: 'docClassify',   title: '模型分类', width: '8%',editRender: { name: 'input' },sortable:true, params:{ orderField: 'DOC_CLASSIFY' },
                   formatter: [
                       'nkFromList',
                       classifies
                   ]
               },
-              { field: 'docType',       title: '单据类型', width: '9%',editRender: { name: 'input' },sortable:true, params:{ orderField: 'DOC_TYPE' } },
-              { field: 'docName',       title: '类型描述', width: '20%',editRender: { name: 'input' } },
+              { field: 'docType',       title: '模型类型', width: '9%',editRender: { name: 'input' },sortable:true, params:{ orderField: 'DOC_TYPE' } },
+              { field: 'docName',       title: '模型描述', width: '20%',editRender: { name: 'input' } },
               { field: 'version',       title: '版本',    width: '8%',editRender: { name: 'input' },sortable:true, params:{ orderField: 'VERSION' }, formatter: formatVersion },
               { field: 'validFrom',     title: '有效期起', width: '10%'},
               { field: 'validTo',       title: '有效期至', width: '10%'},
@@ -139,7 +139,7 @@ export default {
         search(params){
             this.$http.post("/api/def/doc/type/page",NkUtil.translateParamsToQueryString(params))
                 .then((res)=>{
-                    this.$emit("setTab","单据类型");
+                    this.$emit("setTab","模型定义");
                     if(this.$refs.layout)
                         this.$refs.layout.setData(res.data)
                 });

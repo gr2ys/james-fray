@@ -19,6 +19,7 @@ import User from "../stores/StateUser";
 import UI from "../stores/StateUI";
 import StateDebug from "../stores/StateDebug";
 import TextUtils from "../../utils/TextUtils";
+import {v1 as uuidv1} from "uuid";
 
 export default (Vue) => {
 
@@ -37,7 +38,42 @@ export default (Vue) => {
   };
   const onRequestFulfilled = config => {
     let token = AuthUtils.getToken();
-    if(token){                    config.headers.common['NK-Token'] = token; }
+    if(token){
+
+      let timestamp = Math.floor(new Date().getTime()/1000);
+
+      const str = config.url.split('?');
+      const array = str[1] ? str[1].split('&') : [];
+
+      if(config.headers['Content-Type']){
+        if(config.headers['Content-Type'].indexOf('application/x-www-form-urlencoded;')>-1){
+          if(config.data){
+            decodeURIComponent(config.data).split('&').forEach(item=>array.push(item))
+          }
+        }
+      }
+
+      let nonce = uuidv1();
+
+      array.push(`timestamp=${timestamp}`)
+      array.push(`secret=${token}`)
+      array.push(`nonce=${nonce}`)
+
+      // substr(4) 移除/api 前缀
+      const unsign = str[0].substr(4)+'?'+array.sort().join('&');
+
+      const signature = crypto.createHash('sha1')
+          .update(unsign)
+          .digest('hex');
+
+
+      config.headers.common['elcube-client']    = AuthUtils.getClientId(uuidv1);
+      config.headers.common['elcube-user']      = AuthUtils.getUsername();
+      config.headers.common['elcube-timestamp'] = timestamp;
+      config.headers.common['elcube-nonce']     = nonce;
+      config.headers.common['elcube-signature'] = signature;
+
+    }
     return onRequestNoneToken(config)
   };
   const onRequestRejected = error => {
@@ -47,7 +83,14 @@ export default (Vue) => {
   // 设置响应配置
   let errorTime = 0;
   let errorMsg = null;
+  const onResponseSuccessAuthed = res => {
+    AuthUtils.expandToken();
+    return onResponseSuccess(res)
+
+  }
   const onResponseSuccess = res => {
+
+
     // 解码返回的数据
     if(res.data && typeof res.data === 'string' && res.data.startsWith("H4s")){
       res.data = JSON.parse(TextUtils.uncompress(res.data));
@@ -84,11 +127,6 @@ export default (Vue) => {
       if(error.response.data.causeStackTrace)
         console.error(error.response.data.causeStackTrace.join('\n'))
 
-      // Vue.prototype.$error({
-      //   centered: true,
-      //   title: '系统错误',
-      //   content: errorMsg,
-      // });
       if(UI.state.errorVisible===false){
         UI.state.errorVisible = true;
         UI.state.errors = []
@@ -97,18 +135,6 @@ export default (Vue) => {
       return Promise.reject(error);
     }
     return Promise.reject(error);
-  }
-
-  // 用户未登陆 或 token失效
-  const onUnauthorizedError = error => {
-    Vue.prototype.$error({
-      centered: true,
-      title: '验证错误',
-      content: error.response.data.msg,
-    });
-    setTimeout(()=>{
-      location.href=""
-    },1000)
   }
 
   const onDebugContextNotFound = () => {
@@ -127,7 +153,7 @@ export default (Vue) => {
   const onForbiddenError = error => {
     Vue.prototype.$error({
       centered: true,
-      title: '验证错误',
+      title: '访问受限',
       content: error.response.data.msg,
     });
     return Promise.reject(error);
@@ -146,10 +172,10 @@ export default (Vue) => {
     if(      error.response.status >=  500 &&
              error.response.status <   600) { return onSystemError(error);
     }else if(error.response.status === 701) { return onDebugContextNotFound(error);
-    }else if(error.response.status === 401) { return onUnauthorizedError(error);
-    }else if(error.response.status === 901) { return onUnauthorizedError(error);
-    }else if(error.response.status === 403) { return onForbiddenError(error);
     }else if(error.response.status === 400) { return onCaution(error);
+    }else if(error.response.status === 403) { return onForbiddenError(error);
+    }else if(error.response.status === 401) { return Promise.reject(error);
+    }else if(error.response.status === 901) { return Promise.reject(error);
     }else{                                    return Promise.reject(error); // 其他未知的错误
     }
   };
@@ -166,9 +192,9 @@ export default (Vue) => {
   const instanceNone = axios.create(Object.assign({headers: {'Content-Type': 'application/json; charset=utf-8'}},defaultConfig));
 
   instanceForm.interceptors.request.use(onRequestFulfilled, onRequestRejected);
-  instanceForm.interceptors.response.use(onResponseSuccess, onResponseError);
+  instanceForm.interceptors.response.use(onResponseSuccessAuthed, onResponseError);
   instanceJSON.interceptors.request.use(onRequestFulfilled, onRequestRejected);
-  instanceJSON.interceptors.response.use(onResponseSuccess, onResponseError);
+  instanceJSON.interceptors.response.use(onResponseSuccessAuthed, onResponseError);
   instanceNone.interceptors.request.use(onRequestNoneToken, onRequestRejected);
   instanceNone.interceptors.response.use(onResponseSuccess, onResponseError);
 
@@ -179,18 +205,53 @@ export default (Vue) => {
     let state = AuthUtils.state();
 
     if(state.authed){
-      return targetRequestFunction.apply(self,args);
+      return new Promise((resolve,reject)=>{
+        targetRequestFunction.apply(self,args)
+            .then(resolve)
+            .catch((error)=>{
+              if(error.response.status===401){
+                reLogin(()=>{
+                  targetRequestFunction.apply(self,args)
+                      .then(resolve)
+                      .catch(reject)
+                });
+              }else{
+                reject(error);
+              }
+            })
+      })
     }else{
       return new Promise((resolve,reject)=>{
-        refreshToken.apply(self)
-          .then(()=>{
-            targetRequestFunction
-              .apply(self,args)
+        reLogin(()=>{
+          targetRequestFunction.apply(self,args)
               .then(resolve)
-              .catch(reject);
-          })
-          .catch(reject)
+              .catch(reject)
+        });
       });
+    }
+  }
+
+  function reLogin(callback){
+    if(User.state.user.id){
+      // 否则弹出重新登陆对话框
+      User.state.reLogin = true;
+      User.state.reLoginMessage = '由于长时间未操作，需要您重新验证身份';
+      // 缓存用户调用的方法
+      User.state.reLoginSuccess.push(callback);
+
+      clearReLoginInterval();
+      User.state.reLoginTime = reLoginCountdown;
+      reLoginInterval = setInterval(() => {
+        User.state.reLoginTime = --reLoginCountdown;
+        if (reLoginCountdown === 0) {
+          clearReLoginInterval();
+          location.href = '';
+        }
+      }, 1000);
+    }else{
+      AuthUtils.clear();
+      clearReLoginInterval();
+      location.href = '';
     }
   }
 
@@ -202,56 +263,47 @@ export default (Vue) => {
     if(reLoginInterval)clearInterval(reLoginInterval);
     reLoginCountdown = 90;
   }
-  function refreshToken(fromRoute,next) {
-    let that = this;
-    return new Promise((resolve)=>{
-      UI.state.loading=true;
-      axios.post("/api/authentication/refresh_token",{},{
+
+  function sendSMS(phone,verKey){
+    return axios.get(`/api/ver/phone/${phone}/${verKey}?`);
+  }
+  function loginSMS(username, verKey, verCode){
+    return new Promise((resolve, reject)=>{
+      axios.post("api/authentication/token",null,{
         headers: {
-          'Content-Type': 'application/json; charset=utf-8',
+          "elcube-client": AuthUtils.getClientId(uuidv1),
+          "elcube-phone":  username,
+          "elcube-verkey":verKey,
+          "elcube-vercode":verCode,
           'NK-App': 'elcube',
-          'NK-Token': AuthUtils.getToken()
         }
       }).then(res=>{
+        User.state.reLogin=false;
         AuthUtils.setToken(res.data);
-        resolve.apply(that,arguments)
-      }).catch(()=>{
-        if(fromRoute&&fromRoute.path==='/'){
-          // 如果fromRoute.path === '/' 表示用户是通过刷新URL进来的，
-          // 所以，如果获取token失败，则直接返回 / 登陆界面
-          next({path: '/'})
-        }else{
-          // 否则弹出重新登陆对话框
-          User.state.reLogin=true;
-          User.state.reLoginMessage = '由于长时间未操作，需要您重新验证身份';
-          // 缓存用户调用的方法
-          User.state.reLoginSuccess.push(resolve);
-
-          clearReLoginInterval();
-          User.state.reLoginTime=reLoginCountdown;
-          reLoginInterval = setInterval(()=>{
-            User.state.reLoginTime=--reLoginCountdown;
-            if(reLoginCountdown===0){
-              clearReLoginInterval();
-              location.href='';
-            }
-          },1000);
-        }
-
+        clearReLoginInterval();
+        resolve.apply(this,[res]);
+      }).catch(e=>{
+        reject.apply(this,[e.response])
+        reLoginCountdown = 91;
       }).finally(()=>{
-        UI.state.loading=false;
       });
-    })
+    });
   }
 
   function login(username, password, verKey, verCode){
 
+    const timestamp = Math.floor(new Date().getTime()/1000);
+    const signature = crypto.createHash('sha1')
+        .update(`password=${sha1(password)}&timestamp=${timestamp}`).digest('hex');
+
     return new Promise((resolve, reject)=>{
       axios.post("api/authentication/token",qs.stringify({
         systemId: "NK",
+        client: AuthUtils.getClientId(uuidv1),
         os: "Browser",
-        username: username,
-        password: sha1(password),
+        timestamp: timestamp,
+        username:  username,
+        password:  signature,
         verKey,
         verCode,
       }),{
@@ -270,28 +322,19 @@ export default (Vue) => {
       });
     });
   }
+
   function logout(){
-    return new Promise((resolve)=>{
-      axios.post("/api/authentication/clear",{},{
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-          'NK-App': 'elcube',
-          'NK-Token': AuthUtils.getToken()
-        }
-      })
-      .then(resolve)
-      .catch(resolve)
-      .finally(()=>{
-        clearReLoginInterval();
-        AuthUtils.clear();
-      });
-    })
+    clearReLoginInterval();
+    AuthUtils.clear();
+    return Promise.resolve();
   }
 
   return {
     login,
+    loginSMS,
+    sendSMS,
     logout,
-    refreshToken,
+    reLogin,
     instanceNone,
     instanceForm,
     instanceJSON,

@@ -13,15 +13,15 @@
 -->
 <template>
     <div class="bg">
-        <a-card :title="$t('login')" :bordered="false" style="width: 300px;padding-bottom: 10px;">
-            <nk-login-form @change="changed" ref="form" @success="success">
-            </nk-login-form>
+        <a-card :title="$t('login')" :bordered="false" style="width: 300px;padding-bottom: 0;">
+            <component :is="loginFrom" @change="changed" ref="form" @success="success"></component>
             <a-button ref="submit" type="primary" :disabled="!!loginInfo.error" @click="login">
                 {{$t('login')}}
             </a-button>
-<!--            <a-button style="margin-left: 10px;" type="default" @click="defaultLogin">-->
-<!--                Default User-->
-<!--            </a-button>-->
+            <div style="text-align: right">
+                <a-button v-if="loginFrom==='NkLoginForm'" type="link" @click="loginFrom='NkLoginSMS'" >手机验证码登陆</a-button>
+                <a-button v-if="loginFrom==='NkLoginSMS'"  type="link" @click="loginFrom='NkLoginForm'">用户名密码登陆</a-button>
+            </div>
         </a-card>
         <nk-error-modal />
     </div>
@@ -33,7 +33,8 @@ export default {
     name: "Login",
     data(){
         return{
-            loginInfo: {}
+            loginInfo: {},
+            loginFrom: 'NkLoginForm',
         }
     },
     mounted() {
@@ -48,7 +49,7 @@ export default {
             this.loginInfo = e;
         },
         success(){
-            this.$router.push("/apps/default")
+            this.$router.push((this.$route.query&&this.$route.query.redirect)||"/apps/default")
         },
         login(){
             this.$refs.form.login();

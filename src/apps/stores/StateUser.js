@@ -18,15 +18,21 @@ export default {
         reLoginSuccess:[],
         reLoginTime:90,
         reLoginMessage:undefined,
+        reLoginOkType:undefined,
+        reLoginOkText:undefined,
+        reLoginTitle:undefined,
         user: {}
     },
     mutations: {
         setUser(state,user){
             state.user = user;
         },
-        setReLogin(state,{message,callback,reLoginTime}){
+        setReLogin(state,{title,message,okType,okText,callback,reLoginTime}){
             state.reLogin = true;
+            state.reLoginTitle = title;
             state.reLoginMessage = message;
+            state.reLoginOkType = okType;
+            state.reLoginOkText = okText;
             state.reLoginTime = reLoginTime;
             if(callback)
                 state.reLoginSuccess.push(callback)

@@ -23,11 +23,14 @@
         :init-rows="custom.defaultRows"
         :border="custom.border"
         :sortConfig="custom.sortConfig"
+        :exportConfig="custom.exportConfig"
         :lazy="true"
         :selectable="false"
         @change="search"
+        @exportExcel="exportExcel"
         @suggest="suggest"
         @click="selected"
+        @setTab="$emit('setTab',$event)"
     >
         <a-button  slot="action"
                    type="primary"
@@ -44,14 +47,18 @@
             </a-dropdown>
         </a-button-group>
 
-        <nk-page-preview v-if="custom.preview" :params="previewParams" v-model="previewVisible" @close="previewClose"></nk-page-preview>
+        <transition name="slide-fade" v-if="custom.preview">
+            <nk-page-preview :params="previewParams" v-if="previewVisible" @close="previewClose" @to="to"></nk-page-preview>
+        </transition>
+        <iframe ref="download" style="display: none"></iframe>
     </nk-query-layout>
 </template>
 
 <script>
 import NkPagePreview from "../../docengine/page/NkPagePreview";
-import {mapGetters} from "vuex";
+import {mapMutations,mapGetters} from "vuex";
 import NkUtil from "@/utils/NkUtil";
+import moment from 'moment';
 
 export default {
     components: {NkPagePreview},
@@ -85,9 +92,11 @@ export default {
         }
     },
     methods:{
+        ...mapMutations('UI',['doLoading']),
         loadCustom(){
             this.$http.get(`/api/webapp/menu/${this.$route.params.id}`)
                 .then(res=>{
+                    let custom = typeof res.data === 'string'?NkUtil.parseJSON(res.data):res.data;
                     this.custom = Object.assign({
                         title:"自定义查询报表",
                         subTitle:"",
@@ -101,20 +110,15 @@ export default {
                         columns:[],
                         sortConfig:undefined,
                         border:undefined,
-                        creatable:undefined
-                    },NkUtil.parseJSON(res.data));
+                        creatable:undefined,
+                    },custom);
                     this.$emit("setTab",this.custom.title);
 
                     this.$nextTick(()=>{
                         this.$refs.layout.init();
                     })
 
-                    const queryLength = Object.keys(this.$route.query).length;
-                    if(queryLength){
-                        this.$emit("setTab",this.custom.title+"[Filter:"+queryLength+"]");
-                    }else{
-                        this.$emit("setTab",this.custom.title);
-                    }
+                    this.$emit("setTab",this.custom.title);
 
                 }).catch((e)=>{
                     console.error(e);
@@ -139,20 +143,6 @@ export default {
         },
         search(params){
 
-            // for(const key in this.$route.query){
-            //     if(this.$route.query.hasOwnProperty(key)){
-            //         let value = this.$route.query[key];
-            //         if(value.startsWith('[')||value.startsWith('{')){
-            //             try{
-            //                 value = JSON.parse(value)
-            //             }catch (e) {
-            //                 console.log(e);
-            //             }
-            //         }
-            //         params[key]=value;
-            //     }
-            // }
-
             this.params = params;
 
             if(this.custom.postSql){
@@ -175,18 +165,83 @@ export default {
                 });
             }
         },
+        exportExcel(params){
+            this.params = params;
+
+            if(this.custom.postSql){
+                this.$http.postJSON(`/api/data/analyse/export`,Object.assign({
+                        sqlList: (this.custom.postSql instanceof Array) ? this.custom.postSql : [this.custom.postSql],
+                        $debug: this.custom.$debug,
+                        columns: this.custom.columns
+                    },params)
+                ).then((res)=>{
+                    const fileName = this.custom.title +"_" + moment().format("YYYY-MM-DD");
+                    this.$notification.info({
+                        duration: 10,
+                        message: '提示',
+                        description:`准备下载"${fileName}.xlsx"`
+                    })
+                    this.$refs.download.setAttribute("src",`/api/data/analyse/download/${res.data}/${fileName}?${new Date().getTime()}`);
+                }).finally(()=>{
+                    if(this.$refs.layout)
+                        this.$refs.layout.setExportDown()
+                })
+            }else{
+                this.$http.postJSON(`/api/doc/export/${this.custom.index}`,Object.assign({
+                        postCondition: this.custom.postCondition,
+                        $debug: this.custom.$debug,
+                        columns: this.custom.columns
+                    },params)
+                ).then((res)=>{
+                    const fileName = this.custom.title +"_" + moment().format("YYYY-MM-DD");
+                    this.$notification.info({
+                        duration: 10,
+                        message: '提示',
+                        description:`准备下载"${fileName}.xlsx"`
+                    })
+                    this.$refs.download.setAttribute("src",`/api/doc/download/${res.data}/${fileName}?${new Date().getTime()}`);
+                }).finally(()=>{
+                    if(this.$refs.layout)
+                        this.$refs.layout.setExportDown()
+                })
+            }
+        },
         selected({row,$event}){
-            if($event.target.tagName!=='A'){
+            if(!$event.altKey && $event.target.tagName!=='A') {
                 this.previewVisible = true;
                 this.previewParams  = {
                     mode: "detail",
-                    classify:row.classify,
-                    docId:row.docId
+                    docId:row.docId,
+                    row
                 }
             }
         },
+        nk$hide(){
+            this.previewVisible = false;
+        },
+        to(e){
+            let row = this.previewParams.row;
+            this.previewParams = undefined
+            this.$nextTick(()=>{
+                const index = this.$refs.layout.page.list.indexOf(row)
+                row   = this.$refs.layout.page.list[index+e]
+                if(row){
+                    this.previewParams = {
+                        mode: "detail",
+                        docId: row.docId,
+                        row
+                    }
+                }else{
+                    this.previewVisible = false;
+                }
+            })
+        },
         previewClose(){
-            this.$refs.layout.grid().clearCurrentRow();
+            this.previewParams = undefined
+            this.$nextTick(()=>{
+                this.previewVisible = false;
+                this.$refs.layout.grid().clearCurrentRow();
+            })
         },
         createDoc(def){
             this.$router.push(`/apps/docs/create/`+def.docType);
