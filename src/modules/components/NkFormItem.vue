@@ -18,12 +18,12 @@
          @dragend="$emit('dragend',$event)"
          @click="$emit('click',$event)"
          :draggable="draggable">
-        <div class="term" :class="termClass" :style="{'width':width+'px'}">
+        <div class="term" :class="termClass" :style="{'width':(width||120)+'px'}">
             <nk-required-mark v-if="editMode && required" />
             {{term || title}}
             <slot name="term"></slot>
         </div>
-        <div class="content" :class="contentClass" :style="{'width': 'calc(100% - '+width+'px)'}">
+        <div class="content" :class="contentClass" :style="{'width': 'calc(100% - '+(width||120)+'px)'}">
             <slot v-if="!editMode"></slot>
             <slot v-if="editMode" name="edit"></slot>
             <div v-if="editMode && error" class="ant-form-explain" style="color: #ff6068">{{error}}</div>

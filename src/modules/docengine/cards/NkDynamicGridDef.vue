@@ -171,7 +171,7 @@ export default {
             let newItem = {
                 key : 'key'+index,
                 name: '字段'+index,
-                col:1,
+                col:10,
                 inputType: this.inputTypeDefs[0].value,
                 calcTrigger:'',
                 calcOrder:1,
