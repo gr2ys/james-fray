@@ -15,9 +15,10 @@
     <nk-def-card :title="card.cardName+':卡片设计'">
         <span slot="extra">
             <a-button-group size="small" style="margin-right: 10px;">
-                <a-button @click="reviewEditMode=false" :type="reviewEditMode?'default':'primary'">显示</a-button>
-                <a-button @click="reviewEditMode=true"  :type="reviewEditMode?'primary':'default'">编辑</a-button>
+                <a-button @click="reviewEditMode=false"           :type="reviewEditMode?'default':'primary'">显示</a-button>
+                <a-button @click="reviewEditMode=true"            :type="reviewEditMode?'primary':'default'">编辑</a-button>
             </a-button-group>
+            <a-button size="small" @click="showHideFiled=!showHideFiled"   :type="showHideFiled?'primary':'default'">隐藏的字段</a-button>
         </span>
         <div style="display: flex;width: 100%;">
             <div style="width: 100%;max-height: 600px;overflow-y: auto;">
@@ -25,41 +26,43 @@
                     <div ref="parent" class="parent" style="width: 100%;" @click="selectItem">
                         <nk-form :col="def.col||2" :edit="reviewEditMode">
                             <template v-for="(item,seq) in def.items">
-                                <nk-form-divider
-                                    v-if="item.control >= 0 && (item.inputType==='divider'||item.inputType==='-'||item.inputType==='--')"
-                                    :key="item.key"
-                                    :options="item" @nk-dragover="dragover" @drag="drag(item)" @dragend="dragend" @click="selectItem($event,item)"
-                                    :draggable="editMode?'true':'false'"
-                                    :class="{
-                                        'b':true,
-                                        'selected':item._selected,
-                                        'nk-primary-border-color-important':item._selected,
-                                        'drop':item._drop
-                                    }"
-                                    style="cursor: move"
-                                    :title="item.name">
+                                <nk-form-divider v-if="(showHideFiled || item.control >= 0) && (item.inputType==='divider'||item.inputType==='-'||item.inputType==='--')"
+                                                 :key="item.key"
+                                                 :options="item" @nk-dragover="dragover" @drag="drag(item)" @dragend="dragend" @click="selectItem($event,item)"
+                                                 :draggable="editMode?'true':'false'"
+                                                 :class="{
+                                                     'b':true,
+                                                     'selected':item._selected,
+                                                     'nk-primary-border-color-important':item._selected,
+                                                     'drop':item._drop,
+                                                     'hide':item.control < 0,
+                                                 }"
+                                                 style="cursor: move"
+                                                 :title="item.name">
                                     <a-popconfirm @confirm="$nkSortableRemove(def.items,seq+1)" :title="`移除[${item.name}]?`">
                                         <a-icon type="close" v-if="editMode && item._selected" style="position: absolute;right: -25px;top:-15px;cursor: pointer;"/>
                                     </a-popconfirm>
+                                    <span v-if="item.control < 0" style="position: absolute;left: -25px;top:-9px;">已隐藏</span>
                                 </nk-form-divider>
-                                <nk-form-item v-else
-                                              :key="item.key"
-                                              :options="item" @nk-dragover="dragover" @drag="drag(item)" @dragend="dragend" @click="selectItem($event,item)"
-                                              :draggable="editMode?'true':'false'"
-                                              :class="{
-                                                    'b':true,
-                                                    'selected':item._selected,
-                                                    'nk-primary-border-color-important':item._selected,
-                                                    'drop':item._drop
-                                                }"
-                                              :title="item.name"
-                                              :width="def.titleWidth"
-                                              :col="item.col||1"
-                                              :edit="reviewEditMode && item.control > 0"
-                                              style="position: relative;cursor: move"
-                                              :required="item.required"
-                                              :content-align="item.alignRight?'right':''"
-                                              :ignoreValidate="true"
+                                <nk-form-item    v-else-if="(showHideFiled || item.control >= 0)"
+                                                 :key="item.key"
+                                                 :options="item" @nk-dragover="dragover" @drag="drag(item)" @dragend="dragend" @click="selectItem($event,item)"
+                                                 :draggable="editMode?'true':'false'"
+                                                 :class="{
+                                                       'b':true,
+                                                       'selected':item._selected,
+                                                       'nk-primary-border-color-important':item._selected,
+                                                       'drop':item._drop,
+                                                       'hide':item.control < 0,
+                                                   }"
+                                                 :title="item.name"
+                                                 :width="def.titleWidth"
+                                                 :col="item.col||1"
+                                                 :edit="reviewEditMode && item.control > 0"
+                                                 style="position: relative;cursor: move"
+                                                 :required="item.required"
+                                                 :content-align="item.alignRight?'right':''"
+                                                 :ignoreValidate="true"
                                 >
                                     <component :is="item.inputType"
                                                :slot="reviewEditMode && item.control > 0?'edit':'default'"
@@ -71,6 +74,7 @@
                                     <a-popconfirm :slot="reviewEditMode && item.control > 0?'edit':'default'" @confirm="$nkSortableRemove(def.items,seq+1)" :title="`移除[${item.name}]?`">
                                         <a-icon type="close" v-if="editMode && item._selected" style="position: absolute;right: 5px;top:5px;cursor: pointer;z-index: 1000"/>
                                     </a-popconfirm>
+                                    <span v-if="item.control < 0" style="position: absolute;left: 5px;top:5px;">已隐藏</span>
                                 </nk-form-item>
                             </template>
                         </nk-form>
@@ -153,18 +157,20 @@
                                         {{selectedItem.style}}
                                         <a-input slot="edit" size="small" v-model="selectedItem.style"></a-input>
                                     </nk-form-item>
-                                    <nk-form-item title="控制">
-                                        {{selectedItem.control===1 ?'读写':(selectedItem.control===0 ?'只读':'隐藏')}}
-                                        <a-select slot="edit" size="small" v-model="selectedItem.control" >
-                                            <a-select-option :key="1" >读写</a-select-option>
-                                            <a-select-option :key="0" >只读</a-select-option>
-                                            <a-select-option :key="-1">隐藏</a-select-option>
-                                        </a-select>
-                                    </nk-form-item>
-                                    <nk-form-item title="控制 SpEL">
-                                        {{selectedItem.spELControl}}
-                                        <nk-sp-el-editor slot="edit" v-model="selectedItem.spELControl"></nk-sp-el-editor>
-                                    </nk-form-item>
+                                </template>
+                                <nk-form-item title="控制">
+                                    {{selectedItem.control===1 ?'读写':(selectedItem.control===0 ?'只读':'隐藏')}}
+                                    <a-select slot="edit" size="small" v-model="selectedItem.control" >
+                                        <a-select-option :key="1" >读写</a-select-option>
+                                        <a-select-option :key="0" >只读</a-select-option>
+                                        <a-select-option :key="-1">隐藏</a-select-option>
+                                    </a-select>
+                                </nk-form-item>
+                                <nk-form-item title="控制 SpEL">
+                                    {{selectedItem.spELControl}}
+                                    <nk-sp-el-editor slot="edit" v-model="selectedItem.spELControl"></nk-sp-el-editor>
+                                </nk-form-item>
+                                <template v-if="selectedItem.inputType!=='-'">
                                     <nk-form-item title="值条件 SpEL">
                                         {{selectedItem.spELTriggers}}
                                         <a-select slot="edit" size="small" v-model="selectedItem.spELTriggers" mode="multiple" >
@@ -224,6 +230,7 @@ export default {
             selectedItem: undefined,
             activeKey: this.editMode ? 'lab' : 'card',
             reviewEditMode: true,
+            showHideFiled:false,
         }
     },
     mounted() {
@@ -353,6 +360,10 @@ export default {
     .selected{
         border-style: dashed;
         border-width: 1px;
+    }
+    .hide{
+        opacity: 0.3;
+        background-color: #ddd;
     }
     ::v-deep .empty::before{
         content: '-'
