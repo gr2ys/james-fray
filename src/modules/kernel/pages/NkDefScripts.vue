@@ -14,7 +14,7 @@
 <template>
     <nk-query-layout
         ref="layout"
-        title="组件开发"
+        title="脚本组件"
         :search-items-default="searchItemsDefault"
         :dataTableColumns="columns"
         :selectable="false"
@@ -23,6 +23,7 @@
     >
         <a-button-group slot="action">
             <a-button type="primary" @click="create">新建</a-button>
+            <a-button type="default" @click="ide">原生组件</a-button>
         </a-button-group>
     </nk-query-layout>
 </template>
@@ -104,13 +105,16 @@ export default {
         search(params){
             this.$http.post("/api/def/script/page",NkUtil.translateParamsToQueryString(params))
                 .then((res)=>{
-                    this.$emit("setTab","组件开发");
+                    this.$emit("setTab","脚本组件");
                     if(this.$refs.layout)
                         this.$refs.layout.setData(res.data)
                 });
         },
         create(){
             this.$router.push("/apps/def/component/create")
+        },
+        ide(){
+            this.$router.push("/apps/def/component/ide/list")
         }
     }
 }

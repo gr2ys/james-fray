@@ -22,6 +22,7 @@ import NkDashboardLost from "./components/NkDashboardLost";
 
 import NkDefRegistry from "./pages/NkDefRegistry";
 import NkDefScripts from "./pages/NkDefScripts";
+import NkDefScriptsIde from "./pages/NkDefScriptsIde";
 import NkDefScriptDetail from "./pages/NkDefScriptDetail";
 
 import NkDevOpsCache from "./pages/NkDevOpsCache";
@@ -158,6 +159,11 @@ const routes = [
             name: "新建组件",
             path: ':mode',
             component: NkDefScriptDetail
+          },
+          {
+            name: "原生组件",
+            path: 'ide/list',
+            component: NkDefScriptsIde
           },
         ]
       },
