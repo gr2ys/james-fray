@@ -29,13 +29,13 @@ export default {
     },
     render(h) {
         let c = this.$slots[this.editMode?'edit':'default'];
-        return !c||c.length>1?c:h('div',Object.assign({},this.options),c)
+        return !c||c.length<=1?c:h('div',Object.assign({},this.options),c)
     }
 }
 </script>
 
 <style scoped>
-div{
-    display: inline-block;
-}
+/*div{*/
+/*    display: inline-block;*/
+/*}*/
 </style>

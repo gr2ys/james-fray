@@ -65,6 +65,7 @@ require("codemirror/mode/sql/sql.js");
 require("codemirror/mode/vue/vue.js");
 require("codemirror/mode/groovy/groovy.js");
 require("codemirror/mode/javascript/javascript.js");
+require("codemirror/mode/xml/xml.js");
 
 require("codemirror/addon/edit/matchbrackets");
 require("codemirror/addon/selection/active-line");
