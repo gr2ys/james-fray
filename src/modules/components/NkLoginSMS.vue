@@ -3,43 +3,39 @@
         <a-alert v-if="error" type="error" :message="error.data" banner style="margin-bottom: 20px;border-radius: 4px;" />
         <a-form :form="form" @submit="submit">
             <a-form-item :validate-status="userNameError() ? 'error' : ''" :help="userNameError() || ''">
-                <a-input
-                    v-decorator="[
-                                  'username',
-                                  { rules: [{ required: true, message: 'Please input your username!' }], initialValue: username },
-
-                                ]"
-                    :placeholder="$t('username')"
-
-                    @blur="usernameBlur"
-                    :disabled="usernameReadonly"
-                >
-                    <a-icon slot="prefix" type="user" style="color:rgba(0,0,0,.25)" />
-                </a-input>
+                <a-input-group compact>
+                    <a-input
+                        style="width: 60%;"
+                        v-decorator="[
+                                      'username',
+                                      {
+                                          rules: [
+                                                { required: true,     message: '请输入手机号码' },
+                                                { pattern: /1\d{10}/, message: '请输入正确的手机号码' },
+                                          ],
+                                          initialValue: username
+                                      },
+                                    ]"
+                        :placeholder="$t('username')"
+                        :disabled="usernameReadonly"
+                    >
+                        <a-icon slot="prefix" type="mobile" style="color:rgba(0,0,0,.25)" />
+                    </a-input>
+                    <a-button style="width: 40%;padding: 0;" @click="send" :disabled="!!time">
+                        发送验证码{{time?('('+time+')'):''}}
+                    </a-button>
+                </a-input-group>
             </a-form-item>
-            <a-form-item :validate-status="passwordError() ? 'error' : ''" :help="passwordError() || ''">
-                <a-input
-                    v-decorator="[
-                                  'password',
-                                  { rules: [{ required: true, message: 'Please input your Password!' }], initialValue: password },
-                                ]"
-                    type="password"
-                    :placeholder="$t('password')"
-                >
-                    <a-icon slot="prefix" type="lock" style="color:rgba(0,0,0,.25)" />
-                </a-input>
-            </a-form-item>
-            <a-form-item v-if="retryTimes>0" :validate-status="verCodeError() ? 'error' : ''" :help="verCodeError() || ''" class="ver-code">
+            <a-form-item :validate-status="verCodeError() ? 'error' : ''" :help="verCodeError() || ''" class="ver-code">
                 <a-input
                     v-decorator="[
                                   'verCode',
-                                  { rules: [{ required: true, message: 'Please input your Ver Code!' }] },
+                                  { rules: [{ required: true, message: '请输入验证码' }] },
                                 ]"
                     type="text"
                     :placeholder="$t('verCode')"
                 >
                     <a-icon slot="prefix" type="safety-certificate" style="color:rgba(0,0,0,.25)" />
-                    <img slot="addonAfter" :src="`/api/ver/code/${verKey}?${random}`" height="26" @click="random=new Date().getTime()">
                 </a-input>
             </a-form-item>
             <a-button type="primary" html-type="submit" v-show="false"></a-button>
@@ -76,37 +72,23 @@ export default {
                     onValuesChange : this.onValuesChange
                 }
             ),
-            random:'',
-            retryTimes:0,
-            formError:undefined
+            formError:undefined,
+
+            time:0,
+            timer:undefined
         }
     },
     mounted() {
-        this.usernameBlur();
+    },
+    destroyed() {
+        clearInterval(this.timer)
     },
     methods:{
-        defaultLogin(){
-            this.spinning = true;
-            this.$http.login("admin","96e79218965eb72c92a549dd5a330112")
-                .then(()=>{
-                    this.$router.push("/apps/default")
-                }).catch((error)=>{
-                this.error = error;
-                this.spinning = false;
-            });
-        },
         // Only show error after a field is touched.
         userNameError() {
             const { getFieldError,isFieldTouched } = this.form;
             const error = isFieldTouched('username') && getFieldError('username');
             this.change({error:this.formError||error});
-            return error;
-        },
-        // Only show error after a field is touched.
-        passwordError() {
-            const { getFieldError,isFieldTouched } = this.form;
-            const error = isFieldTouched('password') && getFieldError('password');
-            this.change({error:this.formError||error})
             return error;
         },
         // Only show error after a field is touched.
@@ -121,7 +103,6 @@ export default {
             this.$emit("change",Object.assign({
                 error: undefined,
                 username: this.form.getFieldValue("username"),
-                password: this.form.getFieldValue("password"),
                 verCode: this.form.getFieldValue("verCode"),
                 logging:false
             },e));
@@ -137,48 +118,46 @@ export default {
                 });
             })
         },
-        usernameBlur(){
-            // 检查是否需要验证码
-            if(this.form.getFieldValue("username")&&this.form.getFieldValue("username").trim()){
-                this.$http.instanceNone.get("/api/ver/has/"+this.form.getFieldValue("username"))
-                    .then(res=>{
-                        if(res.data){
-                            if(res.data.count){
-                                this.retryTimes = res.data.count;
-                                this.verKey = this.verKey||NkUtil.uuid();
-                                this.error = res.data.message && {data:res.data.message};
-                            }else{
-                                this.error = undefined;
-                            }
-                        }
-                    });
-            }
-        },
         submit(e){
             e.preventDefault();
             this.login();
         },
         clear(){
             this.form.setFieldsValue({
-                password:undefined,
                 verCode:undefined,
             });
-            this.retryTimes = 0;
             this.verKey = undefined;
             this.error = undefined;
         },
-        login(username,password){
+        send(e){
+            e.preventDefault();
+            this.form.validateFields(['username'],(err,values) => {
+                if (!err) {
+                    this.verKey = this.verKey||NkUtil.uuid();
+                    this.$http.sendSMS(values.username,this.verKey)
+                        .then(()=>{
+                            this.time = 90;
+                            this.timer = setInterval(()=>{
+                                this.time--;
+                                if(this.time===0){
+                                    clearInterval(this.timer)
+                                }
+                            },1000)
+                        }).catch((error)=>{
+                            this.error = error
+                        });
+                }
+            });
+        },
+        login(username){
             if(username){
                 this.form.setFieldsValue({username});
-            }
-            if(password){
-                this.form.setFieldsValue({password});
             }
             this.spinning = true;
             this.form.validateFields((err, values) => {
                 if (!err) {
                     this.change({logging:true})
-                    this.$http.login(values.username,values.password,this.verKey,values.verCode)
+                    this.$http.loginSMS(values.username,this.verKey,values.verCode)
                         .then(()=>{
                             this.$emit("success");
                             this.change({logging:false})
@@ -186,17 +165,11 @@ export default {
                             this.clear();
                         }).catch((error)=>{
                             this.form.setFieldsValue({
-                                password:undefined,
                                 verCode:undefined,
                             });
 
                             this.error = error;
                             this.spinning = false;
-
-                            // 处理验证码
-                            this.retryTimes++;
-                            this.verKey = this.verKey||NkUtil.uuid();
-                            this.random=new Date().getTime();
 
                             this.change({logging:false})
                         });
@@ -223,13 +196,13 @@ export default {
 {
 "zh_CN": {
 "login": "登陆",
-"username": "用户名",
+"username": "手机号",
 "password": "密码",
 "verCode": "验证码"
 },
 "en": {
 "login": "Login",
-"username": "Username",
+"username": "Phone",
 "password": "Password",
 "verCode": "VerCode"
 }

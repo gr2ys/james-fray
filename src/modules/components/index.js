@@ -17,6 +17,7 @@
 
 import NkLogo from "./NkLogo";
 import NkLoginForm from "./NkLoginForm";
+import NkLoginSMS from "./NkLoginSMS";
 import NkEditSlot from "./NkEditSlot";
 import NkForm from "./NkForm";
 import NkPageLayout from "./layout/NkPageLayout";
@@ -48,6 +49,7 @@ import NkAInputPercent from "./NkAInputPercent";
 function install(Vue){
   Vue.component("nk-logo", NkLogo);
   Vue.component("NkLoginForm", NkLoginForm);
+  Vue.component("NkLoginSMS", NkLoginSMS);
   Vue.component("nk-required-mark", NkRequiredMark);
   Vue.component("nk-empty", NkEmpty);
 

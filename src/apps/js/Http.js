@@ -263,6 +263,32 @@ export default (Vue) => {
     reLoginCountdown = 90;
   }
 
+  function sendSMS(phone,verKey){
+    return axios.get(`/api/ver/phone/${phone}/${verKey}?`);
+  }
+  function loginSMS(username, verKey, verCode){
+    return new Promise((resolve, reject)=>{
+      axios.post("api/authentication/token",null,{
+        headers: {
+          "elcube-client": AuthUtils.getClientId(uuidv1),
+          "elcube-phone":  username,
+          "elcube-verkey":verKey,
+          "elcube-vercode":verCode,
+          'NK-App': 'elcube',
+        }
+      }).then(res=>{
+        User.state.reLogin=false;
+        AuthUtils.setToken(res.data);
+        clearReLoginInterval();
+        resolve.apply(this,[res]);
+      }).catch(e=>{
+        reject.apply(this,[e.response])
+        reLoginCountdown = 91;
+      }).finally(()=>{
+      });
+    });
+  }
+
   function login(username, password, verKey, verCode){
 
     const timestamp = Math.floor(new Date().getTime()/1000);
@@ -285,7 +311,7 @@ export default (Vue) => {
         }
       }).then(res=>{
         User.state.reLogin=false;
-        AuthUtils.setToken(username,res.data);
+        AuthUtils.setToken(res.data);
         clearReLoginInterval();
         resolve.apply(this,[res]);
       }).catch(e=>{
@@ -304,6 +330,8 @@ export default (Vue) => {
 
   return {
     login,
+    loginSMS,
+    sendSMS,
     logout,
     reLogin,
     instanceNone,
