@@ -123,7 +123,7 @@ export default {
                     camunda: extensionModdle
                 },
             });
-            this.canvas.getElementsByTagName("a")[0].style.transform='scale(0.6)';
+            //this.canvas.getElementsByTagName("a")[0].style.transform='scale(0.6)';
             this.init()
         })
     },
@@ -172,16 +172,16 @@ export default {
             this.viewer.importXML(xml)
                 .then(() => {
                     this.viewer.get('canvas').zoom('fit-viewport',{});
-                    const eventBus = this.viewer.get('eventBus');
-                    const events = [
-                        'element.click',
-                        'element.dblclick'
-                    ];
-                    events.forEach(event => {
-                        eventBus.on(event, () => {
-                            //console.log(e);
-                        })
-                    })
+                    // const eventBus = this.viewer.get('eventBus');
+                    // const events = [
+                    //     'element.click',
+                    //     'element.dblclick'
+                    // ];
+                    // events.forEach(event => {
+                    //     eventBus.on(event, () => {
+                    //         //console.log(e);
+                    //     })
+                    // })
                 }).catch(err => {
                 console.error(err);
             }).finally(()=>{
@@ -213,7 +213,7 @@ export default {
                             return;
                         }
 
-                            resolve(this.bpmInfo);
+                        resolve(this.bpmInfo);
                     }).catch(reject)
             })
         },
@@ -255,8 +255,7 @@ export default {
                 .then(bpmn=>{
                     this.loadingDeploy = true;
                     this.$http.postJSON("/api/def/bpm/deploy",bpmn)
-                        .then(response=>{
-                            console.log(response)
+                        .then(()=>{
                             this.$message.success("部署成功");
                         })
                         .catch(()=>{})
@@ -334,6 +333,11 @@ export default {
     }
     100% {
         transform: scale(1);
+    }
+}
+::v-deep {
+    .bjs-powered-by, .powered-by {
+        transform: scale(0.6);
     }
 }
 </style>

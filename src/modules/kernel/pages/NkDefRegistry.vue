@@ -100,6 +100,7 @@ import NkRegistryText from "../components/NkRegistryTextEdit";
 import NkRegistrySelectOptions from "../components/NkRegistryJSONEdit";
 import NkRegistryDataSetNote from "../components/NkRegistryJSONEdit";
 import NkRegistryCustomQuery from "../components/NkRegistryTextAreaEdit";
+import NkRegistryJSONEdit from "../components/NkRegistryJSONEdit";
 
 const dataType = {
     "@METER":[{
@@ -120,6 +121,10 @@ const dataType = {
     "@PAGE":[{
         title:"自定义查询界面",
         value:"NkRegistryCustomQuery"
+    }],
+    "@WS":[{
+        title:"服务调用",
+        value:"NkRegistryJSONEdit"
     }]
 }
 
@@ -132,7 +137,8 @@ export default {
         NkRegistryText,
         NkRegistrySelectOptions,
         NkRegistryDataSetNote,
-        NkRegistryCustomQuery
+        NkRegistryCustomQuery,
+        NkRegistryJSONEdit
     },
     data() {
         return {

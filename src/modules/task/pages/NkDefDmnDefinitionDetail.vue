@@ -41,12 +41,10 @@
 </template>
 
 <script>
-import NkBpmnView from "./NkDmnView";
 import NkDefDmnTestCard from "./NkDefDmnTestCard";
 
 export default {
     components:{
-        NkBpmnView,
         NkDefDmnTestCard
     },
     data(){

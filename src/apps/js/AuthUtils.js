@@ -13,29 +13,43 @@
  */
 export default {
 
+  getClientId(create){
+    let clientId = localStorage.getItem("$NK-Auth-ClientId");
+    if(!clientId){
+      clientId = 'web-'+create();
+      localStorage.setItem("$NK-Auth-ClientId",clientId);
+    }
+    return clientId;
+  },
+  getUsername(){
+    return localStorage.getItem("$NK-Auth-Username")||'';
+  },
   getToken(){
     return localStorage.getItem("$NK-Auth-AccessToken")||'';
+  },
+  expandToken(){
+    localStorage.setItem("$NK-Auth-ExpireTime",new Date().getTime() + parseInt(localStorage.getItem("$NK-Auth-Expire") - 5000));
   },
   state(){
 
     let now     = new Date().getTime();
     let token   = localStorage.getItem("$NK-Auth-AccessToken")||'';
-    let expire  = localStorage.getItem("$NK-Auth-Expire") - now;
-    let refresh = localStorage.getItem("$NK-Auth-Refresh") - now;
+    let expire  = localStorage.getItem("$NK-Auth-ExpireTime") - now;
 
     return {
       authed: token && expire > 0,  //有效期大于0
-      refresh: refresh > 0    //刷新有效期大于0
     };
   },
-  setToken(data){
-    localStorage.setItem("$NK-Auth-Expire",new Date().getTime() + data.expire);
-    localStorage.setItem("$NK-Auth-Refresh",new Date().getTime() + data.refresh);
-    localStorage.setItem("$NK-Auth-AccessToken",data.accessToken);
+  setToken(username,data){
+    localStorage.setItem("$NK-Auth-Expire",data.expire);
+    localStorage.setItem("$NK-Auth-ExpireTime",new Date().getTime() + data.expire);
+    localStorage.setItem("$NK-Auth-AccessToken",data.token);
+    localStorage.setItem("$NK-Auth-Username",username);
   },
   clear(){
     localStorage.removeItem("$NK-Auth-Expire");
-    localStorage.removeItem("$NK-Auth-Refresh");
+    localStorage.removeItem("$NK-Auth-ExpireTime");
     localStorage.removeItem("$NK-Auth-AccessToken");
+    localStorage.removeItem("$NK-Auth-Username");
   }
 }

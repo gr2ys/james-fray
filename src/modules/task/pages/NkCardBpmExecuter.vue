@@ -24,13 +24,12 @@
         <a-input type="textarea" v-model="completeTask.comment" :auto-size="{ minRows: 4, maxRows: 6 }" placeholder="请输入办理意见"></a-input>
         <div slot="actions" style="padding: 0 20px 0;text-align: right">
             <a-button-group v-if="task">
-                <a-button v-for="transition in task.transitions"
-                          :key="transition.id"
-                          type="primary"
-                          :disabled="buttonDisabled"
-                          @click="completeTaskOk(transition)">
-                    {{ transition.name }}
-                </a-button>
+                <a-popconfirm v-for="transition in task.transitions"
+                              :key="transition.id" :title="`确定${transition.name}?`"
+                              :disabled="buttonDisabled"
+                              @confirm="completeTaskOk(transition)">
+                    <a-button type="primary" :disabled="buttonDisabled">{{ transition.name }}</a-button>
+                </a-popconfirm>
                 <a-button :disabled="!task || task.delegationState === 'PENDING'" type="default" @click="toForward" >转办</a-button>
                 <a-button :disabled="!task || task.delegationState === 'PENDING'" type="default" @click="toDelegate" >委派</a-button>
             </a-button-group>

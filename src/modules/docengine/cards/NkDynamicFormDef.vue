@@ -91,6 +91,14 @@
                             {{row.message}}
                             <a-input slot="edit" size="small" v-model="row.message"></a-input>
                         </nk-form-item>
+                        <nk-form-item title="右对齐">
+                            {{row.alignRight?'是':'否'}}
+                            <a-switch slot="edit" size="small" v-model="row.alignRight" />
+                        </nk-form-item>
+                        <nk-form-item title="自定义样式">
+                            {{row.style}}
+                            <a-input slot="edit" size="small" v-model="row.style"></a-input>
+                        </nk-form-item>
                         <nk-form-item title="控制">
                             {{row.control===1 ?'读写':(row.control===0 ?'只读':'隐藏')}}
                             <a-select slot="edit" size="small" v-model="row.control" >

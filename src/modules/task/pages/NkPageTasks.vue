@@ -22,12 +22,15 @@
         :dataIncludeFields="['itemId']"
         save-as-source="$tasks"
         @change="search"
+        @click="selected"
         @select="selected"
     >
         <a-button-group slot="action">
         </a-button-group>
 
-        <nk-page-preview :params="previewParams" :visible.sync="preViewVisable" @close="previewClose"></nk-page-preview>
+        <transition name="slide-fade">
+            <nk-page-preview :params="previewParams" v-if="previewVisible" @close="previewClose" @to="to"></nk-page-preview>
+        </transition>
 
     </nk-query-layout>
 </template>
@@ -50,7 +53,7 @@ export default {
         return {
             columns:[
                 { type: 'seq',            title: '#',         width: '5%'},
-                { field: 'docTypeDesc',   title: '单据类型',    width: '15%', sortable:true },
+                { field: 'docTypeDesc',   title: '模型类型',    width: '15%', sortable:true },
                 { field: 'taskName',      title: '任务名称',    width: '20%', sortable:true },
                 { field: 'partnerName',   title: '交易伙伴',    width: '20%', sortable:true,params:{ orderField: 'partnerName.original' }},
                 { field: 'taskState',     title: '状态',       width: '10%', sortable:true,formatter: formatterTaskState },
@@ -108,10 +111,13 @@ export default {
                 }
             ],
             previewParams: {},
-            preViewVisable: false
+            previewVisible: false
         }
     },
     methods:{
+        nk$hide(){
+            this.previewVisible = false;
+        },
         search(params){
             this.$http.postJSON("/api/task/tasks",params)
                 .then((res)=>{
@@ -134,15 +140,40 @@ export default {
         toCreate(docType){
             this.$router.push("/apps/docs/create/"+docType)
         },
-        selected({row}){
-            this.preViewVisable = true;
-            this.previewParams  = {
-                mode: "detail",
-                docId:row.docId
+        selected({row, $event}){
+
+            if(!$event.altKey && $event.target.tagName!=='A') {
+                this.previewVisible = true;
+                this.previewParams = {
+                    mode: "detail",
+                    docId: row.docId,
+                    row
+                }
             }
         },
+        to(e){
+            let row = this.previewParams.row;
+            this.previewParams = undefined
+            this.$nextTick(()=>{
+                const index = this.$refs.layout.page.list.indexOf(row)
+                row   = this.$refs.layout.page.list[index+e]
+                if(row){
+                    this.previewParams = {
+                        mode: "detail",
+                        docId: row.docId,
+                        row
+                    }
+                }else{
+                    this.previewVisible = false;
+                }
+            })
+        },
         previewClose(){
-            this.$refs.layout.grid().clearCurrentRow();
+            this.previewParams = undefined
+            this.$nextTick(()=>{
+                this.previewVisible = false;
+                this.$refs.layout.grid().clearCurrentRow();
+            })
         }
     },
     mounted() {

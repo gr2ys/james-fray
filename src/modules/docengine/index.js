@@ -110,24 +110,24 @@ module.routes = [
     ]
   },
   {
-    name: "单据类型",
+    name: "模型",
     path: 'def/doc',
     component: NkDefDocs,
     children: [
       {
-        name: "单据类型配置详情",
+        name: "模型详情",
         path: ':mode',
         component: NkDefDocType,
         meta:{
-          title: "配置详情",
+          title: "模型详情",
         }
       },
       {
-        name: "单据类型配置编辑",
+        name: "模型编辑",
         path: ':mode/:type/:version',
         component: NkDefDocType,
         meta:{
-          title: "配置详情",
+          title: "模型详情",
         }
       }
     ]

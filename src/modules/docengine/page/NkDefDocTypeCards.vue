@@ -34,7 +34,7 @@
             :data="docDef.cards">
             <vxe-table-column   title="卡片"         field="beanName"        width="20%"  :edit-render="{
                         name: '$select',
-                        options: docOptions.cards,
+                        options: cards,
                         optionProps: {value: 'key', label: 'name'},
                         events: {change: componentChange},
                 }" />
@@ -86,6 +86,12 @@ export default {
         }
     },
     computed:{
+        cards(){
+            if(this.docDef.docClassify){
+                return this.docOptions.cards;
+            }
+            return [];
+        }
     },
     created() {
         this.$nkSortableVxeTable(true);

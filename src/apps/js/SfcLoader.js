@@ -16,9 +16,8 @@ import { Modal } from "ant-design-vue";
 
 export default function (Vue, modules, enable){
 
-    function componentLoader(componentName, template, modules) {
-
-        return Vue.component(componentName,() => {
+    function compile(componentName, template, modules){
+        return () => {
 
             return new Promise((resolve,reject)=>{
                 let i18n,markdown;
@@ -60,14 +59,14 @@ export default function (Vue, modules, enable){
                     reject(e);
                 });
             });
-        });
+        }
     }
 
     function loadVueTemplate(componentName, template){
         if(!enable){
             return Promise.reject('sfc 未启用');
         }
-        return componentLoader(componentName, template, modules)
+        return Vue.component(componentName,compile(componentName, template, modules));
     }
 
     function reloadVueResources(){
@@ -82,7 +81,7 @@ export default function (Vue, modules, enable){
                     let count = 0;
                     for(let componentName in res.data){
                         if(res.data.hasOwnProperty(componentName)){
-                            componentLoader(componentName, res.data[componentName], modules)
+                            Vue.component(componentName,compile(componentName, res.data[componentName], modules));
                         }
                         count ++;
                     }
@@ -95,6 +94,7 @@ export default function (Vue, modules, enable){
     }
 
     return {
+        compile,
         loadVueTemplate,
         reloadVueResources
     }

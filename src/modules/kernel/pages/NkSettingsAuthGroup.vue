@@ -43,31 +43,13 @@
                     </a-button-group>
 
                     <nk-form :col="1" :edit="item.groupDesc !== undefined && (!item.groupId || !item.groupId.startsWith('nk-default-'))">
-                        <nk-form-item term="用户组Key">
+                        <nk-form-item term="KEY">
                             {{item.groupKey}}
                             <a-input slot="edit" v-model="item.groupKey" placeholder="用户组Key"></a-input>
                         </nk-form-item>
                         <nk-form-item term="描述">
                             {{item.groupDesc}}
                             <a-input slot="edit" v-model="item.groupDesc" placeholder="权限描述"></a-input>
-                        </nk-form-item>
-                        <nk-form-item term="权限">
-                            <span v-for="d in itemPermIds" :key="d.permId">
-                                {{ d }}
-                            </span>
-                            <a-select
-                                slot="edit"
-                                mode="multiple"
-                                :value="itemPermIds"
-                                placeholder="请选择权限"
-                                style="width: 100%"
-                                :filter-option="false"
-                                @change="itemLimitChange"
-                            >
-                                <a-select-option v-for="d in perms" :key="d.permId">
-                                    {{ d.permDesc }}
-                                </a-select-option>
-                            </a-select>
                         </nk-form-item>
                         <nk-form-item term="关联账号" v-if="item.groupId">
                             <div class="accounts">
@@ -93,32 +75,58 @@
                                 />
                             </div>
                         </nk-form-item>
-                        <nk-form-item term="权限预览" v-if="item.groupId">
-                            <vxe-table
-                                    auto-resize
-                                    size="mini"
-                                    border=inner
-                                    resizable
-                                    highlight-hover-row
-                                    style="width:100%"
-                                    header-cell-class-name="headerCellClassName"
-                                    :data="item.authorities">
-                                <vxe-table-column   title="权限" field="authority"                width="15%"/>
-<!--                                <vxe-table-column   title="资源" field="permResource"             width="15%"/>-->
-<!--                                <vxe-table-column   title="操作" field="permOperate"              width="15%"/>-->
-                                <vxe-table-column   title="限制" field="limitIds"                 width="10%">
-                                    <template v-slot="{ row }">
-                                        {{row.limitIds&&row.limitIds.length}}
+                        <nk-form-item term="权限">
+                            <vxe-toolbar v-if="editMode">
+                                <template v-slot:buttons>
+                                    <vxe-button status="perfect" size="mini" @click="addPerm()">新增</vxe-button>
+                                </template>
+                            </vxe-toolbar>
+                            <vxe-table border="inner" size="mini" :data="item.permissions" ref="xTable"
+                                       :edit-config="{trigger: 'click', mode: 'row', showIcon: editMode, activeMethod}">
+                                <vxe-column width="25%" title="权限定义"   field="permDesc" :edit-render="{}">
+                                    <template v-slot:edit="{row}">
+                                        <a-select
+                                            placeholder="请选择权限"
+                                            style="width: 100%"
+                                            :filter-option="false"
+                                            v-model="row.permId"
+                                            @change="permItemChange(row)"
+                                        >
+                                            <a-select-option v-for="d in perms" :key="d.permId">
+                                                {{ d.permDesc }}
+                                            </a-select-option>
+                                        </a-select>
                                     </template>
-                                </vxe-table-column>
-                                <vxe-table-column   title="扩展属性" field="subResource"           width="30%"/>
-                                <vxe-table-column   title="Level" field="level"                   width="10%">
-                                    <template v-slot="{ row }">
-                                        {{row.level.toString(16)}}
+                                </vxe-column>
+                                <vxe-column width="28%" title="资源"      field="permResource"></vxe-column>
+                                <vxe-column width="10%" title="操作"      field="permOperate"></vxe-column>
+                                <vxe-column width="12%" title="Level"    field="permLevel"></vxe-column>
+                                <vxe-column width="15%" title="限制"      field="limitId" :edit-render="{}">
+                                    <template v-slot="{row}">
+                                        {{row.limitId | nkFromList(limitsOptions,'limitDesc','limitId')}}
                                     </template>
-                                </vxe-table-column>
-                                <vxe-table-column   title="权限定义源" field="fromPermissionDesc"/>
+                                    <template v-slot:edit="{row}">
+                                        <a-select
+                                            placeholder="请选择限制"
+                                            style="width: 100%"
+                                            :filter-option="false"
+                                            v-model="row.limitId"
+                                        >
+                                            <a-select-option v-for="d in limitsOptions" :key="d.limitId">
+                                                {{ d.limitDesc }}
+                                            </a-select-option>
+                                        </a-select>
+                                    </template>
+                                </vxe-column>
+                                <vxe-column title="Action">
+                                    <template v-slot="{seq}">
+                                        <span v-if="editMode" style="margin-left: 10px;" @click="removePerm(seq)">
+                                            <i class="vxe-icon--remove"></i>
+                                        </span>
+                                    </template>
+                                </vxe-column>
                             </vxe-table>
+
                         </nk-form-item>
                     </nk-form>
 
@@ -136,6 +144,7 @@ export default {
             list:[],
             item: {},
             perms:[],
+            limits:[],
             filter: '',
 
             accountSelect: '',
@@ -148,16 +157,27 @@ export default {
         this.reload();
         this.$http.get("/api/settings/auth/perm/list")
             .then(res=>this.perms = res.data);
+        this.$http.get("/api/settings/auth/limit/list")
+            .then(res=>this.limits = res.data);
     },
     computed:{
         itemPermIds(){
             return this.item.permissions && this.item.permissions.map(authority=>authority.permId)
         },
+        limitsOptions(){
+            let limits = [{limitId:'@',limitDesc:'无限制'}];
+            this.limits.forEach(item=>limits.push(item))
+            return limits;
+        },
         listFilter(){
             return this.list.filter((i)=>i.groupDesc.toLowerCase().indexOf(this.filter.toLowerCase())>-1);
+        },
+        editMode(){
+            return this.item.groupDesc !== undefined && (!this.item.groupId || !this.item.groupId.startsWith('nk-default-'));
         }
     },
     methods:{
+        activeMethod(){return this.editMode;},
         reload(){
             this.$http.get("/api/settings/auth/group/list")
                 .then(res=>{
@@ -204,8 +224,21 @@ export default {
         itemNew(){
             this.item = {groupDesc:"未命名用户组",permissions:undefined};
         },
-        itemLimitChange(e){
-            this.item.permissions=e.map(permId=>{return {permId};});
+        addPerm(){
+            this.item.permissions = this.item.permissions||[];
+            let newItem = {
+                permId : undefined,
+                limitId: '@'
+            };
+            this.item.permissions.push(newItem);
+            this.$refs.xTable.loadData(this.item.permissions).then(() => this.$refs.xTable.setActiveRow(newItem));
+        },
+        removePerm(seq){
+            this.item.permissions.splice(seq-1,1)
+        },
+        permItemChange(perm){
+            const find = this.perms.find(p=>p.permId === perm.permId);
+            Object.assign(perm,find);
         },
         accountAdd(e){
             this.$http.post(`/api/settings/auth/group/add/account?groupId=${this.item.groupId}&accountId=${e}`)
@@ -228,7 +261,6 @@ export default {
                 this.$http.post(`/api/settings/auth/accounts?keyword=${e}`)
                     .then(res=>{
                         this.accounts = res.data.map(item=>{return {value:item.id,text:item.username}});
-                        console.log(this.accounts)
                     });
             }
         },

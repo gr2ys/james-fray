@@ -31,12 +31,12 @@
             :edit-config="{trigger: 'click', mode: 'row', showIcon: editMode, activeMethod: ()=>{return editMode}}"
             :data="docDef.status"
             @edit-actived="stateEditActive">
-            <vxe-table-column   title="状态"      field="docState"      width="10%" :edit-render="{
+            <vxe-table-column   title="状态"      field="docState"      width="8%" :edit-render="{
                     name: '$input',
                     props: {type: 'text',maxlength:4},
                     events:{change({column,row},{value}){row[column.property]=value.toUpperCase()}}
                 }"/>
-            <vxe-table-column   title="描述"      field="docStateDesc"  width="10%" :edit-render="{name: 'input', attrs: {type: 'text'}}"/>
+            <vxe-table-column   title="描述"      field="docStateDesc"  width="8%" :edit-render="{name: 'input', attrs: {type: 'text'}}"/>
             <vxe-table-column   title="操作名"     field="operatorName"  width="10%" :edit-render="{name: 'input', attrs: {type: 'text'}}"/>
             <vxe-table-column   title="前序状态"   field="preDocState"      width="10%" :edit-render="{
                     name:'$select',
@@ -44,7 +44,7 @@
                     optionProps: {value: 'docState', label: 'docState'}
                 }" >
             </vxe-table-column>
-            <vxe-table-column   title="编辑控制"   field="editPerm"      width="12%" :edit-render="{
+            <vxe-table-column   title="编辑控制"   field="editPerm"      width="10%" :edit-render="{
                     name:'$select',
                     options: [{
                         label:'不可编辑',value:0
@@ -77,7 +77,7 @@
                 name: '$switch',
                 props: {'open-value':1,'close-value':0},
             }"/>
-            <vxe-table-column   title="忽略校验"   field="ignoreVerify" width="8%" :formatter="({cellValue})=>cellValue?'是':''" :edit-render="{
+            <vxe-table-column   title="不校验"   field="ignoreVerify" width="10%" :formatter="({cellValue})=>cellValue?'是':''" :edit-render="{
                 name: '$switch',
                 props: {'open-value':1,'close-value':0},
             }"/>

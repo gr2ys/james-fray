@@ -88,24 +88,21 @@
 
             <!--编辑-->
             <a-tooltip   v-if="!editMode" title="编辑">
-                <a-button :type="preview?'default':'primary'" :disabled="!docEditable" @click="doEdit">
+                <a-button type="primary" :disabled="!docEditable" @click="doEdit">
                     <a-icon type="edit" />
                 </a-button>
             </a-tooltip>
 
-            <a-tooltip v-if="availablePrimaryStatus.length" title="保存为">
-                <a-popconfirm v-for="item in availablePrimaryStatus"
-                              :key="item.docState"
-                              :title="`确定${item.operatorName || item.docStateDesc}?`"
-                              @confirm="doSave(item.docState)"
-                >
-                    <a-button type="primary"
-                              :disabled="editCheckFailed"
-                    >
-                        <a-icon type="step-forward" /> {{item.operatorName || item.docStateDesc}}
-                    </a-button>
-                </a-popconfirm>
-            </a-tooltip>
+            <a-popconfirm  v-for="item in availablePrimaryStatus"
+                           :key="item.docState"
+                           :title="`确定${item.operatorName || item.docStateDesc}?`"
+                           @confirm="doSave(item.docState)"
+                           :disabled="editCheckFailed"
+            >
+                <a-button type="primary" :disabled="editCheckFailed">
+                    <a-icon type="step-forward" /> {{item.operatorName || item.docStateDesc}}
+                </a-button>
+            </a-popconfirm>
 
             <!--保存-->
             <template v-if="editMode">
@@ -158,6 +155,13 @@
                 </a-dropdown>
             </a-tooltip>
 
+            <!--复制-->
+            <a-tooltip   v-if="!editMode && doc.refObjectId===doc.docId" title="复制">
+                <a-button type="default" @click="toCopy">
+                    <a-icon type="copy" />
+                </a-button>
+            </a-tooltip>
+
             <!--历史-->
             <a-tooltip v-if="!editMode" title="变更历史">
                 <a-button :type="histories?'primary':'default'"
@@ -167,7 +171,7 @@
             </a-tooltip>
 
             <!--文档-->
-            <a-tooltip title="查看文档">
+            <a-tooltip v-if="!preview" title="查看文档">
                 <a-button :type="'default'" @click="autoShowDocHelper">
                     <nk-help-link/>
                 </a-button>
@@ -480,7 +484,8 @@ export default {
                 const req = {
                     docType:this.contextParams.docId,
                     refObjectId:this.$route.query.ref,
-                    preDocId:this.$route.query.pre||this.$route.query.ref
+                    preDocId:this.$route.query.pre||this.$route.query.ref,
+                    copyFromId:this.$route.query.copyFromId,
                 }
                 this.$http.post("/api/doc/pre/create",qs.stringify(req))
                     .then(response=>{
@@ -559,6 +564,14 @@ export default {
                             });
                     },10*1000);
                 });
+        },
+        toCopy(){
+            this.$router.push({
+                path:`/apps/docs/create/${this.doc.def.docType}`,
+                query:{
+                    copyFromId:this.doc.docId
+                }
+            });
         },
         async doSave(state) {
 
@@ -687,19 +700,21 @@ export default {
             this.$http.postJSON(`/api/doc/calculate`,{doc:this.doc,fromCard:card.cardKey,options})
                 .then(response=>{
                     this.doc = response.data;
+                    this.loading=false;
                     this.$nextTick(()=>{
                         this.nkChanged({
                             event:'nk-calc'
                         },card);
                     })
                 })
-                .finally(()=>{
+                .catch(()=>{
                     this.loading=false;
+                }).finally(()=>{
                     clearTimeout(timeout)
                 })
         },
         nkChanged(e,component){
-            Object.assign(e,{$source:component && component.component});
+            Object.assign(e,{$source:component && component.cardKey});
             this.$refs.components&&this.$refs.components.forEach(c=>c.docUpdate&&c.docUpdate(e));
         },
         nkEditModeChanged(editMode){
@@ -725,9 +740,9 @@ export default {
             this.histories=undefined;
             this.clearCheckTimer()
         },
-        toCreateDoc(defDoc){
+        toCreateDoc(def){
             this.$router.push({
-                path:`/apps/docs/create/${defDoc.docType}`,
+                path:`/apps/docs/create/${def.docType}`,
                 query:{
                     pre:this.doc.docId
                 }

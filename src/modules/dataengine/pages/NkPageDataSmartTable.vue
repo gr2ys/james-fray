@@ -71,6 +71,9 @@
                             <a-button type="primary" html-type="submit" style="width: 46px;">
                                 <a-icon type="search" />
                             </a-button>
+                            <a-button v-if="custom.exportConfig && custom.exportConfig.enable" type="default" @click="doExport" style="width: 46px;" :loading="exportLoading">
+                                <a-icon type="export" v-if="!exportLoading" />
+                            </a-button>
                             <a-button type="default" @click="reset({})" style="width: 46px;">
                                 <a-icon type="rollback" />
                             </a-button>
@@ -116,12 +119,14 @@
         <a-modal v-model="saveAs.visible" centered title="请输入备注" @ok="saveAsPost" :confirm-loading="saveAs.confirmLoading">
             <a-input v-model="saveAs.name" placeholder="请输入搜索备注，便于后期使用"></a-input>
         </a-modal>
+        <iframe ref="download" style="display: none"></iframe>
     </nk-page-layout>
 </template>
 
 <script>
 import NkPageDataSmartTableGrid from "./NkPageDataSmartTableGrid";
 import NkUtil from "../../../utils/NkUtil";
+import moment from "moment";
 
 export default {
     components: {NkPageDataSmartTableGrid},
@@ -149,7 +154,9 @@ export default {
                 name: undefined,
                 confirmLoading: false,
                 list: []
-            }
+            },
+
+            exportLoading:false
         }
     },
     created(){
@@ -321,6 +328,24 @@ export default {
                         event.$table.setRowExpand([event.row],true);
                     }
                 });
+        },
+        doExport(){
+            this.exportLoading=true;
+            this.$http.postJSON(`/api/data/analyse/export`,Object.assign({
+                    sqlList: (this.custom.postSql instanceof Array) ? this.custom.postSql : [this.custom.postSql],
+                    columns: this.custom.columns
+                },this.params)
+            ).then((res)=>{
+                const fileName = this.custom.title +"_" + moment().format("YYYY-MM-DD");
+                this.$notification.info({
+                    duration: 10,
+                    message: '提示',
+                    description:`准备下载"${fileName}.xlsx"`
+                })
+                this.$refs.download.setAttribute("src",`/api/data/analyse/download/${res.data}/${fileName}?${new Date().getTime()}`);
+            }).finally(()=>{
+                this.exportLoading=false;
+            })
         },
         /**
          * 表单提交

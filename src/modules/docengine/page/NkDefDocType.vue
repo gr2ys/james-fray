@@ -12,7 +12,7 @@
 	along with ELCube.  If not, see <https://www.gnu.org/licenses/>.
 -->
 <template>
-    <nk-page-layout :title="def.docType || '单据类型'" :sub-title="def.docName" :spinning="loading">
+    <nk-page-layout :title="def.docType || '模型'" :sub-title="def.docName" :spinning="loading">
 
         <div slot="top" v-if="def.debug" style="padding: 10px 10px 0 10px;">
             <a-alert message="单据配置正在调试" type="warning" show-icon />
@@ -112,7 +112,7 @@
                            :doc-def="def"
                            :card-key="selected.cardKey"
                            :doc-options="options"
-                           :edit-mode="editMode" />
+                           :edit-mode="editMode"/>
                 <a-card v-if="selected.beanName" title="文档"
                         :key="'document-'+selected.cardKey"
                         class="doc">
@@ -302,7 +302,7 @@ export default {
 
         this.loading = true;
         let promises = [];
-        promises.push(this.$http.get(`/api/def/doc/type/options?classify=${this.def.docClassify||''}`));
+        //promises.push(this.$http.get(`/api/def/doc/type/options?classify=${this.def.docClassify||''}`));
 
         if(this.isCreate){
             if(this.routeQueries.fromType && this.routeQueries.fromVersion){
@@ -315,12 +315,11 @@ export default {
 
         Promise.all(promises)
             .then((res)=>{
-                this.options = res[0].data;
                 if(this.isCreate){
                     this.editMode = true;
-                    this.$emit('setTab',`新建单据类型`);
-                    if(res[1] && res[1].data){
-                        this.def = res[1].data
+                    this.$emit('setTab',`新建模型`);
+                    if(res[0] && res[0].data){
+                        this.def = res[0].data
                         this.def.docName = this.def.docName+'-副本';
                         this.def.docType = undefined;
                         this.def.version = undefined;
@@ -328,13 +327,17 @@ export default {
                         this.def.state = 'InActive';
                     }
                 }else{
-                    this.def = res[1].data;
-                    this.histories = res[2].data;
-                    this.historiesMore = res[2].data.length === 10;
+                    this.def = res[0].data;
+                    this.histories = res[1].data;
+                    this.historiesMore = res[1].data.length === 10;
                     this.editMode = this.def.state === 'InActive' || this.editMode;
-                    this.$emit('setTab',`单据类型:${this.def.docType}`);
+                    this.$emit('setTab',`模型类型:${this.def.docType}`);
                 }
-                this.loading = false;
+                this.$http.get(`/api/def/doc/type/options?classify=${this.def.docClassify||''}`)
+                    .then(res=>{
+                        this.options = res.data;
+                        this.loading = false;
+                    });
             })
     },
     methods:{
@@ -434,7 +437,7 @@ export default {
         valid(){
             return new Promise((resolve)=>{
                 if(!this.def.docType){
-                    this.$message.error("单据类型不能为空"); return;
+                    this.$message.error("模型类型不能为空"); return;
                 }
                 if(!this.def.docName){
                     this.$message.error("单据描述不能为空"); return;

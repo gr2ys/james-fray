@@ -18,7 +18,7 @@
             {{term || title}}
             <slot name="term"></slot>
         </div>
-        <div class="content" :class="termClass+(error?' has-error':'')" :style="{'max-width': 'calc(100% - '+width+'px)'}">
+        <div class="content" :class="contentClass" :style="{'max-width': 'calc(100% - '+width+'px)'}">
             <slot v-if="!editMode"></slot>
             <slot v-if="editMode" name="edit"></slot>
             <div v-if="editMode && error" class="ant-form-explain" style="color: #ff6068">{{error}}</div>
@@ -43,6 +43,14 @@ export default {
             required: false
         },
         align: {
+            type: String,
+            default: ""
+        },
+        contentAlign: {
+            type: String,
+            default: ""
+        },
+        contentStyle: {
             type: String,
             default: ""
         },
@@ -107,11 +115,24 @@ export default {
 
         },
         termClass(){
-            return [
-                this.$parent.$props.edit?' edit':'',
-                this.align,
-                this.term || this.title ? ' hasContent':''
-            ]
+            const arr = [];
+            if(this.$parent.$props.edit)
+                arr.push('edit')
+            if(this.align)
+                arr.push(this.align)
+            if(this.term || this.title)
+                arr.push('hasContent')
+            return arr;
+        },
+        contentClass(){
+            const arr = [];
+            if(this.$parent.$props.edit)
+                arr.push('edit')
+            if(!this.editMode && this.contentAlign)
+                arr.push(this.contentAlign)
+            if(this.error)
+                arr.push('has-error')
+            return arr;
         },
         error(){
             return this.checkError()
@@ -220,6 +241,10 @@ export default {
 
         .ant-select {
             width: 90%;
+        }
+
+        &.right{
+            text-align: right;
         }
     }
     .edit{

@@ -13,7 +13,7 @@
 -->
 <template>
     <div>
-        <component :is="inputComponent" @click="open" v-model="value" size="small" read-only class="readonly"></component>
+        <component :is="inputComponent" @click="open" v-model="value" size="small" read-only class="readonly" :placeholder="placeholder"></component>
         <component :is="component" v-model="visible" title="SpEL表达式编辑器" width="50%" centered :mask-closable="false" :esc-closable="true">
 
             <a-textarea v-model="el" :rows="10" placeholder="SpEL表达式 或 JSON格式模版"></a-textarea>
@@ -50,23 +50,22 @@
 <script>
 import qs from 'qs'
 import {mapState,mapMutations} from 'vuex'
-import JsonViewer from 'vue-json-viewer';
 
 export default {
     name: "NkSpELEditor",
-    components:{JsonViewer},
     props:{
         value : String,
         modalComponent:{
             type:String,
             default: 'a-modal'
         },
+        placeholder: String
     },
     created() {
         this.component = this.modalComponent;
         if(this.$parent.$options._componentTag==="vxe-table-body"){
             this.component = 'vxe-modal';
-            this.inputComponent = 'vxe-input';
+            //this.inputComponent = 'vxe-input';
         }
     },
     data(){
@@ -167,7 +166,8 @@ export default {
         padding: 4px;
     }
     .overflow{
-        height: 300px;overflow: auto
+        max-height: 300px;
+        overflow: auto
     }
     ::v-deep.readonly{
         cursor: pointer;

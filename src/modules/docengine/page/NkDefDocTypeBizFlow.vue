@@ -31,9 +31,9 @@
             header-cell-class-name="headerCellClassName"
             :edit-config="{trigger: 'click', mode: 'row', showIcon: editMode, activeMethod: ()=>{return editMode}}"
             :data="docDef.flows">
-            <vxe-table-column field="preDocType"    width="20%" :edit-render="{name: '$input',props: {type: 'text',maxlength:4}}" title="前置交易"/>
-            <vxe-table-column field="preDocState"   width="20%" :edit-render="{name: '$input',props: {type: 'text',maxlength:4}}" title="前置交易状态" />
-            <vxe-table-column field="refObjectType" width="30%" :edit-render="{name:'$select',options: docOptions.docFlowInterceptors,optionProps: {value: 'key', label: 'name'},}" title="扩展程序" >
+            <vxe-table-column field="preDocType"    width="15%" :edit-render="{name: '$input',props: {type: 'text',maxlength:4}}" title="前置模型"/>
+            <vxe-table-column field="preDocState"   width="15%" :edit-render="{name: '$input',props: {type: 'text',maxlength:4}}" title="前置模型状态" />
+            <vxe-table-column field="refObjectType" width="20%" :edit-render="{name:'$select',options: docOptions.docFlowInterceptors,optionProps: {value: 'key', label: 'name'},}" title="扩展程序" >
                 <template v-slot="{ row }">
                     <nk-script-label :value="row.refObjectType"></nk-script-label>
                 </template>
@@ -43,6 +43,12 @@
                     <nk-sp-el-template-editor v-model="row.refObjectParams"></nk-sp-el-template-editor>
                 </template>
             </vxe-table-column>
+            <vxe-table-column width="10%" :edit-render="{}" title="自动创建" >
+                <template v-slot:edit="{row}">
+                    实验中
+                </template>
+            </vxe-table-column>
+
             <vxe-table-column>
                 <template v-slot="{ seq }">
                     <span v-if="editMode" class="drag-btn" style="margin-right: 10px;"><i class="vxe-icon--menu"></i></span>

@@ -41,6 +41,9 @@ import NkEmpty from "./NkEmpty";
 import NkMeter from "./NkMeter";
 import VueHighlight from "./vue-highlight";
 import 'highlight.js/styles/github.css';
+import NkADatePicker from "./NkADatePicker";
+import NkARangePicker from "./NkARangePicker";
+import NkAInputPercent from "./NkAInputPercent";
 
 function install(Vue){
   Vue.component("nk-logo", NkLogo);
@@ -79,6 +82,10 @@ function install(Vue){
   Vue.component("nk-meter",NkMeter);
 
   Vue.component("NkDocException",NkDocException);
+
+  Vue.component("nk-a-date-picker",NkADatePicker);
+  Vue.component("nk-a-range-picker",NkARangePicker);
+  Vue.component("nk-a-input-percent",NkAInputPercent);
 
   Vue.use(VueHighlight);
 }

@@ -19,7 +19,7 @@
                 <nk-form :col="1" :edit="edit">
                     <nk-form-item title="决策">
                         {{selectedDecision}}
-                        <a-select slot="edit" v-model="selectedDecision" @change="decisionChange">
+                        <a-select slot="edit" size="small" v-model="selectedDecision" @change="decisionChange">
                             <a-select-option v-for="item in decisions" :key="item.id">
                                 {{item.name || '&lt;Unnamed&gt;'}}
                             </a-select-option>
@@ -30,7 +30,24 @@
                         <nk-form-divider :key="item.decisionId" :term="item.decisionName" />
                         <nk-form-item    :key="item.decisionId+'-'+i.key" :title="i.name || '&lt;Unnamed&gt;'" v-for="(i) in item.items">
                             {{inputVariables[i.key]}}
-                            <a-input slot="edit" :placeholder="i.key" v-model="inputVariables[i.key]"></a-input>
+                            <a-input-group slot="edit" compact size="small">
+                                <a-select style="width: 30%" size="small" v-model="i.type" @change="changed($event,i.key,i)">
+                                    <a-select-option value="string">string</a-select-option>
+                                    <a-select-option value="integer">integer</a-select-option>
+                                    <a-select-option value="long">long</a-select-option>
+                                    <a-select-option value="double">double</a-select-option>
+                                    <a-select-option value="boolean">boolean</a-select-option>
+                                    <a-select-option value="date">date</a-select-option>
+                                </a-select>
+                                <a-input-number size="small" v-if="i.type==='integer'||i.type==='long'" style="width: 70%" :placeholder="i.key" v-model="inputVariables[i.key]" :precision="0"></a-input-number>
+                                <a-input-number size="small" v-else-if="i.type==='double'"              style="width: 70%" :placeholder="i.key" v-model="inputVariables[i.key]" :precision="2" :step="0.01"></a-input-number>
+                                <nk-a-date-picker            v-else-if="i.type==='date'"                style="width: 70%" :placeholder="i.key" v-model="inputVariables[i.key]" ></nk-a-date-picker>
+                                <a-select size="small"       v-else-if="i.type==='boolean'"             style="width: 70%" :placeholder="i.key" v-model="i[i.key+'_boolean']" @change="inputVariables[i.key]=$event==='true'">
+                                    <a-select-option value="false" >false</a-select-option>
+                                    <a-select-option value="true"  >true</a-select-option>
+                                </a-select>
+                                <a-input size="small"        v-else                                     style="width: 70%" :placeholder="i.key" v-model="inputVariables[i.key]"></a-input>
+                            </a-input-group>
                         </nk-form-item>
                     </template>
                 </nk-form>
@@ -41,7 +58,7 @@
                     <template v-for="(item) in outputs">
                         <nk-form-divider :key="item.decisionId" :term="item.decisionName" />
                         <nk-form-item    :key="item.decisionId+'-'+index" :title="item.label || '&lt;Unnamed&gt;'" v-for="(item,index) in item.items">
-                            <div style="height:28px;line-height:28px;background-color:#f3f3f3 ; padding:0 5px;border:1px solid #d9d9d9;border-radius: 5px;">
+                            <div style="height:24px;line-height:22px;background-color:#f3f3f3 ; padding:0 5px;border:1px solid #d9d9d9;border-radius: 5px;">
                                 <span v-if="outputVariables[item.decisionId+'-'+item.name]">{{outputVariables[item.decisionId+'-'+item.name]}}</span>
                                 <span style="color: #aaa;" v-else>{{item.decisionId+'&lt;'+item.typeRef+'&gt;'}}</span>
                             </div>
@@ -138,6 +155,14 @@ export default {
                 });
             });
 
+        },
+        changed(e,key,i){
+            if(e==='boolean'){
+                this.$set(this.inputVariables,key,false);
+                this.$set(i,key+'_boolean',"false");
+            }else{
+                this.$set(this.inputVariables,key,null);
+            }
         }
     }
 }

@@ -220,7 +220,6 @@ export default {
             this.selectedShape=undefined;
             this.viewer.importXML(xml)
                 .then(() => {
-                    this.viewer._container.getElementsByTagName("a")[0].style.transform='scale(0.6)';
                     const canvas = this.viewer._viewers.drd.get("canvas");
                     canvas.zoom('fit-viewport',{});
                     canvas.zoom(canvas.zoom()*0.7);
@@ -411,6 +410,11 @@ export default {
     }
     100% {
         transform: scale(1);
+    }
+}
+::v-deep {
+    .bjs-powered-by, .powered-by {
+        transform: scale(0.6);
     }
 }
 </style>

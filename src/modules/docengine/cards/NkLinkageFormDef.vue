@@ -94,6 +94,14 @@
                                 <a-select-option :key="-1">隐藏</a-select-option>
                             </a-select>
                         </nk-form-item>
+                        <nk-form-item title="右对齐">
+                            {{row.alignRight?'是':'否'}}
+                            <a-switch slot="edit" size="small" v-model="row.alignRight" />
+                        </nk-form-item>
+                        <nk-form-item title="自定义样式">
+                            {{row.style}}
+                            <a-input slot="edit" size="small" v-model="row.style"></a-input>
+                        </nk-form-item>
                         <nk-form-item title="值 SpEL">
                             {{row.spELContent}}
                             <nk-sp-el-editor slot="edit" v-model="row.spELContent"></nk-sp-el-editor>
@@ -142,7 +150,7 @@ export default {
                 inputType: this.inputTypeDefs[0].value,
                 calcTrigger:'',
                 calcOrder:1,
-                required:false,
+                required:true,
                 control:1,
                 spELContent:'',
                 spELTriggers:[],

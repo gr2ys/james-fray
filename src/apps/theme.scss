@@ -22,6 +22,9 @@ $vxe-primary-color: $elcube-primary-color !default;
 $vxe-table-font-color: $vxe-font-color !default;
 $vxe-table-border-color: #e8eaec !default;
 $vxe-table-border-radius: 4px !default;
+$vxe-input-border-color: #d9d9d9 !default;
+$vxe-input-height-mini: 24px !default;
+$vxe-input-height-small: 24px !default;
 
 @import '/node_modules/vxe-table/styles/index.scss';
 @import '/node_modules/vxe-table-plugin-antd/style.scss';
