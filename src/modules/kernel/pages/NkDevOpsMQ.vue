@@ -68,10 +68,8 @@
                             <nk-form-item :width="180" title="routing_key">{{i.routing_key}}</nk-form-item>
                             <nk-form-item :width="180" title="payload">{{i.payload}}</nk-form-item>
                         </nk-form>
-                        <div v-if="index===0
-                        && i.properties.headers
-                        && i.properties.headers['x-first-death-queue']" slot="extra" style="border-left: dashed 1px #ccc;display: flex;height: 100px;align-items: center;">
-                            <a-popconfirm @confirm="resume" title="确认重新投递？" placement="topRight">
+                        <div v-if="index===0" slot="extra" style="border-left: dashed 1px #ccc;display: flex;height: 100px;align-items: center;">
+                            <a-popconfirm @confirm="resume" title="确认重新投递？" placement="topRight" v-if="i.properties.headers && i.properties.headers['x-first-death-queue']">
                                 <a-button type="link">重新投递</a-button>
                             </a-popconfirm>
                             <a-popconfirm @confirm="discard" title="确认丢弃？" placement="topRight">
