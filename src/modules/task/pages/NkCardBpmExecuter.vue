@@ -38,7 +38,7 @@
                 <a-select       v-else-if="item.typeName==='enum'"    slot="edit" size="small" style="width: 30%;" v-model="completeTask.form[item.id]" :options="item.options"></a-select>
                 <component     v-else :is="item.typeName"             slot="edit" :editMode=true v-model="completeTask.form[item.id]" :properties="item.properties" :options="item.options"></component>
             </nk-form-item>
-            <nk-form-item title="办理意见" :required="true" :validate-for="completeTask.comment">
+            <nk-form-item title="办理意见" :required="true" :validate-for="completeTask.comment" message="请输入办理意见">
                 <a-input slot="edit" type="textarea" v-model="completeTask.comment" :auto-size="{ minRows: 4, maxRows: 6 }" placeholder="请输入办理意见"></a-input>
             </nk-form-item>
         </nk-form>

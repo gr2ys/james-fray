@@ -90,10 +90,8 @@
 </template>
 
 <script>
-// import NkUtil from "../../utils/NkUtil";
 import NkRegistryText from "../components/NkRegistryTextEdit";
 import NkRegistryNumber from "../components/NkRegistryNumber";
-// import NkRegistryTextArea from "../components/NkRegistryTextAreaEdit";
 import NkRegistryJSON from "../components/NkRegistryJSONEdit";
 import NkRegistrySelectOptions from "../components/NkRegistrySelectOptions";
 import NkRegistryDataSetNote from "../components/NkRegistryJSONEdit";
