@@ -29,12 +29,13 @@
                         v-if            ="item.typeName=='string'"
                         size            ="small"
                         :default-value  ="item.defaultValue"
-                        style           ="max-width: 300px;"
+                        style           ="width: 150px;"
                         v-model         ="param[item.id]"/>
 
                 <a-select       v-if          ="item.typeName=='SelectFormType'"
                                 :default-value  ="item.defaultValue"
                                 v-model         ="param[item.id]"
+                                style           ="width: 150px;"
                                 size            ="small"
                                 :options        ="userIdsOp">
                 </a-select>
@@ -128,7 +129,7 @@ export default {
                         label:"",
                         value:""
                     };
-                    op.label = item.realname;
+                    op.label = item.realname+"("+item.username+")";
                     op.value = item.id;
                     this.userIdsOp.push(op);
                 })
