@@ -458,7 +458,7 @@ export default {
         availablePrimaryStatus(){
             return this.doc.def && this.doc.def.status.filter(
                 state => state.visible && (state.preDocState === this.doc.docState)
-                    && ((state.displayPrimary && this.statusEditable) || this.statusEditOnly)
+                    && ((state.displayPrimary && this.statusEditable && this.editMode) || this.statusEditOnly)
             );
         },
         contextParams(){
