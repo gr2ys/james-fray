@@ -88,7 +88,7 @@
 
             <!--编辑-->
             <a-tooltip   v-if="!editMode" title="编辑">
-                <a-button :type="preview?'default':'primary'" :disabled="!docEditable" @click="doEdit">
+                <a-button type="primary" :disabled="!docEditable" @click="doEdit">
                     <a-icon type="edit" />
                 </a-button>
             </a-tooltip>
@@ -163,7 +163,7 @@
             </a-tooltip>
 
             <!--文档-->
-            <a-tooltip title="查看文档">
+            <a-tooltip v-if="!preview" title="查看文档">
                 <a-button :type="'default'" @click="autoShowDocHelper">
                     <nk-help-link/>
                 </a-button>

@@ -20,10 +20,6 @@
             @change="search"
     >
 
-        <a-button-group slot="action">
-            <a-button type="primary" @click="toCreate">新建</a-button>
-        </a-button-group>
-
     </nk-query-layout>
 </template>
 
@@ -56,56 +52,47 @@
           },
         ],
         searchItemsDefault:[
-          // {
-          //   name:'实例类型',
-          //   field:'source',
-          //   component:'nk-search-options-single',
-          //   defaultOptions: false,
-          //   defaultValue: 'runtime',
-          //   options:{
-          //     buckets:[
-          //       {
-          //         name:'进行中实例',
-          //         key:'runtime'
-          //       },
-          //       {
-          //         name:'历史实例',
-          //         key:'historic'
-          //       }
-          //     ]
-          //   }
-          // },
-          // {
-          //   name:'关键字',
-          //   field:'keyword',
-          //   component:'nk-search-options-text',
-          //   placeholder:'请输入关键字'
-          // },
+          {
+            name:'实例类型',
+            field:'source',
+            component:'nk-search-options-single',
+            defaultOptions: false,
+              defaultValue:{
+                  term:{
+                      source:"runtime"
+                  }
+              },
+            options:{
+              buckets:[
+                {
+                  name:'进行中实例',
+                  key:'runtime'
+                },
+                {
+                  name:'历史实例',
+                  key:'historic'
+                }
+              ]
+            }
+          },
+          {
+            name:'关键字',
+            field:'keyword',
+            component:'nk-search-options-text',
+            placeholder:'请输入关键字'
+          },
         ]
       }
     },
     methods:{
       search(params){
-
-          // const keyValue = NkUtil.translateParamsToKeyValue(params);
-        // if(!keyValue.source || keyValue.source==='runtime'){
           this.$http.post("/api/ops/bpm/instances",NkUtil.translateParamsToQueryString(params))
             .then((res)=>{
               this.$emit("setTab","流程实例");
               if(this.$refs.layout)
                 this.$refs.layout.setData(res.data)
             });
-        // }else{
-        //   this.$http.post("/api/ops/bpm/instance/process/instances",NkUtil.translateParamsToQueryString(params))
-        //     .then((res)=>{
-        //       if(this.$refs.layout)
-        //         this.$refs.layout.setData(res.data)
-        //     });
-        // }
       },
-      toCreate(){
-        this.$router.push("/apps/def/partner/create")
-      }
     }
   }
 </script>

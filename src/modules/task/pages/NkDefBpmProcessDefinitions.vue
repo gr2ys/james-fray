@@ -55,7 +55,11 @@
             field:'latest',
             component:'nk-search-options-single',
             defaultOptions:false,
-            defaultValue:'true',
+              defaultValue:{
+                  term:{
+                      'latest':"true"
+                  }
+              },
             options:{
               buckets:[{
                 name: 'All',
