@@ -189,6 +189,7 @@
                         <template #default="{seq,row}">{{row.formatter}}</template>
                         <template #edit="{seq,row}">
                             <a-select size="small" :default-value="row.formatter&&row.formatter.join(' ')" :options="[
+                                {value:undefined,                   label:'-'},
                                 {value:'docLink docId',             label:'docLink'},
                                 {value:'nkDatetime',                label:'date'},
                                 {value:'nkDatetimeFriendly',        label:'datetime'},
@@ -196,7 +197,7 @@
                                 {value:'nkCurrency',                label:'currency'},
                                 {value:'nkNumber',                  label:'number'},
                                 {value:'nkPercent',                 label:'percent'},
-                            ]">
+                            ]" @change="formatterChange($event,row)">
                             </a-select>
                         </template>
                     </vxe-column>
@@ -354,6 +355,9 @@ export default {
             }else{
                 row.field = undefined;
             }
+        },
+        formatterChange(e,row){
+            row.formatter = e?e.split(' '):undefined;
         }
     }
 }

@@ -72,8 +72,9 @@
                    size="small"
                    @click="bpmnVisible=true">查看流程图</a-button>
         <a-button-group size="small" slot="extra"  v-if="bpmnVisible">
-            <a-button @click="$refs.bpmn.zoom( 1)"><a-icon type="zoom-in" /></a-button>
-            <a-button @click="$refs.bpmn.zoom(-1)"><a-icon type="zoom-out" /></a-button>
+            <a-button @click="$refs.bpmn.zoom( 1)"><a-icon type="plus" /></a-button>
+            <a-button @click="$refs.bpmn.zoom(-1)"><a-icon type="minus" /></a-button>
+            <a-button @click="$refs.bpmn.fit()"><a-icon type="sync" /></a-button>
             <a-button size="small" @click="bpmnVisible=false"><a-icon type="close-circle" /></a-button>
         </a-button-group>
 

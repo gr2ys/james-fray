@@ -13,6 +13,10 @@
 -->
 <template>
     <nk-card>
+        <template v-slot:extra>
+            <a-button v-if="def.downLoadFile&&!editMode" type="primary" @click="selectDownAllContract()" size="small">打包下载</a-button>
+        </template>
+        <iframe ref="iframe" style="display: none"></iframe>
         <nk-form ref="form" :col="def.col||1" :edit="editMode">
 
             <template v-for="(item) in def.items" >
@@ -85,8 +89,17 @@ export default {
         },
         obtainSlot(item){
             return this.editMode && item.control > 0?'edit':'default'
-        }
-    }
+        },
+        selectDownAllContract() {
+            this.nk$call().then(res=>{
+                this.$http.get("/api/fs/download?url="+res).then(res1 => {
+                    this.$refs.iframe.src = res1.data;
+                });
+            });
+
+        },
+
+    },
 }
 </script>
 

@@ -71,8 +71,10 @@ export default {
             //this.$refs['js-canvas'].getElementsByTagName("a")[0].style.transform='scale(0.6)';
         },
         zoom(flag) {
-            console.log(this.taskDefinitionKey)
             this.viewer.get('zoomScroll').stepZoom(flag)
+        },
+        fit() {
+            this.viewer.get('canvas').zoom('fit-viewport',{});
         },
     },
     destroyed() {
