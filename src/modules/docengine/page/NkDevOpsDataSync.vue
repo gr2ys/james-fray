@@ -55,6 +55,7 @@
                 message:undefined,
                 messageRandom:undefined,
                 dropFirst:false,
+                ignoreError:false,
                 where:''
             }
         },
@@ -62,7 +63,7 @@
         },
         methods: {
             reindex(){
-                this.$http.post('/api/ops/datasync/redo',`dropFirst=${this.dropFirst}&where=${this.where}`)
+                this.$http.post('/api/ops/datasync/redo',`dropFirst=${this.dropFirst}&ignoreError=${this.ignoreError}&where=${this.where}`)
                     .then(res=>{
                         this.reindexInfo(res.data);
                     })
