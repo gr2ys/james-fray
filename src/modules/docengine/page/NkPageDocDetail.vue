@@ -156,11 +156,11 @@
             </a-tooltip>
 
             <!--复制-->
-            <a-tooltip   v-if="!editMode && doc.refObjectId===doc.docId" title="复制">
+            <!-- <a-tooltip   v-if="!editMode && doc.refObjectId===doc.docId" title="复制">
                 <a-button type="default" @click="toCopy">
                     <a-icon type="copy" />
                 </a-button>
-            </a-tooltip>
+            </a-tooltip> -->
 
             <!--历史-->
             <a-tooltip v-if="!editMode" title="变更历史">
