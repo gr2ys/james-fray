@@ -22,24 +22,30 @@
         <nk-bpm-timeline :task="task" :histories="task.historicalTasks" style="margin-left: 10px;margin-top: 15px;"></nk-bpm-timeline>
 
         <div v-if="task && completeTask" style="border-top: dashed 1px #ccc;padding-bottom: 20px;"></div>
-        <nk-form ref="form" :col="1" v-if="task && completeTask && completeTask.form" :edit="true">
-            <nk-form-item v-for="(item,index) in this.task.formFields"
-                          :key="index"
+        <nk-form ref="form" :col="1" v-if="task && this.task.formFields && completeTask && completeTask.form" :edit="true">
+            <nk-form-item v-for="(item) in this.task.formFields"
+                          :key="item.id"
                           :term="item.label"
+                          :edit="true"
                           :validate-for="completeTask.form[item.id]"
                           :required="!!(formValidations[item.id].required)"
                           :message="item.properties&&item.properties.errorMessage"
                           :validator="(toFunction(formValidations[item.id]['function'],item.properties))"
             >
-                <a-input             v-if="item.typeName==='string'"  slot="edit" size="small" style="width: 70%;" v-model="completeTask.form[item.id]"/>
-                <a-input-number v-else-if="item.typeName==='long'"    slot="edit" size="small" style="width: 30%;" v-model="completeTask.form[item.id]"/>
-                <a-switch       v-else-if="item.typeName==='boolean'" slot="edit" size="small" v-model="completeTask.form[item.id]"/>
-                <a-date-picker  v-else-if="item.typeName==='date'"    slot="edit" size="small" v-model="completeTask.form[item.id]" valueFormat="DD/MM/YYYY"></a-date-picker>
-                <a-select       v-else-if="item.typeName==='enum'"    slot="edit" size="small" style="width: 30%;" v-model="completeTask.form[item.id]" :options="item.options"></a-select>
-                <component     v-else :is="item.typeName"             slot="edit" :editMode=true v-model="completeTask.form[item.id]" :properties="item.properties" :options="item.options"></component>
+                <template #edit>
+                    <a-input             v-if="item.typeName==='string'"  size="small" style="width: 70%;" v-model="completeTask.form[item.id]"/>
+                    <a-input-number v-else-if="item.typeName==='long'"    size="small" style="width: 30%;" v-model="completeTask.form[item.id]"/>
+                    <a-switch       v-else-if="item.typeName==='boolean'" size="small" v-model="completeTask.form[item.id]"/>
+                    <a-date-picker  v-else-if="item.typeName==='date'"    size="small" v-model="completeTask.form[item.id]" valueFormat="DD/MM/YYYY"></a-date-picker>
+                    <a-select       v-else-if="item.typeName==='enum'"    size="small" style="width: 30%;" v-model="completeTask.form[item.id]" :options="item.options"></a-select>
+                    <component     v-else :is="item.typeName"             :editMode="true" v-model="completeTask.form[item.id]" :properties="item.properties" :options="item.options"></component>
+                </template>
+
             </nk-form-item>
-            <nk-form-item title="办理意见" :required="true" :validate-for="completeTask.comment" message="请输入办理意见">
-                <a-input slot="edit" type="textarea" v-model="completeTask.comment" :auto-size="{ minRows: 4, maxRows: 6 }" placeholder="请输入办理意见"></a-input>
+            <nk-form-item term="办理意见" :required="true" :validate-for="completeTask.comment" message="请输入办理意见">
+                <template #edit>
+                    <a-input type="textarea" v-model="completeTask.comment" :auto-size="{ minRows: 4, maxRows: 6 }" placeholder="请输入办理意见"></a-input>
+                </template>
             </nk-form-item>
         </nk-form>
 

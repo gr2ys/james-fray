@@ -38,15 +38,16 @@
                                :pattern="item.inputOptions&&item.inputOptions.pattern"
                                :message="item.message||(item.name +'校验不通过')"
                 >
-                    <component ref="items"
-                               :is="item.inputType"
-                               :slot="editMode && item.control > 0?'edit':'default'"
-                               :editMode="editMode && item.control > 0"
-                               v-model="data[item.key]"
-                               :input-options="item.inputOptions"
-                               :style="item.style"
-                               @change="itemChange($event,item)"
-                    ></component>
+                    <template #[obtainSlot(item)]>
+                        <component ref="items"
+                                   :is="item.inputType"
+                                   :editMode="editMode && item.control > 0"
+                                   v-model="data[item.key]"
+                                   :input-options="item.inputOptions"
+                                   :style="item.style"
+                                   @change="itemChange($event,item)"
+                        ></component>
+                    </template>
                 </nk-form-item>
             </template>
 
@@ -73,6 +74,9 @@ export default {
         },
         hasError(){
             return this.$refs.form.hasError();
+        },
+        obtainSlot(item){
+            return this.editMode && item.control > 0?'edit':'default'
         }
     }
 }
