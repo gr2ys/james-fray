@@ -139,6 +139,9 @@ export default {
             });
     },
     methods:{
+        nk$hide(){
+            this.previewVisible = false;
+        },
         suggest(params){
             this.$http.postJSON(`/api/doc/suggest/document`,params).then((res)=>{
                 if(this.$refs.layout){
@@ -162,7 +165,6 @@ export default {
                 this.previewVisible = true;
                 this.previewParams = {
                     mode: "detail",
-                    classify: row.classify,
                     docId: row.docId
                 }
             }

@@ -208,10 +208,12 @@ export default {
                 this.previewVisible = true;
                 this.previewParams  = {
                     mode: "detail",
-                    classify:row.classify,
                     docId:row.docId
                 }
             }
+        },
+        nk$hide(){
+            this.previewVisible = false;
         },
         previewClose(){
             this.$refs.layout.grid().clearCurrentRow();

@@ -93,12 +93,13 @@
                 </a-button>
             </a-tooltip>
 
-            <a-popconfirm  v-for="item in availablePrimaryStatus" :key="item.docState" :title="`确定${item.operatorName || item.docStateDesc}?`"
-                          @confirm="doSave(item.docState)"
+            <a-popconfirm  v-for="item in availablePrimaryStatus"
+                           :key="item.docState"
+                           :title="`确定${item.operatorName || item.docStateDesc}?`"
+                           @confirm="doSave(item.docState)"
+                           :disabled="editCheckFailed"
             >
-                <a-button type="primary"
-                          :disabled="editCheckFailed"
-                >
+                <a-button type="primary" :disabled="editCheckFailed">
                     <a-icon type="step-forward" /> {{item.operatorName || item.docStateDesc}}
                 </a-button>
             </a-popconfirm>

@@ -22,12 +22,13 @@
         :dataIncludeFields="['itemId']"
         save-as-source="$tasks"
         @change="search"
+        @click="selected"
         @select="selected"
     >
         <a-button-group slot="action">
         </a-button-group>
 
-        <nk-page-preview :params="previewParams" :visible.sync="preViewVisable" @close="previewClose"></nk-page-preview>
+        <nk-page-preview :params="previewParams" v-model="previewVisible" @close="previewClose"></nk-page-preview>
 
     </nk-query-layout>
 </template>
@@ -108,10 +109,13 @@ export default {
                 }
             ],
             previewParams: {},
-            preViewVisable: false
+            previewVisible: false
         }
     },
     methods:{
+        nk$hide(){
+            this.previewVisible = false;
+        },
         search(params){
             this.$http.postJSON("/api/task/tasks",params)
                 .then((res)=>{
@@ -134,11 +138,13 @@ export default {
         toCreate(docType){
             this.$router.push("/apps/docs/create/"+docType)
         },
-        selected({row}){
-            this.preViewVisable = true;
-            this.previewParams  = {
-                mode: "detail",
-                docId:row.docId
+        selected({row, $event}){
+            if($event.target.tagName!=='A') {
+                this.previewVisible = true;
+                this.previewParams = {
+                    mode: "detail",
+                    docId: row.docId
+                }
             }
         },
         previewClose(){
