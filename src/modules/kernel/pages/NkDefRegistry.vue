@@ -221,7 +221,9 @@ export default {
         saveSelected(){
             this.loading = true;
             const value = Object.assign({},this.selectedNode);
-            value.content = value.content && JSON.stringify(value.content);
+            if(typeof value.content === 'object'){
+                value.content = JSON.stringify(value.content);
+            }
             if(this.selectedNode.isNew){
                 value.regKey  = value.regKey + this.selectedNewKey;
                 if(this.parentNode.children && this.parentNode.children.find(c=>c.regKey === value.regKey)){
