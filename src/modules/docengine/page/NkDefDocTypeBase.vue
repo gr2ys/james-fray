@@ -58,17 +58,6 @@
                 {{docDef.businessKeySpEL}}
                 <nk-sp-el-editor slot="edit" v-model="docDef.businessKeySpEL" style="width: 280px;"></nk-sp-el-editor>
             </nk-form-item>
-            <nk-form-item term="云推送">
-                {{docDef.cloudSyncEnablePush ? '启用':'禁用'}}
-                <a-select size="small" slot="edit" v-model="docDef.cloudSyncEnablePush" style="width: 100px;">
-                    <a-select-option :value="1">启用</a-select-option>
-                    <a-select-option :value="null">禁用</a-select-option>
-                </a-select>
-            </nk-form-item>
-            <nk-form-item term="云订阅">
-                {{docDef.cloudSyncSubscribeId}}
-                <a-input size="small" slot="edit" v-model="docDef.cloudSyncSubscribeId" style="width: 280px;" placeholder="服务ID，仅对CLOUD节点生效"></a-input>
-            </nk-form-item>
             <nk-form-item term="版本描述">
                 {{docDef.versionDesc}}
                 <a-textarea slot="edit" v-model="docDef.versionDesc" style="width: 280px;"></a-textarea>

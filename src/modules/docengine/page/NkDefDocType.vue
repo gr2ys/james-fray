@@ -163,6 +163,7 @@
 
 <script>
 import NkDefDocTypeBase from "./NkDefDocTypeBase";
+import NkDefDocTypeCloud from "./NkDefDocTypeCloud";
 import NkDefDocTypeStatus from "./NkDefDocTypeStatus";
 import NkDefDocTypeHelpDoc from "./NkDefDocTypeHelpDoc";
 import NkDefDocTypeBizFlow from "./NkDefDocTypeBizFlow";
@@ -176,8 +177,9 @@ import {mapState} from "vuex";
 
 const defaultCards = [
     {key:"doc",     name:"基本信息",    defComponentNames: [NkDefDocTypeBase,    NkDefDocTypeStatus,NkDefDocTypeHelpDoc]},
-    {key:"cycle",   name:"业务逻辑",    defComponentNames: [NkDefDocTypeBizFlow, NkDefDocTypeCycle, NkDefDocTypeIndex, NkDefDocTypeDataSyncs]},
+    {key:"cycle",   name:"业务逻辑",    defComponentNames: [NkDefDocTypeBizFlow, NkDefDocTypeCycle, NkDefDocTypeIndex]},
     {key:"bpm",     name:"审批流程",    defComponentNames: [NkDefDocTypeBPM,                        ]},
+    {key:"cloud",   name:"云Cloud",      defComponentNames: [NkDefDocTypeCloud, NkDefDocTypeDataSyncs                      ]},
     {key:"cards",   name:"功能卡片",    defComponentNames: [NkDefDocTypeCards,                      ]},
 ];
 
