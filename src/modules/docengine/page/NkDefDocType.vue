@@ -74,7 +74,7 @@
                         {{i.name}}
                     </a-list-item>
                 </a-list>
-                <a-list item-layout="horizontal" :data-source="def.cards" style="margin-top: 2px">
+                <a-list v-if="def.cards&&def.cards.length" item-layout="horizontal" :data-source="def.cards" style="margin-top: 2px">
                     <a-list-item slot="renderItem"
                                  slot-scope="i"
                                  @click="menuClick(i)"
@@ -84,27 +84,28 @@
                 </a-list>
                 <a-list item-layout="horizontal" :data-source="histories" style="margin-top: 2px">
                     <div slot="header">
-                        版本记录
+                        <a @click="menuClick(historiesListMenu)" style="color: rgba(0, 0, 0, 0.85)">
+                            版本记录
+                        </a>
                         <a @click="openDefTree">Graph</a>
                     </div>
-                    <div v-if="historiesMore" slot="footer" style="text-align: center;color: #999;cursor: pointer;" @click="loadHistories()">
-                        加载更多...
+                    <div slot="footer" style="text-align: center;color: #999;cursor: pointer;">
+                        查看全部
                     </div>
                     <a-list-item slot="renderItem"
                                  slot-scope="i"
                                  :class="{'history-item':true,active:i.version===def.version}"
                                  @click="toVersion(i)">
                             <div>
-                                <span>
+                                <div>
                                     <a-tag v-if="i.state==='Active'"   color="green"  class="version-tag">{{i.state.charAt(0)}}</a-tag>
                                     <a-tag v-if="i.state==='InActive'" color="orange" class="version-tag">{{i.state.charAt(0)}}</a-tag>
                                     <a-tag v-if="i.state==='History'"  class="version-tag">{{i.state.charAt(0)}}</a-tag>
-                                    {{i.version | formatVersion}}
-                                </span>
-
+                                    <span v-if="i.versionDesc">{{i.versionDesc}}</span>
+                                    <span v-else>{{i.version | formatVersion}}</span>
+                                </div>
                                 <a v-if="def.version!==i.version" class="diff" @click="diffVersion(i,$event)">Diff</a>
                             </div>
-                            <p v-if="i.versionDesc">{{i.versionDesc}}</p>
                     </a-list-item>
                 </a-list>
             </a-layout-sider>
@@ -116,7 +117,10 @@
                            :doc-def="def"
                            :card-key="selected.cardKey"
                            :doc-options="options"
-                           :edit-mode="editMode"/>
+                           :edit-mode="editMode"
+                           @replace="$emit('replace',$event)"
+                           @diff="diffVersion"
+                />
                 <a-card v-if="selected.beanName" title="文档"
                         :key="'document-'+selected.cardKey"
                         class="doc">
@@ -239,6 +243,7 @@ import NkDefDocTypeIndex from "./NkDefDocTypeIndex";
 import NkDefDocTypeDataSyncs from "./NkDefDocTypeDataSyncs";
 import NkDefDocTypeBPM from "./NkDefDocTypeBPM";
 import NkDefDocTypeCards from "./NkDefDocTypeCards";
+import NkDefDocTypeHistories from "./NkDefDocTypeHistories";
 import NkDocDefTree from "../components/NkDocDefTree";
 import NkUtil from "../../../utils/NkUtil";
 import {mapMutations, mapState} from "vuex";
@@ -413,6 +418,8 @@ export default {
 
             visibleDefTree:false,
             historiesRoot:undefined,
+
+            historiesListMenu:{defComponentNames:[NkDefDocTypeHistories]}
         }
     },
     computed:{
@@ -643,7 +650,7 @@ export default {
             }
         },
         diffVersion(i,e){
-            e.stopPropagation();
+            if(e)e.stopPropagation();
             this.visibleDiff = true;
             this.diff = undefined;
             this.$http.get(`/api/def/doc/type/detail/${i.docType}/${i.version}`)
@@ -771,25 +778,38 @@ export default {
         .ant-card.doc .ant-card-body{
             padding: 1px;
         }
+        ::v-deep .ant-list-footer{
+            padding: 5px 10px;
+        }
     }
     .history-item{
         display: block;
         cursor: pointer;
+        padding: 5px 10px;
         & > div{
             display: flex;
             align-items: center;
+            justify-items: center;
             justify-content: space-between;
+            div{
+                display: block;
+                width: 80%;
+                span{
+                    width: 120px;
+                    padding-left: 5px;
+                    display: inline-block;
+                    margin: 5px 0 0 0;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    word-break: break-all;
+                }
+            }
         }
         &.active{
             div{
                 color: #1890ff;
             }
-        }
-        p{
-            margin: 5px 0 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
         }
         .version-tag{
             width: 18px;
