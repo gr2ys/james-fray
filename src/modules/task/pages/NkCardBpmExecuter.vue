@@ -157,15 +157,13 @@ export default {
     },
     methods:{
         initFrom(){
+            let form = {};
             if(this.task.formFields && this.task.formFields.length){
-                let form = {};
                 this.task.formFields.forEach(item=>{
                     form[item.id]=(item.value&&item.value.value) || item.defaultValue;
                 });
-                this.completeTask = {form};
-            }else{
-                this.completeTask = {};
             }
+            this.completeTask = {form:{}};
         },
         completeTaskOk(transition){
 
