@@ -191,18 +191,26 @@
                  :closable="false"
                  :destroyOnClose="true"
                  :maskClosable="false"
-                 ok-text="确认无误，继续激活"
+                 :ok-text="versionConflict?'版本冲突已确认无误，继续激活':'确定激活'"
                  @ok="doConfirmActive"
                  :confirm-loading="confirmLoadingActive"
                  :cancelButtonProps="{props:{disabled:confirmLoadingActive}}"
+                 :okButtonProps="{props:{
+                     disabled:!(def.versionDesc && def.versionDesc.trim()),
+                     type:versionConflict?'danger':'primary'
+                 }}"
         >
-            <template slot="title">
+            <template slot="title" v-if="versionConflict">
                 <a-icon type="exclamation-circle" />
                 版本冲突，请确认
             </template>
+            <template slot="title" v-else>
+                激活版本
+            </template>
             <a-skeleton :loading="!diff">
-                <nk-diff v-if="diff" :data="diff" mode="split" :mergeable="true" @change="diffChange" style="height: calc(100vh - 190px)"  />
+                <nk-diff v-if="diff" :data="diff" mode="split" :mergeable="true" @change="diffChange" style="height: calc(100vh - 270px)"  />
             </a-skeleton>
+            <a-textarea placeholder="请输入版本描述" style="height: 80px;" v-model="def.versionDesc"></a-textarea>
         </a-modal>
     </nk-page-layout>
 </template>
@@ -343,6 +351,7 @@ export default {
 
             visibleActiveDiff:false,
             confirmLoadingActive:false,
+            versionConflict:false,
         }
     },
     computed:{
@@ -493,8 +502,9 @@ export default {
             // 获取当前激活版本
             this.$http.get(`/api/def/doc/type/detail/${this.def.docType}/@`)
                 .then(res=>{
-                    if(res.data && res.data.version!==this.def.prevVersion){ // 如果激活的版本存在 且 父版本不一致
+                    if(res.data){ // 如果激活的版本存在 且 父版本不一致
                         this.visibleActiveDiff = true;
+                        this.versionConflict = res.data.version!==this.def.prevVersion
                         this.diff = diffJson(res.data,this.def,{});
                         this.loading = false;
                     }else{
