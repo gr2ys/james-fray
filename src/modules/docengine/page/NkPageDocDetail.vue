@@ -505,11 +505,23 @@ export default {
             }else if(this.contextParams.mode==='detail'){
                 this.$http.get("/api/doc/detail/"+this.contextParams.docId)
                     .then(response=>{
-                        this.doc = response.data;
-                        this.nkEditModeChanged(false);
-                        this.$emit('setTab',this.doc.docName||'未命名单据');
-                        this.loading = false
-                        this.autoShowDocHelper();
+                        if(response.data){
+                            this.doc = response.data;
+                            this.nkEditModeChanged(false);
+                            this.$emit('setTab',this.doc.docName||'未命名单据');
+                            this.loading = false
+                            this.autoShowDocHelper();
+                        }else{
+                            const self = this;
+                            this.$warning({
+                                centered:true,
+                                title: '提示',
+                                content: '单据不存在',
+                                onOk(){
+                                    self.$emit("close")
+                                }
+                            })
+                        }
                     }).catch(res=>{
                         if(res.response.status===403){
                             this.$emit("close")
