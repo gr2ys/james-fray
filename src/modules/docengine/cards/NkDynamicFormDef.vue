@@ -42,7 +42,6 @@
                                     <a-popconfirm @confirm="$nkSortableRemove(def.items,seq+1)" :title="`移除[${item.name}]?`">
                                         <a-icon type="close" v-if="editMode && item._selected" style="position: absolute;right: -25px;top:-15px;cursor: pointer;"/>
                                     </a-popconfirm>
-                                    <span v-if="item.control < 0" style="position: absolute;left: -25px;top:-9px;">已隐藏</span>
                                 </nk-form-divider>
                                 <nk-form-item    v-else-if="(showHideFiled || item.control >= 0)"
                                                  :key="item.key"
@@ -74,7 +73,6 @@
                                     <a-popconfirm :slot="reviewEditMode && item.control > 0?'edit':'default'" @confirm="$nkSortableRemove(def.items,seq+1)" :title="`移除[${item.name}]?`">
                                         <a-icon type="close" v-if="editMode && item._selected" style="position: absolute;right: 5px;top:5px;cursor: pointer;z-index: 1000"/>
                                     </a-popconfirm>
-                                    <span v-if="item.control < 0" style="position: absolute;left: 5px;top:5px;">已隐藏</span>
                                 </nk-form-item>
                             </template>
                         </nk-form>
