@@ -22,9 +22,9 @@
                 <a-button slot="enterButton">测试</a-button>
             </a-input-search>
             <div v-if="error" class="error">{{error}}</div>
-            <div v-if="result!==undefined" class="result">
+            <div v-else-if="result!==undefined" class="result">
                 <label style="font-weight: bold;">Result:</label>
-                <div :class="{overflow:component==='vxe-modal'}">
+                <div v-if="result!==null" :class="{overflow:component==='vxe-modal'}">
                     <json-viewer
                         :value="result"
                         :expand-depth=5
@@ -34,6 +34,7 @@
                         boxed
                         sort />
                 </div>
+                <code v-else style="margin-left: 10px;">null</code>
             </div>
 
             <div v-if="component==='vxe-modal'" style="margin-top: 10px;text-align: right">
