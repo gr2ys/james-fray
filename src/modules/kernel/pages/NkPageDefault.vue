@@ -23,7 +23,7 @@
                 >
                     {{item.name}}
                 </a-button>
-                <a-dropdown >
+                <a-dropdown v-if="screenWidth>768">
                     <a-menu slot="overlay" @click="menuClick">
                         <a-menu-item key="2"> <a-icon type="plus" />添加卡片 </a-menu-item>
                         <a-menu-divider />
@@ -37,6 +37,7 @@
 
         <a-spin :active="true" :spinning="loading" ref="dashboard">
             <grid-layout
+                v-if="screenWidth>768"
                 :layout.sync="layoutFilter"
                 :col-num="24"
                 :row-height="30"
@@ -73,6 +74,20 @@
                     </a-card>
                 </grid-item>
             </grid-layout>
+            <div v-else>
+                <div v-for="(item) in layoutFilter" :key="item.i" class="simple-item" :style="{height:(item.h*30)+'px'}">
+                    <component v-if="item.component"
+                               :is="item.componentLost?'nk-dashboard-lost':item.component"
+                               :title="item.title"
+                               :value="item.config"
+                               :editable="false"
+                               ref="items"
+                    ></component>
+                    <a-card v-else :title="item.title" size="small" style="height:100%;" ref="items">
+                        {{ item.i }}{{item.component}}
+                    </a-card>
+                </div>
+            </div>
         </a-spin>
 
 
@@ -142,7 +157,8 @@ export default {
             modalAvailableCards:{
                 visible:false,
                 cards:[]
-            }
+            },
+            screenWidth: document.body.clientWidth
         }
     },
     created(){
@@ -167,6 +183,7 @@ export default {
         let self = this;
         let timeout = undefined;
         this.resizeEvent = ()=>{
+            this.screenWidth = document.body.clientWidth;
             if(timeout) clearTimeout(timeout);
             timeout = setTimeout(self.resizeAll,100);
         };
@@ -301,5 +318,8 @@ export default {
 <style scoped lang="less">
     ::v-deep.nk-page-layout .nk-page-layout-content > .content{
         padding: 15px !important;
+    }
+    .simple-item + .simple-item{
+        margin-top: 15px;
     }
 </style>

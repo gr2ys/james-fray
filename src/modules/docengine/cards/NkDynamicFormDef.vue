@@ -94,6 +94,15 @@
                             <a-input slot="edit" size="small" v-model="selectedItem.style"></a-input>
                         </nk-form-item>
                     </template>
+                    <template v-else>
+                        <nk-form-item title="分隔器样式">
+                            {{selectedItem.inputOptions.dividerStyle}}
+                            <a-select slot="edit" size="small" v-model="selectedItem.inputOptions.dividerStyle" >
+                                <a-select-option key="separator" >分隔符</a-select-option>
+                                <a-select-option key="tips" >文字提示</a-select-option>
+                            </a-select>
+                        </nk-form-item>
+                    </template>
                     <nk-form-item title="控制">
                         {{selectedItem.control===1 ?'读写':(selectedItem.control===0 ?'只读':'隐藏')}}
                         <a-select slot="edit" size="small" v-model="selectedItem.control" >
@@ -102,12 +111,12 @@
                             <a-select-option :key="-1">隐藏</a-select-option>
                         </a-select>
                     </nk-form-item>
-                    <nk-form-item title="控制 SpEL">
+                    <nk-form-item title="控制EL">
                         {{selectedItem.spELControl}}
                         <nk-sp-el-editor slot="edit" v-model="selectedItem.spELControl"></nk-sp-el-editor>
                     </nk-form-item>
                     <template v-if="selectedItem.inputType!=='-'">
-                        <nk-form-item title="值条件 SpEL">
+                        <nk-form-item title="值EL条件">
                             {{selectedItem.spELTriggers}}
                             <a-select slot="edit" size="small" v-model="selectedItem.spELTriggers" mode="multiple" >
                                 <a-select-option key="ALWAYS">ALWAYS</a-select-option>
@@ -115,7 +124,7 @@
                                 <a-select-option key="BLANK">BLANK</a-select-option>
                             </a-select>
                         </nk-form-item>
-                        <nk-form-item title="值 SpEL">
+                        <nk-form-item title="值EL">
                             {{selectedItem.spELContent}}
                             <nk-sp-el-editor slot="edit" v-model="selectedItem.spELContent"></nk-sp-el-editor>
                         </nk-form-item>

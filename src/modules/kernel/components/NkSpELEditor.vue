@@ -14,9 +14,9 @@
 <template>
     <div>
         <component :is="inputComponent" @click="open" v-model="value" size="small" read-only class="readonly" :placeholder="placeholder"></component>
-        <component :is="component" v-model="visible" title="SpEL表达式编辑器" width="50%" centered :mask-closable="false" :esc-closable="true">
+        <component :is="component" v-model="visible" title="EL表达式编辑器" width="50%" centered :mask-closable="false" :esc-closable="true">
 
-            <a-textarea v-model="el" :rows="10" placeholder="SpEL表达式 或 JSON格式模版"></a-textarea>
+            <a-textarea v-model="el" :rows="10" placeholder="EL表达式 或 JSON格式模版"></a-textarea>
 
             <a-input-search placeholder="输入单据ID(可选)" v-model="docId" @search="test()" style="margin-top: 12px;">
                 <a-button slot="enterButton">测试</a-button>

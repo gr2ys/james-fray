@@ -18,9 +18,9 @@
       <slot name="tips"></slot>
       <nk-sticky :stickyTop="-11" :z-index="11" class="layout-print-hide">
         <div class="nk-page-layout-stick" :class="{'show-right':headerIndent && rightBar && !layoutConfig.helperVisible}" style="padding-top: 20px;align-items: center;">
-          <div style="flex-shrink: 0">
-            <span v-if="showStickyTitle" class="ant-page-header-heading-title">{{title}}</span>
-            <span v-if="showStickyTitle" class="ant-page-header-heading-sub-title">{{subTitle}}</span>
+          <div class="nk-text-ellipsis">
+            <span v-if="showStickyTitle" class="ant-page-header-heading-title ">{{title}}</span>
+            <span v-if="showStickyTitle && subTitle" class="ant-page-header-heading-sub-title ">{{subTitle}}</span>
           </div>
           <slot name="tips"></slot>
           <slot name="action" style="flex-shrink: 0;padding-left: 10px;"></slot>
@@ -40,11 +40,11 @@
         <slot name="avatar"     slot="avatar"></slot>
         <slot name="backIcon"   slot="backIcon"></slot>
         <slot name="action"     slot="extra"></slot>
-        <a-row>
-          <a-col :span="18">
+        <a-row class="main">
+          <a-col :md="18" :sm="16" :xs="20">
             <slot name="content"></slot>
           </a-col>
-          <a-col :span="6">
+          <a-col :md="6" :sm="8" :xs="4" style="position: relative;">
             <slot name="extra"></slot>
           </a-col>
         </a-row>
@@ -108,6 +108,7 @@ export default {
 .nk-page-layout-stick{
   display: flex;
   justify-content: space-between;
+  align-items: center;
   height: 65px;
   background:white;
   border-bottom: 1px solid #e8e8e8;
@@ -250,6 +251,46 @@ export default {
       display: none;
     }
   }
+}
+@media screen and ( max-width: 768px ) {
+    ::v-deep.nk-page-layout {
+        .nk-page-layout-header{
+            .ant-page-header{
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+        }
+        .nk-page-layout-content {
+            // 内容
+            .content {
+                padding: 12px;
+            }
+        }
+    }
+    .main{
+        //display: flex;
+        //flex-direction: column-reverse;
+
+        //::v-deep .ant-statistic{
+        //    display: flex;
+        //    border-bottom: dashed 1px #ccc;
+        //    align-items: baseline;
+        //    margin-bottom: 20px;
+        //    .ant-statistic-content{
+        //        margin-left: 10px;
+        //    }
+        //}
+    }
+}
+
+@media screen and (max-width: 576px){
+    ::v-deep .ant-page-header-heading-extra {
+        display: block;
+        float: right;
+        width: unset;
+        padding-top: unset;
+        overflow: unset;
+    }
 }
 
 @media print{

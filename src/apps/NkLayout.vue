@@ -13,11 +13,12 @@
 -->
 <template>
     <a-spin :spinning="loading" wrapperClassName="layout-spinning">
+        <div v-if="!collapsed" ref="bg" class="bg" @click="doCollapsed"></div>
         <a-layout class="nk-layout-full">
             <a-layout-sider v-model="collapsed" :trigger="null" collapsible="collapsible" class="nk-layout-sider" width="256" :collapsed-width="60">
                 <div :class="{fixed:fixedMenu,collapsed}">
                     <component :is="logo" class="logo"></component>
-                    <nk-nav :active-page="activePage" :collapsed="collapsed"></nk-nav>
+                    <nk-nav :active-page="activePage" :collapsed="collapsed" @naved="naved"></nk-nav>
                     <transition  name="slide-fade">
                         <div class="copyright nk-primary-background-color" v-if="!collapsed" :class="{
                             'dev':version.version.toUpperCase().indexOf('BETA')>-1 || env&&env[1]&&env[1].toUpperCase().indexOf('SNAPSHOT')>-1
@@ -35,14 +36,14 @@
                             :type="collapsed ? 'menu-unfold' : 'menu-fold'"
                             @click="doCollapsed"
                         ></a-icon>
-                        <span v-if="env&&env[0]" class="env trigger nk-primary-color">{{env[0]}}</span>
+                        <span v-if="env&&env[0]" class="hide-when-mini env trigger nk-primary-color">{{env[0]}}</span>
                     </div>
                     <div>
                     </div>
                     <div class="nk-user">
                         <nk-debug-panel class="nk-debug-panel" v-if="!layoutConfig.helperVisible && hasAuthority('SYS:Debug')" style="margin-right: 20px;" />
                         <a-dropdown :trigger="['click']">
-                            <div class="ant-dropdown-link" @click="e => e.preventDefault()" >
+                            <div class="ant-dropdown-link" @click="e => e.preventDefault()" style="cursor: pointer;">
                                 <a-avatar class="a-avatar"  size="small">
                                     <a-icon slot="icon" type="user" ></a-icon>
                                 </a-avatar>
@@ -442,6 +443,11 @@ export default {
         doCollapsed() {
             this.collapsed = !this.collapsed
             localStorage.setItem("$NK-Layout-collapsed",this.collapsed?"true":"false");
+        },
+        naved(){
+            if(document.body.clientWidth<768){
+                this.doCollapsed();
+            }
         }
     }
 }
@@ -453,10 +459,15 @@ export default {
     position: fixed;
     height: 100%;
     width: 256px;
+    transition: width 0.1s;
+    -moz-transition: width 0.1s;
+    -webkit-transition: width 0.1s;
+    -o-transition: width 0.1s;
 
     ::v-deep .nk-menu{
         overflow-y: auto;
         height: calc(100vh - 91px);
+        background-color: #001529;
 
         &::-webkit-scrollbar {
             display: none; /* Chrome Safari */
@@ -468,10 +479,10 @@ export default {
         box-shadow: -5px 1px 5px #001529;
         min-height: 80px;
         width:256px;
-        transition: width 0.2s;
-        -moz-transition: width 0.2s;
-        -webkit-transition: width 0.2s;
-        -o-transition: width 0.2s;
+        transition: width 0.1s;
+        -moz-transition: width 0.1s;
+        -webkit-transition: width 0.1s;
+        -o-transition: width 0.1s;
     }
 }
 
@@ -504,7 +515,7 @@ export default {
 }
 .nk-layout-full{
 
-    min-width: 800px;
+    min-width: 375px;
 
     .ant-spin.abc{
         height: calc( 100vh ) !important;
@@ -515,7 +526,6 @@ export default {
     /*菜单展开按钮*/
     .trigger {
         font-size: 16px;
-        line-height: 64px;
         padding: 0 24px;
         cursor: pointer;
         transition: color 0.3s;
@@ -539,6 +549,7 @@ export default {
     /*头部*/
     .nk-layout-header{
         height: 64px;
+        line-height: 64px;
         background: #fff;
         padding: 0;
         box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
@@ -590,6 +601,56 @@ export default {
         right: 160px;
         background-color: white;
         z-index: 1;
+    }
+}
+.bg{
+    display: none;
+}
+@media screen and ( max-width: 768px ){
+    .bg{
+        display: block;
+        position: fixed;
+        background-color: #000;
+        opacity: 0.2;
+        width: 100%;
+        height: 100%;
+        z-index: 99998;
+    }
+    .nk-debug-panel{
+        display: none;
+    }
+    ::v-deep {
+        .nk-layout-content .nk-layout-tabs{
+            .ant-tabs-bar{
+                margin: 8px 12px 0;
+            }
+        }
+    }
+    .nk-layout-full{
+        .ant-layout-sider-collapsed{
+            min-width: 0 !important;
+            width: 0 !important;
+            flex: 0 !important;
+            position: fixed;
+        }
+        .nk-layout-header {
+            height: 48px;
+            line-height: 48px;
+        }
+        .nk-layout-sider{
+            position: absolute;
+            z-index: 9999999999;
+        }
+    }
+    .fixed{
+    }
+    .collapsed.fixed{
+        width: 0;
+        .logo{
+            width: 0;
+            padding: 0;
+            overflow: hidden;
+        }
     }
 }
 @media print{

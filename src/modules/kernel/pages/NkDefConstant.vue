@@ -51,7 +51,7 @@
                                   field="">
                     <template v-slot="{seq,items}">
                         <span @click="itemMove(seq)">
-                            <i class="vxe-icon--remove"></i>
+                            <a-icon type="delete" />
                         </span>
                     </template>
                 </vxe-table-column>

@@ -44,7 +44,12 @@
                     <a-button type="link" @click="validDateLongTerm">长期有效</a-button>
                 </div>
             </nk-form-item>
-            <nk-form-item term="模型程序" :validateFor="docDef.refObjectType" required message="请选择模型程序">
+            <nk-form-item :validateFor="docDef.refObjectType" required message="请选择模型程序">
+                <span slot="term">
+                    模型程序
+                    <nk-help-link url="http://docs.elcube.cn/guide/def-doc-create.html#模型程序"></nk-help-link>
+                </span>
+
                 <nk-script-label :key="docDef.refObjectType" :value="docDef.refObjectType"></nk-script-label>
                 <a-select size="small" v-model="docDef.refObjectType"
                           placeholder="请选择模型程序"

@@ -14,7 +14,7 @@
 <template>
     <nk-card card-key="nk-card-doc-type-component" class="nk-page-layout-card" title="自定义组件">
         <a-alert v-if="!docDef.version" message="请先保存单据配置" style="margin-bottom:10px;" banner/>
-        <nk-help-link slot="extra" url="http://cwiki.nkpro.cn/pages/viewpage.action?pageId=23789596" />
+        <nk-help-link slot="extra" url="http://docs.elcube.cn/guide/def-doc-cards.html" />
         <vxe-toolbar v-if="editMode && docDef.version">
             <template v-slot:buttons>
                 <vxe-button icon="fa fa-plus" status="perfect" size="mini" @click="addComponent()">新增</vxe-button>
@@ -49,22 +49,28 @@
                                 :edit-render="{name:'$input',props:{type:'integer',min:0}}"/>
             <vxe-table-column   title="计算次数"      field="calcTimes"         width="10%"
                                 :edit-render="{name:'$input',props:{type:'integer',min:1,max:5}}"/>
-            <vxe-table-column   title="编辑"  field="editableSpEL"             width="8%"
-                                :edit-render="{name:'$input',props:{placeholder:'{\'S001\',\'S002\'}.contains(docState)'}}"/>
-            <vxe-table-column   title="显示"  field="visibleSpEL"             width="8%"
-                                :edit-render="{name:'$input',props:{placeholder:'{\'S001\',\'S002\'}.contains(docState)'}}"/>
+            <vxe-table-column   title="编辑"  field="editableSpEL"             width="8%" :edit-render="{}">
+                <template v-slot:edit="{seq,row}">
+                    <nk-sp-el-editor v-model="row.editableSpEL" placeholder="true 可编辑"></nk-sp-el-editor>
+                </template>
+            </vxe-table-column>
+            <vxe-table-column   title="显示"  field="visibleSpEL"             width="8%" :edit-render="{}">
+                <template v-slot:edit="{seq,row}">
+                    <nk-sp-el-editor v-model="row.visibleSpEL" placeholder="true 显示"></nk-sp-el-editor>
+                </template>
+            </vxe-table-column>
             <vxe-table-column   title="数据复制"  field="copyFromRef"           width="10%"
                                 :formatter="boolFormat"
                                 :edit-render="{name:'$switch',props: {'open-value':1,'close-value':0}}"
             />
             <vxe-table-column   title=""            field=""               >
-                <template v-slot="{seq,row}">
+                <template v-slot:default="{seq,row}">
                     <span v-if="editMode" class="drag-btn" style="margin-right: 10px;">
-                            <i class="vxe-icon--menu"></i>
+                            <a-icon type="swap" rotate="90" />
                         </span>
                     <span v-if="editMode" style="margin-right: 10px;" @click="$nkSortableRemove(docDef.cards,seq)">
-                            <i class="vxe-icon--remove"></i>
-                        </span>
+                            <a-icon type="delete" />
+                    </span>
                 </template>
             </vxe-table-column>
         </vxe-table>

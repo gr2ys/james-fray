@@ -71,10 +71,14 @@ export default {
     }
 
     .grid{
-        display: flex;
         justify-content: flex-start;
         align-items: flex-start;
         flex-wrap: wrap;
+    }
+    @media screen and (min-width: 768px) {
+        .grid{
+            display: flex;
+        }
     }
 
     .nk-form-item + .nk-form-divider{

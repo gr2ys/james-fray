@@ -56,10 +56,10 @@
             <vxe-table-column   title="">
                 <template v-slot="{seq,row}">
                 <span v-if="editMode" class="drag-btn" style="margin-right: 10px;">
-                        <i class="vxe-icon--menu"></i>
+                        <a-icon type="swap" rotate="90" />
                     </span>
                     <span v-if="editMode" style="margin-right: 10px;" @click="$nkSortableRemove(docDef.lifeCycles,seq)">
-                        <i class="vxe-icon--remove"></i>
+                        <a-icon type="delete" />
                     </span>
                 </template>
             </vxe-table-column>

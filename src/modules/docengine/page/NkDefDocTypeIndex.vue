@@ -13,7 +13,7 @@
 -->
 <template>
     <nk-card card-key="nk-card-doc-type-state" class="nk-page-layout-card" title="索引字段">
-        <nk-help-link slot="extra" url="http://cwiki.nkpro.cn/pages/viewpage.action?pageId=23789596" />
+        <nk-help-link slot="extra" url="http://docs.elcube.cn/guide/def-doc-type.html#索引规则" />
         <vxe-toolbar v-if="editMode">
             <template v-slot:buttons>
                 <vxe-button icon="fa fa-plus" status="perfect" size="mini" @click="add()">新增</vxe-button>
@@ -51,7 +51,7 @@
                     {value:'serial$', label:'serial$ | 序列号文本(全文检索)'},
                 ]
             }"/>
-            <vxe-table-column   title="SpEL"      field="ruleSpEL" width="50%" :edit-render="{}">
+            <vxe-table-column   title="EL"      field="ruleSpEL" width="50%" :edit-render="{}">
                 <template v-slot:edit="{row}">
                     <nk-sp-el-editor v-model="row.ruleSpEL"></nk-sp-el-editor>
                 </template>
@@ -59,7 +59,7 @@
             <vxe-table-column   title=""    field=""     width="10%">
                 <template v-slot="{seq,items}">
                     <span v-if="editMode" @click="$nkSortableRemove(docDef.indexRules, seq)">
-                        <i class="vxe-icon--remove"></i>
+                        <a-icon type="delete" />
                     </span>
                 </template>
             </vxe-table-column>

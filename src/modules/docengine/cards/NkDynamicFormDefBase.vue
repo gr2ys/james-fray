@@ -75,10 +75,10 @@
                               field="">
                 <template v-slot="{seq,items}">
                     <span v-if="editMode && sortable" class="drag-btn" style="margin-left: 10px;">
-                        <i class="vxe-icon--menu"></i>
+                        <a-icon type="swap" rotate="90" />
                     </span>
                     <span v-if="editMode" style="margin-left: 10px;" @click="$nkSortableRemove(def.items,seq)">
-                        <i class="vxe-icon--remove"></i>
+                        <a-icon type="delete" />
                     </span>
                 </template>
                 <template #content="{ row }">
@@ -107,11 +107,11 @@
                                 <a-select-option :key="-1">隐藏</a-select-option>
                             </a-select>
                         </nk-form-item>
-                        <nk-form-item title="控制 SpEL 表达式">
+                        <nk-form-item title="控制EL">
                             {{row.spELControl}}
                             <nk-sp-el-editor slot="edit" v-model="row.spELControl"></nk-sp-el-editor>
                         </nk-form-item>
-                        <nk-form-item title="值 SpEL 条件">
+                        <nk-form-item title="值EL条件">
                             {{row.spELTriggers}}
                             <a-select slot="edit" size="small" v-model="row.spELTriggers" mode="multiple" >
                                 <a-select-option key="ALWAYS">ALWAYS</a-select-option>
@@ -119,7 +119,7 @@
                                 <a-select-option key="BLANK">BLANK</a-select-option>
                             </a-select>
                         </nk-form-item>
-                        <nk-form-item title="值 SpEL 表达式">
+                        <nk-form-item title="值EL">
                             {{row.spELContent}}
                             <nk-sp-el-editor slot="edit" v-model="row.spELContent"></nk-sp-el-editor>
                         </nk-form-item>

@@ -67,13 +67,13 @@
                 </template>
             </vxe-column>
             <!--增加一行空列，避免宽度不够不能自适应-->
-            <vxe-column title="">
+            <vxe-column title="" fixed="right" width="60px">
                 <template v-slot="{seq,items}">
-                    <span v-if="editMode && def.sortable" class="drag-btn" style="margin-left: 10px;">
-                        <i class="vxe-icon--menu"></i>
+                    <span v-if="editMode && def.sortable" class="drag-btn btn">
+                        <a-icon type="swap" rotate="90" />
                     </span>
-                    <span v-if="editMode&&!def.disabledRemove" style="margin-left: 10px;" @click="xTableRemove(data,seq)">
-                        <i class="vxe-icon--remove"></i>
+                    <span v-if="editMode&&!def.disabledRemove" class="btn" @click="xTableRemove(data,seq)">
+                        <a-icon type="delete" />
                     </span>
                 </template>
             </vxe-column>
@@ -250,5 +250,8 @@ export default {
     }
     ::v-deep .empty::before{
         content: '-'
+    }
+    .btn + .btn{
+        margin-left: 10px;
     }
 </style>

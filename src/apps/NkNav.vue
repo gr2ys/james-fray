@@ -128,7 +128,8 @@ export default {
                 this.$refs.link.click();
             }else if(this.$route.fullPath!==e.key) {
                 try{
-                    this.$router.push(e.key)
+                    this.$router.push(e.key);
+                    this.$emit('naved')
                 }catch (e){
                     //eslint-disable-line
                 }

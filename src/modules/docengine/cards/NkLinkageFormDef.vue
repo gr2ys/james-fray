@@ -87,7 +87,7 @@
                                 <a-select-option :key="-1">隐藏</a-select-option>
                             </a-select>
                         </nk-form-item>
-                        <nk-form-item title="控制 SpEL">
+                        <nk-form-item title="控制EL">
                             {{selectedItem.spELControl}}
                             <nk-sp-el-editor slot="edit" v-model="selectedItem.spELControl"></nk-sp-el-editor>
                         </nk-form-item>
@@ -99,11 +99,11 @@
                             {{selectedItem.style}}
                             <a-input slot="edit" size="small" v-model="selectedItem.style"></a-input>
                         </nk-form-item>
-                        <nk-form-item title="值 SpEL">
+                        <nk-form-item title="值EL">
                             {{selectedItem.spELContent}}
                             <nk-sp-el-editor slot="edit" v-model="selectedItem.spELContent"></nk-sp-el-editor>
                         </nk-form-item>
-                        <nk-form-item title="映射 SpEL">
+                        <nk-form-item title="映射EL">
                             {{selectedItem.spELMapping}}
                             <nk-sp-el-template-editor slot="edit" v-model="selectedItem.spELMapping"></nk-sp-el-template-editor>
                         </nk-form-item>
