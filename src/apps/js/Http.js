@@ -63,7 +63,7 @@ export default (Vue) => {
           .digest('hex');
 
 
-      config.headers.common['elcube-client']    = 'web';
+      config.headers.common['elcube-client']    = AuthUtils.getClientId(uuidv1);
       config.headers.common['elcube-user']      = AuthUtils.getUsername();
       config.headers.common['elcube-timestamp'] = timestamp;
       config.headers.common['elcube-nonce']     = uuidv1();
@@ -261,7 +261,7 @@ export default (Vue) => {
     return new Promise((resolve, reject)=>{
       axios.post("api/authentication/token",qs.stringify({
         systemId: "NK",
-        client: "web",
+        client: AuthUtils.getClientId(uuidv1),
         os: "Browser",
         timestamp: timestamp,
         username:  username,

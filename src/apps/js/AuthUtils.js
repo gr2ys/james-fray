@@ -13,6 +13,14 @@
  */
 export default {
 
+  getClientId(create){
+    let clientId = localStorage.getItem("$NK-Auth-ClientId");
+    if(!clientId){
+      clientId = 'web-'+create();
+      localStorage.setItem("$NK-Auth-ClientId",clientId);
+    }
+    return clientId;
+  },
   getUsername(){
     return localStorage.getItem("$NK-Auth-Username")||'';
   },
