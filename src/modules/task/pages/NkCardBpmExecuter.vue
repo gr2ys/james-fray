@@ -29,7 +29,7 @@
                           :validate-for="completeTask.form[item.id]"
                           :required="!!(formValidations[item.id].required)"
                           :message="item.properties&&item.properties.errorMessage"
-                          :validator="(toFunction(formValidations[item.id].validator,item.properties))"
+                          :validator="(toFunction(formValidations[item.id]['function'],item.properties))"
             >
                 <a-input             v-if="item.typeName==='string'"  slot="edit" size="small" style="width: 70%;" v-model="completeTask.form[item.id]"/>
                 <a-input-number v-else-if="item.typeName==='long'"    slot="edit" size="small" style="width: 30%;" v-model="completeTask.form[item.id]"/>
@@ -256,7 +256,7 @@ export default {
         },
         toFunction(script,props){
             if(script){
-                const interpreter = new Interpreter({props});
+                const interpreter = new Interpreter({props,console});
                 return interpreter.evaluate(`(${script})`);
             }
             return undefined;
