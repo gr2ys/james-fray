@@ -724,10 +724,29 @@ export default {
                 this.editMode = editMode;
                 this.$emit("editModeChanged",this.editMode);
                 this.$nextTick(()=>{
-                    this.$refs.components&&this.$refs.components.forEach(c=> {
-                        c.docEditModeChanged && c.docEditModeChanged(this.editMode);
-                        c.nk$editModeChanged && c.nk$editModeChanged(this.editMode);
-                    });
+                    // 由于Vue组件挂载需要时间，所以这里保险期间，增加一个组件是否渲染完毕的检查
+                    if(this.$refs.components.length<this.availableCards.length){
+                        let counter = 0;
+                        let interval = setInterval(()=>{
+                            try{
+                                if(this.$refs.components.length>=this.availableCards.length || counter>=10){
+                                    this.$refs.components&&this.$refs.components.forEach(c=> {
+                                        c.docEditModeChanged && c.docEditModeChanged(this.editMode);
+                                        c.nk$editModeChanged && c.nk$editModeChanged(this.editMode);
+                                    });
+                                    clearInterval(interval)
+                                }
+                            }catch{
+                                clearInterval(interval)
+                            }
+                            counter ++;
+                        },10);
+                    }else{
+                        this.$refs.components&&this.$refs.components.forEach(c=> {
+                            c.docEditModeChanged && c.docEditModeChanged(this.editMode);
+                            c.nk$editModeChanged && c.nk$editModeChanged(this.editMode);
+                        });
+                    }
                 });
             }
         },
