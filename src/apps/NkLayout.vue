@@ -18,11 +18,13 @@
                 <div :class="{fixed:fixedMenu,collapsed}">
                     <component :is="logo" class="logo"></component>
                     <nk-nav :active-page="activePage" :collapsed="collapsed"></nk-nav>
-                    <div class="copyright nk-primary-background-color" v-if="!collapsed" :class="{
-                        'dev':version.version.toUpperCase().indexOf('BETA')>-1 || env&&env[1]&&env[1].toUpperCase().indexOf('SNAPSHOT')>-1
-                    }">
-                        elcube&reg; ver. {{version.version}} / {{(env&&env[1])||'0.0.0'}}
-                    </div>
+                    <transition  name="slide-fade">
+                        <div class="copyright nk-primary-background-color" v-if="!collapsed" :class="{
+                            'dev':version.version.toUpperCase().indexOf('BETA')>-1 || env&&env[1]&&env[1].toUpperCase().indexOf('SNAPSHOT')>-1
+                        }">
+                            elcube&reg; ver. {{version.version}} / {{(env&&env[1])||'0.0.0'}}
+                        </div>
+                    </transition>
                 </div>
             </a-layout-sider>
             <a-layout class="nk-layout-right">
