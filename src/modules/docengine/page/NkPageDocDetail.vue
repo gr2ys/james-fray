@@ -97,6 +97,7 @@
                            :key="item.docState"
                            :title="`确定${item.operatorName || item.docStateDesc}?`"
                            @confirm="doSave(item.docState)"
+                           placement="bottomRight"
                            :disabled="editCheckFailed"
             >
                 <a-button type="primary" :disabled="editCheckFailed">
@@ -156,11 +157,11 @@
             </a-tooltip>
 
             <!--复制-->
-            <a-tooltip   v-if="!editMode && doc.refObjectId===doc.docId" title="复制">
+            <!-- <a-tooltip   v-if="!editMode && doc.refObjectId===doc.docId" title="复制">
                 <a-button type="default" @click="toCopy">
                     <a-icon type="copy" />
                 </a-button>
-            </a-tooltip>
+            </a-tooltip> -->
 
             <!--历史-->
             <a-tooltip v-if="!editMode" title="变更历史">
@@ -457,7 +458,7 @@ export default {
         availablePrimaryStatus(){
             return this.doc.def && this.doc.def.status.filter(
                 state => state.visible && (state.preDocState === this.doc.docState)
-                    && ((state.displayPrimary && this.statusEditable) || this.statusEditOnly)
+                    && ((state.displayPrimary && this.statusEditable && this.editMode) || this.statusEditOnly)
             );
         },
         contextParams(){
@@ -479,6 +480,7 @@ export default {
             })
         },
         initData(){
+            this.loading = true
             if(this.contextParams.mode==='create'){
                 this.createMode = true;
                 const req = {
@@ -496,26 +498,38 @@ export default {
                         this.loading = false;
                         this.autoShowDocHelper();
                     }).catch(res=>{
-                    if(res.response.status===403){
-                        this.$emit("close")
-                    }
-                });
+                        if(res.response.status===403){
+                            this.$emit("close")
+                        }
+                    });
             }else if(this.contextParams.mode==='detail'){
                 this.$http.get("/api/doc/detail/"+this.contextParams.docId)
                     .then(response=>{
-                        this.doc = response.data;
-                        this.nkEditModeChanged(false);
-                        this.$emit('setTab',this.doc.docName||'未命名单据');
-                        this.loading = false
-                        this.autoShowDocHelper();
+                        if(response.data){
+                            this.doc = response.data;
+                            this.nkEditModeChanged(false);
+                            this.$emit('setTab',this.doc.docName||'未命名单据');
+                            this.loading = false
+                            this.autoShowDocHelper();
+                        }else{
+                            const self = this;
+                            this.$warning({
+                                centered:true,
+                                title: '提示',
+                                content: '单据不存在',
+                                onOk(){
+                                    self.$emit("close")
+                                }
+                            })
+                        }
                     }).catch(res=>{
-                    if(res.response.status===403){
-                        this.$emit("close")
-                    }
-                    if(res.response.data.msg==="单据不存在"){
-                        this.$emit("close")
-                    }
-                });
+                        if(res.response.status===403){
+                            this.$emit("close")
+                        }
+                        if(res.response.data.msg==="单据不存在"){
+                            this.$emit("close")
+                        }
+                    });
             }else if(this.contextParams.mode==='snapshot'){
                 this.$http.get("/api/doc/detail/snapshot/"+this.contextParams.docId)
                     .then(response=>{
@@ -640,7 +654,9 @@ export default {
             this.loading = true;
             this.docState = state;
             this.doc.docState = this.docState;
-            this.$http.postJSON(`/api/doc/update`, this.doc)
+            let reqData = Object.assign({},this.doc);
+            reqData.def = undefined;
+            this.$http.postJSON(`/api/doc/update`, reqData)
                 .then((response) => {
                     if(this.debugId){
                         this.$message.info("Tips: 调试模式下，单据未持久化")
@@ -722,10 +738,29 @@ export default {
                 this.editMode = editMode;
                 this.$emit("editModeChanged",this.editMode);
                 this.$nextTick(()=>{
-                    this.$refs.components&&this.$refs.components.forEach(c=> {
-                        c.docEditModeChanged && c.docEditModeChanged(this.editMode);
-                        c.nk$editModeChanged && c.nk$editModeChanged(this.editMode);
-                    });
+                    // 由于Vue组件挂载需要时间，所以这里保险期间，增加一个组件是否渲染完毕的检查
+                    if(this.$refs.components.length<this.availableCards.length){
+                        let counter = 0;
+                        let interval = setInterval(()=>{
+                            try{
+                                if(this.$refs.components.length>=this.availableCards.length || counter>=10){
+                                    this.$refs.components&&this.$refs.components.forEach(c=> {
+                                        c.docEditModeChanged && c.docEditModeChanged(this.editMode);
+                                        c.nk$editModeChanged && c.nk$editModeChanged(this.editMode);
+                                    });
+                                    clearInterval(interval)
+                                }
+                            }catch{
+                                clearInterval(interval)
+                            }
+                            counter ++;
+                        },10);
+                    }else{
+                        this.$refs.components&&this.$refs.components.forEach(c=> {
+                            c.docEditModeChanged && c.docEditModeChanged(this.editMode);
+                            c.nk$editModeChanged && c.nk$editModeChanged(this.editMode);
+                        });
+                    }
                 });
             }
         },

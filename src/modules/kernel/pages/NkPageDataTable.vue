@@ -47,7 +47,7 @@
             </a-dropdown>
         </a-button-group>
 
-        <transition name="slide-fade">
+        <transition name="slide-fade" v-if="custom.preview">
             <nk-page-preview :params="previewParams" v-if="previewVisible" @close="previewClose" @to="to"></nk-page-preview>
         </transition>
         <iframe ref="download" style="display: none"></iframe>
@@ -96,6 +96,7 @@ export default {
         loadCustom(){
             this.$http.get(`/api/webapp/menu/${this.$route.params.id}`)
                 .then(res=>{
+                    let custom = typeof res.data === 'string'?NkUtil.parseJSON(res.data):res.data;
                     this.custom = Object.assign({
                         title:"自定义查询报表",
                         subTitle:"",
@@ -110,7 +111,7 @@ export default {
                         sortConfig:undefined,
                         border:undefined,
                         creatable:undefined,
-                    },NkUtil.parseJSON(res.data));
+                    },custom);
                     this.$emit("setTab",this.custom.title);
 
                     this.$nextTick(()=>{

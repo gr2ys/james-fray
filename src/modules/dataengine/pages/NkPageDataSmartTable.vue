@@ -181,6 +181,7 @@ export default {
         loadCustom(){
             this.$http.get(`/api/webapp/menu/${this.$route.params.id}`)
                 .then(res=>{
+                    let custom = typeof res.data === 'string'?NkUtil.parseJSON(res.data):res.data;
                     this.custom = Object.assign({
                             title:"数据报表",
                             subTitle:"数据挖掘与分析",
@@ -200,7 +201,7 @@ export default {
                             previewParams: {},
                             previewVisible: false,
                         },
-                        NkUtil.parseJSON(res.data)
+                        custom
                     );
 
                     this.$nextTick(()=>{

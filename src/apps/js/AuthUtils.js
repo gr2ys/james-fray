@@ -40,11 +40,11 @@ export default {
       authed: token && expire > 0,  //有效期大于0
     };
   },
-  setToken(username,data){
+  setToken(data){
     localStorage.setItem("$NK-Auth-Expire",data.expire);
     localStorage.setItem("$NK-Auth-ExpireTime",new Date().getTime() + data.expire);
     localStorage.setItem("$NK-Auth-AccessToken",data.token);
-    localStorage.setItem("$NK-Auth-Username",username);
+    localStorage.setItem("$NK-Auth-Username",data.username);
   },
   clear(){
     localStorage.removeItem("$NK-Auth-Expire");

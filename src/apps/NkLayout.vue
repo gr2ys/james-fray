@@ -22,7 +22,7 @@
                         <div class="copyright nk-primary-background-color" v-if="!collapsed" :class="{
                             'dev':version.version.toUpperCase().indexOf('BETA')>-1 || env&&env[1]&&env[1].toUpperCase().indexOf('SNAPSHOT')>-1
                         }">
-                            elcube&reg; ver. {{version.version}} / {{(env&&env[1])||'0.0.0'}}
+                            elcube&trade; ver. {{version.version}} / {{(env&&env[1])||'0.0.0'}}
                         </div>
                     </transition>
                 </div>
@@ -33,7 +33,7 @@
                         <a-icon
                             class="trigger nk-hover-primary-color"
                             :type="collapsed ? 'menu-unfold' : 'menu-fold'"
-                            @click="() => (collapsed = !collapsed)"
+                            @click="doCollapsed"
                         ></a-icon>
                         <span v-if="env&&env[0]" class="env trigger nk-primary-color">{{env[0]}}</span>
                     </div>
@@ -60,6 +60,9 @@
                                 </a-menu-item>
                                 <a-menu-item key="2">
                                     <a @click="logout()">安全退出</a>
+                                </a-menu-item>
+                                <a-menu-item key="4">
+                                    <router-link to="/apps/about">关于ELCube</router-link>
                                 </a-menu-item>
                             </a-menu>
                         </a-dropdown>
@@ -199,6 +202,14 @@ export default {
         defaultPage.route = defaultPage.path
         this.pageCaches[defaultPage.path]=defaultPage;
         this.pages.push(defaultPage);
+
+        let collapsed = localStorage.getItem("$NK-Layout-collapsed");
+        if(!collapsed){
+            this.collapsed = screen.width < 1440;
+            localStorage.setItem("$NK-Layout-collapsed",this.collapsed?"true":"false");
+        }else{
+            this.collapsed = collapsed==='true';
+        }
     },
     mounted() {
         // 添加当前路由页面
@@ -430,6 +441,10 @@ export default {
         },
         loginFormChanged(e){
             this.loginInfo = e;
+        },
+        doCollapsed() {
+            this.collapsed = !this.collapsed
+            localStorage.setItem("$NK-Layout-collapsed",this.collapsed?"true":"false");
         }
     }
 }
@@ -444,7 +459,7 @@ export default {
 
     ::v-deep .nk-menu{
         overflow-y: auto;
-        height: calc(100vh - 80px);
+        height: calc(100vh - 91px);
 
         &::-webkit-scrollbar {
             display: none; /* Chrome Safari */
@@ -550,7 +565,7 @@ export default {
     /*内容页*/
     .nk-layout-content{
         min-height: calc(100vh - 64px);
-        ::v-deep.nk-page-layout-card {
+        ::v-deep .nk-page-layout-card {
             margin-bottom: 24px;
         }
     }

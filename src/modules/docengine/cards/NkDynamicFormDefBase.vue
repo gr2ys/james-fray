@@ -16,12 +16,13 @@
         <nk-form :col="1" :edit="editMode" style="width:300px;">
             <nk-form-item title="列">
                 {{def.col}}
-                <a-input v-model="def.col" slot="edit" size="small" />
+                <a-input-number v-model="def.col" slot="edit" size="small" :min="1" :max="4" />
             </nk-form-item>
             <nk-form-item title="标题宽">
                 {{def.titleWidth}}
                 <a-input-number v-model="def.titleWidth" slot="edit" size="small" :min="20" :max="300" />
             </nk-form-item>
+            <slot name="header"></slot>
         </nk-form>
         <vxe-toolbar v-if="editMode">
             <template v-slot:buttons>
@@ -82,9 +83,21 @@
                 </template>
                 <template #content="{ row }">
                     <nk-form :edit="editMode" :col="2">
+                        <nk-form-item title="是否非空">
+                            {{row.required?'是':'否'}}
+                            <a-switch slot="edit" size="small" v-model="row.required" />
+                        </nk-form-item>
                         <nk-form-item title="校验提示">
                             {{row.message}}
                             <a-input slot="edit" size="small" v-model="row.message"></a-input>
+                        </nk-form-item>
+                        <nk-form-item title="右对齐">
+                            {{row.alignRight?'是':'否'}}
+                            <a-switch slot="edit" size="small" v-model="row.alignRight" />
+                        </nk-form-item>
+                        <nk-form-item title="自定义样式">
+                            {{row.style}}
+                            <a-input slot="edit" size="small" v-model="row.style"></a-input>
                         </nk-form-item>
                         <nk-form-item title="控制">
                             {{row.control===1 ?'读写':(row.control===0 ?'只读':'隐藏')}}
@@ -98,21 +111,17 @@
                             {{row.spELControl}}
                             <nk-sp-el-editor slot="edit" v-model="row.spELControl"></nk-sp-el-editor>
                         </nk-form-item>
-                        <nk-form-item title="右对齐">
-                            {{row.alignRight?'是':'否'}}
-                            <a-switch slot="edit" size="small" v-model="row.alignRight" />
+                        <nk-form-item title="值 SpEL 条件">
+                            {{row.spELTriggers}}
+                            <a-select slot="edit" size="small" v-model="row.spELTriggers" mode="multiple" >
+                                <a-select-option key="ALWAYS">ALWAYS</a-select-option>
+                                <a-select-option key="INIT">INIT</a-select-option>
+                                <a-select-option key="BLANK">BLANK</a-select-option>
+                            </a-select>
                         </nk-form-item>
-                        <nk-form-item title="自定义样式">
-                            {{row.style}}
-                            <a-input slot="edit" size="small" v-model="row.style"></a-input>
-                        </nk-form-item>
-                        <nk-form-item title="值 SpEL">
+                        <nk-form-item title="值 SpEL 表达式">
                             {{row.spELContent}}
                             <nk-sp-el-editor slot="edit" v-model="row.spELContent"></nk-sp-el-editor>
-                        </nk-form-item>
-                        <nk-form-item title="映射 SpEL">
-                            {{row.spELMapping}}
-                            <nk-sp-el-template-editor slot="edit" v-model="row.spELMapping"></nk-sp-el-template-editor>
                         </nk-form-item>
                     </nk-form>
                     <component v-if="row===activeRow && fieldDefComponent"
@@ -141,6 +150,7 @@ export default {
         this.nk$callDef()
             .then(res=>{
                 this.inputTypeDefs = res;
+                this.inputTypeDefs.push({value:'-',label:'-- | 分隔'})
             });
     },
     methods:{
@@ -154,7 +164,7 @@ export default {
                 inputType: this.inputTypeDefs[0].value,
                 calcTrigger:'',
                 calcOrder:1,
-                required:true,
+                required:false,
                 control:1,
                 spELContent:'',
                 spELTriggers:[],

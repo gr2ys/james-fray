@@ -175,7 +175,7 @@ export default {
   }
 
   // 卡片样式
-  ::v-deep.ant-card{
+  ::v-deep .ant-card{
     .ant-card-head{
       min-height: 24px;
       .ant-card-head-title{
@@ -188,7 +188,7 @@ export default {
 
 
   // 表单样式
-  ::v-deep.ant-form-item{
+  ::v-deep .ant-form-item{
     margin-bottom: 12px;
     label{
       font-size: 12px;
@@ -202,20 +202,20 @@ export default {
   }
 
   // 表格样式
-  ::v-deep.vxe-toolbar{
+  ::v-deep .vxe-toolbar{
     height: 36px;
     padding-bottom: 8px;
   }
 
-  ::v-deep.vxe-table--header{
+  ::v-deep .vxe-table--header{
     background: #fafafa ;
   }
-  ::v-deep.vxe-row-has-error{
+  ::v-deep .vxe-row-has-error{
     color: crimson;
   }
 
   // 状态样式
-  ::v-deep.ant-statistic{
+  ::v-deep .ant-statistic{
     .ant-statistic-title{
       font-size: 13px;
     }

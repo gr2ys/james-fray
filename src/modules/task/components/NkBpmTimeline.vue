@@ -1,11 +1,7 @@
 <template>
     <a-timeline>
         <span slot="pendingDot"><a-icon type="clock-circle-o" style="font-size: 12px;" /></span>
-        <span v-if="task" slot="pending" style="padding-left: 16px;">
-            {{task.name}} 流转中...
-            <slot name="assignee"></slot>
-        </span>
-        <a-timeline-item v-for="t in histories" :key="t.id">
+        <a-timeline-item v-for="(t) in list" :key="t.id">
             <p style="margin: 5px 0 20px;padding: 2px 0 0 15px;">
                 {{t.name}}
                 <span style="color: #ccc;padding-left: 10px;">{{ t.createTime | nkDatetimeFriendly}} </span>
@@ -21,6 +17,10 @@
                 <p slot="content">{{item.taskName}}{{ item.comment }}</p>
             </a-comment>
         </a-timeline-item>
+        <span v-if="task" slot="pending" style="padding-left: 16px;">
+            {{task.name}} 流转中...
+            <slot name="assignee"></slot>
+        </span>
     </a-timeline>
 </template>
 
@@ -34,6 +34,14 @@ export default {
             default(){
                 return [];
             }
+        }
+    },
+    computed:{
+        list(){
+            if(this.task){
+                return this.histories.filter((item,index)=>index<this.histories.length-1);
+            }
+            return this.histories;
         }
     }
 }

@@ -13,14 +13,14 @@
 -->
 <template>
     <nk-form-item title="值">
-        <a-input v-model="text" size="small"></a-input>
+        <a-input-number v-model="text" size="small"></a-input-number>
     </nk-form-item>
 </template>
 
 <script>
 export default {
     props:{
-        value: String
+        value: Number
     },
     computed:{
         text:{

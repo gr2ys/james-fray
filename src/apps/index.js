@@ -65,6 +65,7 @@ require("codemirror/mode/sql/sql.js");
 require("codemirror/mode/vue/vue.js");
 require("codemirror/mode/groovy/groovy.js");
 require("codemirror/mode/javascript/javascript.js");
+require("codemirror/mode/xml/xml.js");
 
 require("codemirror/addon/edit/matchbrackets");
 require("codemirror/addon/selection/active-line");
@@ -118,7 +119,7 @@ let globalOptions = {
 
 // 加载各个模块，并将模块的routes和stores合并
 let routes      = Kernel.routes,
-    stores      = Stores,
+    stores      = {...Stores,...Kernel.stores},
     sfc         = {
         MixinSortable,
         NkFormat,
@@ -179,6 +180,7 @@ const run = (options)=>{
 
     const sfcLoader = new SfcLoader(Vue, {
         'vue'             : Vue,
+        'vuex'            : Vuex,
         'ant-design-vue'  : Antd,
         '@antv/g2plot'    : g2plot,
         'eval5'           : eval5,

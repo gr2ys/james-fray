@@ -14,23 +14,22 @@
 <template>
     <nk-page-layout title="基础配置" sub-title="设置系统通用属性" :loading="loading">
 
-        <div style="display: flex;;width: 100%;">
-            <div
-                class="ant-card-bordered" style="width: 300px;margin-right: 20px;padding:10px;flex-grow: 1;background-color: #fff;">
-                <a-directory-tree ref="tree"
-                                  v-if="tree"
-                                  :tree-data="tree"
-                                  :selected-keys="selectKeys"
-                                  :expanded-keys="expandedKeys"
-                                  :default-expand-all="expand"
-                                  :show-line="false"
-                                  :show-icon="true"
-                                  @select="select"
-                                  style=""
-                >
-                </a-directory-tree>
-            </div>
-            <div style="width: 100%;">
+        <a-layout>
+        <a-layout-sider theme="light" bordered width="250" style="background-color: #fff;margin-right: 20px;padding:10px;">
+            <a-directory-tree ref="tree"
+                              v-if="tree"
+                              :tree-data="tree"
+                              :selected-keys="selectKeys"
+                              :expanded-keys="expandedKeys"
+                              :default-expand-all="expand"
+                              :show-line="false"
+                              :show-icon="true"
+                              @select="select"
+                              style=""
+            >
+            </a-directory-tree>
+        </a-layout-sider>
+            <a-layout-content>
                 <a-card v-if="selectedNode && !selectedNode.isNew" title="子元素" style="margin-bottom: 20px;">
                     <template v-if="selectedNode.children">
                         <a-tag v-for="item in selectedNode.children" :key="item.key" :closable="true" @click="select([item.key])">
@@ -47,28 +46,24 @@
                         <nk-form-item title="键" :edit="!!selectedNode.isNew">
                             {{selectedNode.regKey}}
                             <div slot="edit">
-                                <a-input v-model="selectedNewKey" >
+                                <a-input size="small" v-model="selectedNewKey" >
                                     <span slot="addonBefore" v-if="selectedNode.regKey">{{selectedNode.regKey}}</span>
                                 </a-input>
                             </div>
                         </nk-form-item>
                         <nk-form-item title="描述">
                             {{selectedNode.title}}
-                            <a-input slot="edit" v-model="selectedNode.title" style="width: 200px;"></a-input>
+                            <a-input size="small" slot="edit" v-model="selectedNode.title" style="width: 200px;"></a-input>
                         </nk-form-item>
                         <nk-form-item title="数据类型" v-if="!!selectedNode">
-                            <a-select v-model="selectedNode.dataType"
+                            <a-select size="small" v-model="selectedNode.dataType"
                                       :options="selectedDataTypes"
-                                      @change="$set(selectedNode,'content',undefined)"
+                                      @change="dataTypeChanged"
                                       style="width: 200px;">
                             </a-select>
                         </nk-form-item>
-                        <nk-form-item title="值" v-if="selectedNode.dataType && selectedNode.loaded">
-                            <div style="width: 100%;">
-                                <component :is="selectedNode.dataType" v-model="selectedNode.content" :editable="true"></component>
-                            </div>
-                        </nk-form-item>
                     </nk-form>
+                    <component :is="selectedNode.dataType" v-model="selectedNode.content" :editable="true"></component>
 
                     <div v-if="!!selectedNode" slot="actions" style="text-align: right;padding-right: 40px;">
                         <a-button-group>
@@ -89,18 +84,19 @@
                 <a-card v-if="!selectedNode" style="padding: 100px 0;">
                     <nk-empty></nk-empty>
                 </a-card>
-            </div>
-        </div>
+            </a-layout-content>
+        </a-layout>
     </nk-page-layout>
 </template>
 
 <script>
-// import NkUtil from "../../utils/NkUtil";
 import NkRegistryText from "../components/NkRegistryTextEdit";
-import NkRegistrySelectOptions from "../components/NkRegistryJSONEdit";
+import NkRegistryNumber from "../components/NkRegistryNumber";
+import NkRegistryJSON from "../components/NkRegistryJSONEdit";
+import NkRegistrySelectOptions from "../components/NkRegistrySelectOptions";
 import NkRegistryDataSetNote from "../components/NkRegistryJSONEdit";
-import NkRegistryCustomQuery from "../components/NkRegistryTextAreaEdit";
 import NkRegistryJSONEdit from "../components/NkRegistryJSONEdit";
+import NkRegistryCustomQuery from "../components/NkRegistryCustomQueryEdit";
 
 const dataType = {
     "@METER":[{
@@ -108,11 +104,20 @@ const dataType = {
         value:'NkMeterAntVArea'
     }],
     "@DICT":[{
-        title:"普通文本",
+        title:"文本",
         value:"NkRegistryText"
+    },{
+        title:"数字",
+        value:"NkRegistryNumber"
     },{
         title:"下拉选项",
         value:"NkRegistrySelectOptions"
+    },{
+        title:"单据选择",
+        value:"NkRegistryCustomQuery"
+    },{
+        title:"自定义JSON（进阶）",
+        value:"NkRegistryJSON"
     }],
     "@DATASET":[{
         title:"数据集描述",
@@ -121,6 +126,9 @@ const dataType = {
     "@PAGE":[{
         title:"自定义查询界面",
         value:"NkRegistryCustomQuery"
+    },{
+        title:"自定义JSON（进阶）",
+        value:"NkRegistryJSON"
     }],
     "@WS":[{
         title:"服务调用",
@@ -135,6 +143,8 @@ export default {
     },
     components:{
         NkRegistryText,
+        NkRegistryNumber,
+        NkRegistryJSON,
         NkRegistrySelectOptions,
         NkRegistryDataSetNote,
         NkRegistryCustomQuery,
@@ -149,7 +159,8 @@ export default {
             selectKeys:[],
             parentNode:undefined,
             expand:false,
-            loading:false
+            loading:false,
+            dataTypeIsUndefined:false,
         }
     },
     computed:{
@@ -217,6 +228,7 @@ export default {
                 this.selectedNode = this.tree.find(c=>c.key===selectKey);
                 this.selectedNode.readonly = true;
             }
+            this.dataTypeIsUndefined = !this.selectedNode.dataType;
         },
         saveSelected(){
             this.loading = true;
@@ -283,6 +295,22 @@ export default {
                     this.select([parentKey]);
                 }
             });
+        },
+        dataTypeChanged(){
+            if(this.dataTypeIsUndefined){
+                this.$set(this.selectedNode,'content',undefined)
+                this.dataTypeIsUndefined = false;
+            }else{
+                const self = this;
+                this.$confirm({
+                    title: '是否保留数据？',
+                    onOk() {
+                    },
+                    onCancel(){
+                        self.$set(self.selectedNode,'content',undefined)
+                    }
+                });
+            }
         }
     }
 }

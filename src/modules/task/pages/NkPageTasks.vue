@@ -20,6 +20,7 @@
         :search-items-more-def="searchItemsMoreDef"
         :dataTableColumns="columns"
         :dataIncludeFields="['itemId']"
+        :sort-config="{defaultSort:{order:'desc',field:'taskStartTime'}}"
         save-as-source="$tasks"
         @change="search"
         @click="selected"

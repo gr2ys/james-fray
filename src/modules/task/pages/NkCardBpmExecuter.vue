@@ -19,11 +19,38 @@
                       :task-definition-key="task.taskDefinitionKey"
                       style="margin-bottom: 10px;" />
 
-        <nk-bpm-timeline :task="task" :histories="task.historicalTasks"></nk-bpm-timeline>
+        <nk-bpm-timeline :task="task" :histories="task.historicalTasks" style="margin-left: 10px;margin-top: 15px;"></nk-bpm-timeline>
 
-        <a-input type="textarea" v-model="completeTask.comment" :auto-size="{ minRows: 4, maxRows: 6 }" placeholder="请输入办理意见"></a-input>
-        <div slot="actions" style="padding: 0 20px 0;text-align: right">
-            <a-button-group v-if="task">
+        <div v-if="task && completeTask" style="border-top: dashed 1px #ccc;padding-bottom: 20px;"></div>
+        <nk-form ref="form" :col="1" v-if="task && this.task.formFields && completeTask && completeTask.form" :edit="true">
+            <nk-form-item v-for="(item) in this.task.formFields"
+                          :key="item.id"
+                          :term="item.label"
+                          :edit="true"
+                          :validate-for="completeTask.form[item.id]"
+                          :required="!!(formValidations[item.id].required)"
+                          :message="item.properties&&item.properties.errorMessage"
+                          :validator="(toFunction(formValidations[item.id]['function'],item.properties))"
+            >
+                <template #edit>
+                    <a-input             v-if="item.typeName==='string'"  size="small" style="width: 70%;" v-model="completeTask.form[item.id]"/>
+                    <a-input-number v-else-if="item.typeName==='long'"    size="small" style="width: 30%;" v-model="completeTask.form[item.id]"/>
+                    <a-switch       v-else-if="item.typeName==='boolean'" size="small" v-model="completeTask.form[item.id]"/>
+                    <a-date-picker  v-else-if="item.typeName==='date'"    size="small" v-model="completeTask.form[item.id]" valueFormat="DD/MM/YYYY"></a-date-picker>
+                    <a-select       v-else-if="item.typeName==='enum'"    size="small" style="width: 30%;" v-model="completeTask.form[item.id]" :options="item.options"></a-select>
+                    <component     v-else :is="item.typeName"             :editMode="true" v-model="completeTask.form[item.id]" :properties="item.properties" :options="item.options"></component>
+                </template>
+
+            </nk-form-item>
+            <nk-form-item term="办理意见" :required="true" :validate-for="completeTask.comment" message="请输入办理意见">
+                <template #edit>
+                    <a-input type="textarea" v-model="completeTask.comment" :auto-size="{ minRows: 4, maxRows: 6 }" placeholder="请输入办理意见"></a-input>
+                </template>
+            </nk-form-item>
+        </nk-form>
+
+        <div v-if="task && completeTask" slot="actions" style="padding: 0 20px 0;text-align: right">
+            <a-button-group>
                 <a-popconfirm v-for="transition in task.transitions"
                               :key="transition.id" :title="`确定${transition.name}?`"
                               :disabled="buttonDisabled"
@@ -77,6 +104,8 @@
 <script>
 import NkBpmnView from "./NkBpmnView";
 import {mapGetters} from "vuex";
+import { Interpreter } from "eval5";
+
 
 export default {
     components: {NkBpmnView},
@@ -88,8 +117,10 @@ export default {
     },
     data(){
         return {
+            userIdsOp:[],
+            param:{},
             bpmnVisible: false,
-            completeTask: {},
+            completeTask: undefined,
             modal:{
                 visible:false,
                 title:undefined,
@@ -100,28 +131,74 @@ export default {
             }
         }
     },
+    created(){
+        this.initFrom();
+    },
+    watch:{
+        taskId(){
+            this.initFrom();
+        }
+    },
     computed:{
         ...mapGetters('User',[
             'hasAuthority'
         ]),
+        taskId(){
+            return this.task && this.task.id;
+        },
         buttonDisabled(){
-            return this.editMode || !(this.completeTask.comment && this.completeTask.comment.replace(/\s/g,''));
+            return this.editMode || !(this.completeTask && this.completeTask.comment && this.completeTask.comment.replace(/\s/g,''));
         },
         okButtonDisabled(){
             return this.editMode || !this.modal.accountId || !(this.modal.comment && this.modal.comment.replace(/\s/g,''));
+        },
+        formValidations(){
+            const validations = {};
+            if(this.task.formFields){
+                this.task.formFields.forEach(field=>{
+                    validations[field.id]={};
+                    if(field.validationConstraints){
+                        field.validationConstraints.forEach(item=>{
+                            validations[field.id][item.name]=item.configuration;
+                        })
+                    }
+                });
+            }
+            return validations
         }
     },
     methods:{
+        initFrom(){
+            let form = {};
+            if(this.task.formFields && this.task.formFields.length){
+                this.task.formFields.forEach(item=>{
+                    form[item.id]=(item.value&&item.value.value) || item.defaultValue;
+                });
+            }
+            this.completeTask = {form:{}};
+        },
         completeTaskOk(transition){
+
+            let error = undefined;
+            if((error = this.$refs.form.hasError())){
+                this.$message.error(error);
+                return;
+            }
             this.$emit("input",true);
-            this.completeTask = Object.assign(this.completeTask,{taskId:this.task.id,transition});
+
+            this.completeTask = Object.assign(this.completeTask,{
+                taskId:this.task.id,
+                transition,
+                processInstanceId:this.task.processInstanceId
+            });
+
             this.$http.postJSON(`/api/task/complete`,this.completeTask)
                 .then(()=>{
                     this.$emit("complete",true);
-                    this.completeTask = {};
+                    this.completeTask = undefined;
                     this.bpmnVisible = false;
                 })
-                .finally(()=> {
+                .catch(()=> {
                     this.$emit("input",false);
                 });
         },
@@ -145,9 +222,10 @@ export default {
             this.$http.postJSON(`/api/task/forward`,completeTask)
                 .then(()=>{
                     this.$emit("complete",true);
+                    this.completeTask = undefined;
                     this.bpmnVisible = false;
                 })
-                .finally(()=> {
+                .catch(()=> {
                     this.$emit("input",false);
                 });
         },
@@ -157,9 +235,10 @@ export default {
             this.$http.postJSON(`/api/task/delegate`,completeTask)
                 .then(()=>{
                     this.$emit("complete",true);
+                    this.completeTask = undefined;
                     this.bpmnVisible = false;
                 })
-                .finally(()=> {
+                .catch(()=> {
                     this.$emit("input",false);
                 });
         },
@@ -180,6 +259,13 @@ export default {
         modalOk(){
             this.modal.visible = false;
             this.modal.callback();
+        },
+        toFunction(script,props){
+            if(script){
+                const interpreter = new Interpreter({props,console});
+                return interpreter.evaluate(`(${script})`);
+            }
+            return undefined;
         }
     },
     mounted() {

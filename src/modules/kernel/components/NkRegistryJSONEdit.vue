@@ -12,10 +12,12 @@
 	along with ELCube.  If not, see <https://www.gnu.org/licenses/>.
 -->
 <template>
-    <div>
-        <a-textarea v-model="val" @blur="change" :auto-size="{minRows:5,maxRows:20}"></a-textarea>
-        <span v-if="error">{{error}}</span>
-    </div>
+    <nk-form :edit="true" :col="1">
+        <nk-form-item title="值">
+            <a-textarea slot="edit" v-model="val" @change="change" :auto-size="{minRows:5,maxRows:20}"></a-textarea>
+            <span v-if="error" slot="edit" class="nk-error-color">{{error}}</span>
+        </nk-form-item>
+    </nk-form>
 </template>
 
 <script>
@@ -50,7 +52,7 @@ export default {
     methods:{
         change(){
             try{
-                this.$emit("input",JSON.parse(this.val));
+                this.$emit("input",JSON.parse(this.text));
                 this.error = undefined;
             }catch (e){
                 this.error = e.message;

@@ -110,6 +110,10 @@
                     <a-tab-pane key="card" tab="卡片" style="margin-top: -14px;">
                         <div style="overflow-y: auto;max-height: 558px;padding: 8px 0;">
                             <nk-form :col="1" :edit="editMode" style="width:100%;">
+                                <nk-form-item title="宽">
+                                    {{def.width}}
+                                    <a-input-number v-model="def.width" slot="edit" size="small" :min="40" :max="100" />
+                                </nk-form-item>
                                 <nk-form-item title="列数量">
                                     {{def.col}}
                                     <a-input-number v-model="def.col" slot="edit" size="small" :min="1" :max="24" />
@@ -149,9 +153,13 @@
                                         {{selectedItem.calcOrder}}
                                         <a-input-number slot="edit" size="small" v-model="selectedItem.calcOrder" :min="1" :max="4" />
                                     </nk-form-item>
-                                    <nk-form-item title="列宽">
+                                    <nk-form-item title="详情宽">
                                         {{selectedItem.col}}
                                         <a-input-number slot="edit" size="small" v-model="selectedItem.col" :min="1" :max="24" />
+                                    </nk-form-item>
+                                    <nk-form-item title="列表宽">
+                                        {{selectedItem.width}}
+                                        <a-input-number slot="edit" size="small" v-model="selectedItem.width" :min="0" :max="30" />
                                     </nk-form-item>
                                     <nk-form-item title="是否非空">
                                         {{selectedItem.required?'是':'否'}}
@@ -171,11 +179,10 @@
                                     </nk-form-item>
                                 </template>
                                 <nk-form-item title="控制">
-                                    {{selectedItem.control===1 ?'读写':(selectedItem.control===0 ?'只读':'隐藏')}}
+                                    {{selectedItem.control===1 ?'读写':'只读'}}
                                     <a-select slot="edit" size="small" v-model="selectedItem.control" >
                                         <a-select-option :key="1" >读写</a-select-option>
                                         <a-select-option :key="0" >只读</a-select-option>
-                                        <a-select-option :key="-1">隐藏</a-select-option>
                                     </a-select>
                                 </nk-form-item>
                                 <nk-form-item title="控制 SpEL">

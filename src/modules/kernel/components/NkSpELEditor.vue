@@ -22,9 +22,9 @@
                 <a-button slot="enterButton">测试</a-button>
             </a-input-search>
             <div v-if="error" class="error">{{error}}</div>
-            <div v-if="result" class="result">
+            <div v-else-if="result!==undefined" class="result">
                 <label style="font-weight: bold;">Result:</label>
-                <div :class="{overflow:component==='vxe-modal'}">
+                <div v-if="result!==null" :class="{overflow:component==='vxe-modal'}">
                     <json-viewer
                         :value="result"
                         :expand-depth=5
@@ -34,6 +34,7 @@
                         boxed
                         sort />
                 </div>
+                <code v-else style="margin-left: 10px;">null</code>
             </div>
 
             <div v-if="component==='vxe-modal'" style="margin-top: 10px;text-align: right">
@@ -98,58 +99,27 @@ export default {
         open(){
             this.visible = true;
             this.result = undefined;
-            try{
-                this.el = this.parse(this.value,2);
-                this.error = undefined;
-            }catch (e){
-                this.el = this.value;
-                this.error = undefined;
-            }
+            this.el = this.value;
+            this.error = undefined;
         },
         submit(){
-            try{
-                this.$emit("input", this.validate(this.el));
-                this.visible = false;
-                this.error = undefined;
-            }catch (e){
-                this.error = e;
-            }
+            this.$emit("input", this.el);
+            this.visible = false;
+            this.error = undefined;
         },
         test(){
+            if(!this.el||!this.el.trim()){
+                this.error = '表达式不能为空';
+                this.result = undefined;
+                return;
+            }
             this.$http.post("/api/debug/spel/test",qs.stringify({
                 el: this.el,
                 docId : this.docId
             })).then(res=>{
                 this.error = res.data.errorMessage;
-                this.result = undefined;
-                if(res.data.result){
-                    this.result = res.data.result;
-                }
+                this.result = res.data.result;
             })
-        },
-        parse(value,space){
-            const v = value && value.replace(/\s/g,'');
-            if(!v)
-                return v;
-            return JSON.stringify(JSON.parse(value),null,space)
-        },
-        validate(value){
-            value = value && value.trim();
-            try{
-                return JSON.stringify(JSON.parse(value));
-            }catch (e){
-                if(typeof value==='string'){
-                    if(value.startsWith('{')&&value.endsWith('}')){
-                        return value;
-                    }
-                    try{
-                        JSON.stringify(JSON.parse(`"${value}"`));
-                        return value;
-                    }catch (e){
-                        throw e;
-                    }
-                }
-            }
         }
     }
 }

@@ -88,7 +88,8 @@
                                         <a-select
                                             placeholder="请选择权限"
                                             style="width: 100%"
-                                            :filter-option="false"
+                                            showSearch
+                                            :filter-option="filterOption"
                                             v-model="row.permId"
                                             @change="permItemChange(row)"
                                         >
@@ -264,6 +265,9 @@ export default {
                     });
             }
         },
+        filterOption(value, option){
+            return option.componentOptions.children[0].text.indexOf(value) >= 0
+        }
     }
 }
 </script>

@@ -59,7 +59,8 @@ import 'bpmn-js-properties-panel/dist/assets/bpmn-js-properties-panel.css';
 import BpmnModeler                from 'bpmn-js/lib/Modeler';
 import propertiesPanelModule      from 'bpmn-js-properties-panel/lib';
 import propertiesProviderModule   from 'bpmn-js-properties-panel/lib/provider/camunda';
-import customTranslate            from '../ref/customTranslate';
+// import propertiesProviderModule   from '../components/NkCamundaPropertiesProviderModule';
+import customTranslate            from '../ref/NkCamundaCustomTranslate';
 import extensionModdle            from 'camunda-bpmn-moddle/resources/camunda.json';
 import NkUtil                     from "@/utils/NkUtil";
 

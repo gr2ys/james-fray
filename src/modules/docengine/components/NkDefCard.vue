@@ -13,13 +13,14 @@
 -->
 <template>
     <a-card size="default"
-            :title="title || (cardComponent.card.cardName + '配置')"
+            :title="$slots.title ? undefined : (title || (cardComponent.card.cardName + '配置'))"
             :extra="extra"
             :loading="loading"
             :hoverable="true"
             :headStyle="headStyle"
             :bodyStyle="bodyStyle"
             :bordered="true"
+            style="cursor: default;"
     >
 
         <slot slot="title" name="title"></slot>
@@ -27,9 +28,9 @@
         <slot slot="cover" name="cover"></slot>
 
         <div slot="extra">
-            <slot name="extra"></slot>
-            <a @click="showJson = !showJson" style="font-size: 12px">切换</a>
-            <nk-help-link v-if="cardComponent.$docs" style="margin-left: 5px;" />
+            <slot name="extra" v-if="!showJson"></slot>
+            <a-button @click="showJson = !showJson" :type="showJson?'primary':'default'" size="small" style="font-size: 12px;margin-left: 10px;">源码</a-button>
+            <nk-help-link v-if="cardComponent.$docs" style="margin-left: 10px;" />
         </div>
         <codemirror v-if="showJson"
                     ref="codemirror2"

@@ -43,7 +43,8 @@
             <!--增加一行空列，避免宽度不够不能自适应-->
             <vxe-column v-if="def.seq" type="seq" title="#" width="5%"></vxe-column>
 
-            <vxe-column v-for="(item) in def.items" :key="item.key"
+            <!--避免配置更新后不重新渲染，所以要使用item.inputOptions作为key-->
+            <vxe-column v-for="(item) in def.items" :key="item.key+JSON.stringify(item.inputOptions)"
                       :width="(item.col||10) + '%'"
                       :title="item.name"
                       :field="item.key"
@@ -97,6 +98,7 @@ export default {
         return {
             loading: false,
             trigger: false,
+            triggerKeys: [],
             calcLock: false
         }
     },
@@ -168,7 +170,10 @@ export default {
             if(this.trigger&&!this.calcLock){
                 this.trigger = false;
                 this.calcLock = true;
-                this.nk$calc();
+                this.nk$calc({
+                    triggerKeys:this.triggerKeys
+                });
+                this.triggerKeys = [];
             }
         },
         xTableRemove(data,seq){
@@ -192,6 +197,9 @@ export default {
             // 单元格内容改变后，如果需要触发计算，则先记录状态，等退出行编辑模式后再触发
             if(item.calcTrigger){
                 this.trigger = true;
+                if(this.triggerKeys.indexOf(item.key)===-1){
+                    this.triggerKeys.push(item.key);
+                }
             }
             this.$refs.xTable.updateStatus(scope);
         },
@@ -202,7 +210,7 @@ export default {
             }
             const errMap = await this.$refs.xTable.fullValidate(true).catch(errMap => errMap)
             if (errMap) {
-                return `${this.card.cardName}-${errMap.column.title} ${errMap.rule.$options.message||errMap.rule.$options.content}`;
+                return `${this.card.cardName}-${errMap[Object.keys(errMap)[0]][0].column.title} ${errMap[Object.keys(errMap)[0]][0].rule.$options.message||errMap[Object.keys(errMap)[0]][0].rule.$options.content}`;
             }
             return false;
         },
