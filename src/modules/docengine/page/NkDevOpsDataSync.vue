@@ -17,9 +17,12 @@
         <nk-card class="card" title="数据同步">
 
             <nk-form :col="1">
-                <nk-form-item title="清空数据">
-                    <a-switch v-model="dropFirst"></a-switch>
-                </nk-form-item>
+              <nk-form-item title="清空数据">
+                <a-switch v-model="dropFirst"></a-switch>
+              </nk-form-item>
+              <nk-form-item title="忽略错误">
+                <a-switch v-model="ignoreError"></a-switch>
+              </nk-form-item>
                 <nk-form-item title="过滤条件">
                     <a-input v-model="where" placeholder="EQL WHERE"  addon-before="SELECT * FROM doc WHERE"></a-input>
                 </nk-form-item>
