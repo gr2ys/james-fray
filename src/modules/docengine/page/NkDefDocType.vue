@@ -112,7 +112,7 @@
                            :doc-def="def"
                            :card-key="selected.cardKey"
                            :doc-options="options"
-                           :edit-mode="editMode" />
+                           :edit-mode="editMode"/>
                 <a-card v-if="selected.beanName" title="文档"
                         :key="'document-'+selected.cardKey"
                         class="doc">
