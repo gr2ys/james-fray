@@ -65,17 +65,23 @@ export default {
       nkDatetimeFriendly ({ cellValue }) {
         return NkFormat.nkDatetimeFriendly(cellValue)
       },
+      nkDatetime ({ cellValue },format) {
+        return NkFormat.nkDatetime(cellValue,format)
+      },
+      nkDate ({ cellValue },format) {
+        return NkFormat.nkDatetime(cellValue,format||'Y/M/D')
+      },
+      nkDatetimeISO ({ cellValue },format) {
+        return NkFormat.nkDatetimeISO(cellValue,format)
+      },
+      nkDateISO ({ cellValue },format) {
+        return NkFormat.nkDatetimeISO(cellValue,format||'Y/M/D')
+      },
       nkCurrency ({ cellValue }) {
         return NkFormat.nkCurrency(cellValue)
       },
       nkPercent ({ cellValue }) {
         return NkFormat.nkPercent(cellValue)
-      },
-      nkDatetime ({ cellValue },format) {
-        return NkFormat.nkDatetime(cellValue,format)
-      },
-      nkDatetimeISO ({ cellValue },format) {
-        return NkFormat.nkDatetimeISO(cellValue,format)
       },
       nkNull({cellValue},defaultValue){
         return cellValue || defaultValue;
