@@ -28,7 +28,9 @@
         <a-button-group slot="action">
         </a-button-group>
 
-        <nk-page-preview :params="previewParams" v-model="previewVisible" @close="previewClose"></nk-page-preview>
+        <transition name="slide-fade">
+            <nk-page-preview :params="previewParams" v-if="previewVisible" @close="previewClose" @to="to"></nk-page-preview>
+        </transition>
 
     </nk-query-layout>
 </template>
@@ -143,11 +145,30 @@ export default {
                 this.previewVisible = true;
                 this.previewParams = {
                     mode: "detail",
-                    docId: row.docId
+                    docId: row.docId,
+                    row
                 }
             }
         },
+        to(e){
+            let row = this.previewParams.row;
+            this.previewParams = undefined
+            this.$nextTick(()=>{
+                const index = this.$refs.layout.page.list.indexOf(row)
+                row   = this.$refs.layout.page.list[index+e]
+                if(row){
+                    this.previewParams = {
+                        mode: "detail",
+                        docId: row.docId,
+                        row
+                    }
+                }else{
+                    this.previewVisible = false;
+                }
+            })
+        },
         previewClose(){
+            this.previewVisible = false;
             this.$refs.layout.grid().clearCurrentRow();
         }
     },

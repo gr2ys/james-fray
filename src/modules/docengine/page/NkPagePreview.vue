@@ -12,16 +12,23 @@
 	along with ELCube.  If not, see <https://www.gnu.org/licenses/>.
 -->
 <template>
-    <transition name="slide-fade">
-        <div class="preview" v-if="value">
-            <div class="background" @click="hide"></div>
-            <div class="foreground">
-                <nk-page-doc-detail :params="params" :preview="true">
-                    <nk-doc-link :doc="params" type="primary" slot="buttons" @click="hide"><a-icon type="enter" /></nk-doc-link>
-                </nk-page-doc-detail>
+    <div class="preview">
+        <div class="background" @click="hide">
+            <div class="buttons">
+                <div class="prev" @click="to(-1,$event)">
+                    <a-icon type="left" />
+                </div>
+                <div class="next" @click="to( 1,$event)">
+                    <a-icon type="right" />
+                </div>
             </div>
         </div>
-    </transition>
+        <div class="foreground">
+            <nk-page-doc-detail v-if="params" :params="params" :preview="true">
+                <nk-doc-link :doc="params" type="primary" slot="buttons"><a-icon type="enter" /></nk-doc-link>
+            </nk-page-doc-detail>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -38,12 +45,24 @@ export default {
         }
     },
     mounted() {
+        window.addEventListener("keydown",this.keydown)
+    },
+    destroyed() {
+        window.removeEventListener("keydown",this.keydown)
     },
     methods:{
         hide(){
-            this.$emit("input",false);
             this.$emit("close");
-        }
+        },
+        to(s,e){
+            this.$emit("to",s);
+            e.stopPropagation();
+        },
+        keydown(e){
+            if(e.key==='Escape'){
+                this.$emit("close");
+            }
+        },
     }
 }
 </script>
@@ -62,6 +81,41 @@ export default {
             height: 100%;
             background-color: #2b2b2b;
             opacity: 0.5;
+
+            .buttons{
+                width: 35%;
+                height: 100px;
+                position: absolute;
+                bottom: 0;
+                display: flex;
+            }
+
+            .prev{
+                width: 50%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 48px;
+                cursor: pointer;
+                color: white;
+                &:hover{
+                    background-color: #fff;
+                    color: #2b2b2b;
+                }
+            }
+            .next{
+                width: 50%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 48px;
+                cursor: pointer;
+                color: white;
+                &:hover{
+                    background-color: #fff;
+                    color: #2b2b2b;
+                }
+            }
         }
         .foreground{
             position: absolute;
@@ -77,19 +131,5 @@ export default {
             &::-webkit-scrollbar{
             }
         }
-    }
-
-    /* 可以设置不同的进入和离开动画 */
-    /* 设置持续时间和动画函数 */
-    .slide-fade-enter-active {
-        transition: all .3s ease;
-    }
-    .slide-fade-leave-active {
-        transition: all .1s cubic-bezier(1.0, 0.5, 0.8, 1.0);
-    }
-    .slide-fade-enter, .slide-fade-leave-to
-        /* .slide-fade-leave-active for below version 2.1.8 */ {
-        transform: translateX(10px);
-        opacity: 0;
     }
 </style>

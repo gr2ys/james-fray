@@ -43,7 +43,7 @@
             </a-dropdown>
         </a-button-group>
 
-        <nk-page-preview :params="previewParams" v-model="previewVisible"></nk-page-preview>
+        <nk-page-preview :params="previewParams" v-if="previewVisible" @close="previewClose" @to="to"></nk-page-preview>
 
     </nk-query-layout>
 </template>
@@ -168,10 +168,29 @@ export default {
                     docId: row.docId
                 }
             }
-        }
+        },
+        to(e){
+            let row = this.previewParams.row;
+            this.previewParams = undefined
+            this.$nextTick(()=>{
+                const index = this.$refs.layout.page.list.indexOf(row)
+                row   = this.$refs.layout.page.list[index+e]
+                if(row){
+                    this.previewParams = {
+                        mode: "detail",
+                        docId: row.docId,
+                        row
+                    }
+                }else{
+                    this.previewVisible = false;
+                }
+            })
+        },
+        previewClose(){
+            this.previewVisible = false;
+            this.$refs.layout.grid().clearCurrentRow();
+        },
     },
-    mounted() {
-    }
 }
 </script>
 
