@@ -55,9 +55,6 @@
                                 <a-menu-item key="1">
                                     <a @click="doSetDocumentPage('nkdn://')">文档中心</a>
                                 </a-menu-item>
-                                <a-menu-item key="3">
-                                    <router-link to="/apps/apidoc">系统API</router-link>
-                                </a-menu-item>
                                 <a-menu-item key="2">
                                     <a @click="logout()">安全退出</a>
                                 </a-menu-item>
