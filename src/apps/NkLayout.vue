@@ -421,7 +421,6 @@ export default {
             this.$refs.login.login();
         },
         loginFormSuccess(){
-            console.log('1232')
             this.submitLogin();
         },
         loginFormChanged(e){

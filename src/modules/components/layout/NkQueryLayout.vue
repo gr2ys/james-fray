@@ -79,8 +79,8 @@
                             <a-button type="primary" html-type="submit" style="width: 46px;">
                                 <a-icon type="search" />
                             </a-button>
-                            <a-button v-if="exportConfig && exportConfig.enable" type="default" @click="doExport" style="width: 46px;">
-                                <a-icon type="export" />
+                            <a-button v-if="exportConfig && exportConfig.enable" type="default" @click="doExport" style="width: 46px;" :loading="exportLoading">
+                                <a-icon type="export" v-if="!exportLoading" />
                             </a-button>
                             <a-button type="default" @click="reset({})" style="width: 46px;">
                                 <a-icon type="rollback" />
@@ -102,7 +102,7 @@
                 show-overflow="tooltip"
                 size="mini"
                 :border="border"
-                :columns="dataTableColumns"
+                :columns="availableDataTableColumns"
                 :data="page.list"
                 :loading="loading"
                 @cell-click="vxeCellClick"
@@ -188,6 +188,14 @@ export default {
         },
         exportConfig:Object
     },
+    computed:{
+        aggs(){
+            return this.page.aggs || {}
+        },
+        availableDataTableColumns(){
+            return this.dataTableColumns && this.dataTableColumns.filter(item=>item.ignore!==true);
+        }
+    },
     data(){
         return {
             loading: true,
@@ -211,17 +219,13 @@ export default {
                 list: []
             },
 
-            suggest: []
+            suggest: [],
+            exportLoading:false
         }
     },
     mounted(){
         if(!this.lazy) {
             this.init()
-        }
-    },
-    computed:{
-        aggs(){
-            return this.page.aggs || {}
         }
     },
     methods:{
@@ -247,19 +251,7 @@ export default {
 
             this.page.rows = this.initRows;
             this.params.rows = this.initRows;
-
-            // 设置索引的返回字段
-            const fields = this.dataIncludeFields;
-            if(fields.indexOf("docId")===-1){fields.push("docId")}
-            if(fields.indexOf("classify")===-1){fields.push("classify")}
-            if(fields.indexOf("itemType")===-1){fields.push("itemType")}
-            this.dataTableColumns.forEach(item=>{
-                if(item.field && fields.indexOf(item.field)===-1){
-                    fields.push(item.field);
-                }
-            })
-            this.params.source=fields;
-
+            this.params.source=this.buildFields(false);
 
             this.searchMoreDefUpdate();
             this.searchItemsDefault
@@ -274,6 +266,23 @@ export default {
             if(this.saveAsSource){
                 this.saveAsGet();
             }
+        },
+        buildFields(includeIgnore){
+            // 设置索引的返回字段
+            const fields = this.dataIncludeFields;
+            if(fields.indexOf("docId")===-1){fields.push("docId")}
+            if(fields.indexOf("classify")===-1){fields.push("classify")}
+            if(fields.indexOf("itemType")===-1){fields.push("itemType")}
+            this.dataTableColumns
+                .filter(item=>{
+                    return includeIgnore || item.ignore!==true
+                })
+                .forEach(item=>{
+                    if(item.field && fields.indexOf(item.field)===-1){
+                        fields.push(item.field);
+                    }
+                })
+            return fields;
         },
         reset(params){
 
@@ -377,7 +386,10 @@ export default {
         },
 
         doExport(){
-            this.$emit("exportExcel", this.params)
+            this.exportLoading = true;
+            let params = Object.assign({},this.params);
+            params.source = this.buildFields(true);
+            this.$emit("exportExcel", params)
         },
         /**
          * 执行参数更新，并通知父组件，由父组件执行搜索
@@ -525,6 +537,9 @@ export default {
         },
         grid(){
             return this.$refs.grid;
+        },
+        setExportDown(){
+            this.exportLoading=false;
         }
     }
 }

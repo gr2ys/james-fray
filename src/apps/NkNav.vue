@@ -140,7 +140,6 @@ export default {
                     const options = JSON.parse(m.badgeOption);
                     this.$http.postJSON(options.url,options.body).then(res=>{
                         this.$set(m,'total',res.data.total)
-                        console.log(m)
                     });
                 }catch (e){
                     this.$set(m,'tag',m.badgeOption)

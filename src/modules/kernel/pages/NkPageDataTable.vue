@@ -56,6 +56,7 @@
 import NkPagePreview from "../../docengine/page/NkPagePreview";
 import {mapMutations,mapGetters} from "vuex";
 import NkUtil from "@/utils/NkUtil";
+import moment from 'moment';
 
 export default {
     components: {NkPagePreview},
@@ -165,25 +166,40 @@ export default {
             this.params = params;
 
             if(this.custom.postSql){
-                // this.$http.postJSON(`/api/data/analyse/query`,Object.assign({
-                //         sqlList: (this.custom.postSql instanceof Array) ? this.custom.postSql : [this.custom.postSql],
-                //         $debug: this.custom.$debug,
-                //     },params)
-                // ).then((res)=>{
-                //     if(this.$refs.layout)
-                //         this.$refs.layout.setData(res.data)
-                // });
+                this.$http.postJSON(`/api/data/analyse/query`,Object.assign({
+                        sqlList: (this.custom.postSql instanceof Array) ? this.custom.postSql : [this.custom.postSql],
+                        $debug: this.custom.$debug,
+                        columns: this.custom.columns
+                    },params)
+                ).then((res)=>{
+                    const fileName = this.custom.title +"_" + moment().format("YYYY-MM-DD");
+                    this.$notification.info({
+                        duration: 10,
+                        message: '提示',
+                        description:`准备下载"${fileName}.xlsx"`
+                    })
+                    this.$refs.download.setAttribute("src",`/api/doc/download/${res.data}/${fileName}?${new Date().getTime()}`);
+                }).finally(()=>{
+                    if(this.$refs.layout)
+                        this.$refs.layout.setExportDown()
+                })
             }else{
-                this.doLoading(true)
                 this.$http.postJSON(`/api/doc/export/${this.custom.index}`,Object.assign({
                         postCondition: this.custom.postCondition,
                         $debug: this.custom.$debug,
                         columns: this.custom.columns
                     },params)
                 ).then((res)=>{
-                    this.$refs.download.setAttribute("src",`/api/doc/download/${res.data}/${this.custom.title}?${new Date().getTime()}`);
+                    const fileName = this.custom.title +"_" + moment().format("YYYY-MM-DD");
+                    this.$notification.info({
+                        duration: 10,
+                        message: '提示',
+                        description:`准备下载"${fileName}.xlsx"`
+                    })
+                    this.$refs.download.setAttribute("src",`/api/doc/download/${res.data}/${fileName}?${new Date().getTime()}`);
                 }).finally(()=>{
-                    this.doLoading(false)
+                    if(this.$refs.layout)
+                        this.$refs.layout.setExportDown()
                 })
             }
         },

@@ -125,8 +125,7 @@ export default {
         drillInner($event,parent){
             this.$emit('nk-row-drill',$event,parent);
         },
-        rowExpand(e){
-            console.log(e)
+        rowExpand(){
         }
     }
 }

@@ -172,16 +172,16 @@ export default {
             this.viewer.importXML(xml)
                 .then(() => {
                     this.viewer.get('canvas').zoom('fit-viewport',{});
-                    const eventBus = this.viewer.get('eventBus');
-                    const events = [
-                        'element.click',
-                        'element.dblclick'
-                    ];
-                    events.forEach(event => {
-                        eventBus.on(event, () => {
-                            //console.log(e);
-                        })
-                    })
+                    // const eventBus = this.viewer.get('eventBus');
+                    // const events = [
+                    //     'element.click',
+                    //     'element.dblclick'
+                    // ];
+                    // events.forEach(event => {
+                    //     eventBus.on(event, () => {
+                    //         //console.log(e);
+                    //     })
+                    // })
                 }).catch(err => {
                 console.error(err);
             }).finally(()=>{
@@ -213,7 +213,7 @@ export default {
                             return;
                         }
 
-                            resolve(this.bpmInfo);
+                        resolve(this.bpmInfo);
                     }).catch(reject)
             })
         },
@@ -255,8 +255,7 @@ export default {
                 .then(bpmn=>{
                     this.loadingDeploy = true;
                     this.$http.postJSON("/api/def/bpm/deploy",bpmn)
-                        .then(response=>{
-                            console.log(response)
+                        .then(()=>{
                             this.$message.success("部署成功");
                         })
                         .catch(()=>{})

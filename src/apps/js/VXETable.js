@@ -141,7 +141,6 @@ export default {
             props,
             on:{
               input:(e)=>{
-                console.log(e)
                 const value = Math.round(e.value*Math.pow(10,props.digits||0))/Math.pow(10,props.digits||0);
                 setValue(row,column.property,props.percent?(value/100):value)
                 if(renderOpts.events&&renderOpts.events.change){
