@@ -537,11 +537,23 @@ export default {
                     callback(){
                         self.doDelete(true);
                     },
+                    title:'安全确认',
                     message:'请注意，删除单据配置后不可恢复，需进行二次身份验证',
+                    okText:'确认无误，继续删除',
+                    okType:'danger',
                     reLoginTime:undefined
                 })
             }else{
-                this.doDelete();
+                let self = this;
+                this.setReLogin({
+                    callback(){
+                        self.doDelete();
+                    },
+                    title:'安全确认',
+                    message:'请注意，删除单据配置后不可恢复，需进行二次身份验证',
+                    okText:'确认删除',
+                    reLoginTime:undefined
+                })
             }
         },
         diffChange(value){

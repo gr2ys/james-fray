@@ -98,15 +98,15 @@
 
         <a-modal :visible="reLogin"
                  centered
-                 title="安全验证"
-                 okText="确定"
+                 :title="reLoginTitle||'安全验证'"
                  :cancelText="logoutText"
                  width="350px"
                  :maskClosable="false"
                  :maskStyle="maskStyle"
                  :destroyOnClose="true"
                  @cancel="cancel()"
-                 :okButtonProps="{props: {disabled:!!loginInfo.error}}"
+                 :okButtonProps="{props: {disabled:!!loginInfo.error,type:reLoginOkType||'primary'}}"
+                 :okText="reLoginOkText||'确定'"
                  @ok="login"
                  :confirm-loading="loginInfo.logging"
         >
@@ -178,7 +178,7 @@ export default {
             'layoutConfig'
         ]),
         ...mapState('User',[
-            'reLoginMessage'
+            'reLoginMessage','reLoginOkType','reLoginOkText','reLoginTitle'
         ]),
         ...mapGetters('User',[
             'user','reLogin','reLoginTime','hasAuthority'
