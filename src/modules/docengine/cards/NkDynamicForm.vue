@@ -26,7 +26,7 @@
                                :default-if-edit-lost="false"
                                :col="item.col"
                                :edit="editMode && item.control > 0"
-                               :width="def.titleWidth"
+                               :width="def.titleWidth||undefined"
                                :ellipsis="def.titleEllipsis"
                                :content-align="item.alignRight?'right':''"
 
