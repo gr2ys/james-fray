@@ -98,7 +98,7 @@
                             <slot name="card" :def="def"></slot>
                         </div>
                     </a-tab-pane>
-                    <a-tab-pane v-if="selectedItem" key="field" :tab="selectedItem.name" style="margin-top: -14px;">
+                    <a-tab-pane v-if="selectedItem" key="field" :tab="selectedItem.inputType | formatInputType(inputTypeDefs)" style="margin-top: -14px;">
                         <div style="overflow-y: auto;max-height: 558px;padding: 8px 0;">
                             <slot name="field" :selectedItem="selectedItem"></slot>
                             <component v-if="fieldDefComponent"
@@ -136,6 +136,17 @@ export default {
         filter:String,
         reviewEditMode: Boolean,
         showHideFiled: Boolean,
+    },
+    filters:{
+        formatInputType(value,inputTypeDefs){
+            if(inputTypeDefs){
+                let d = inputTypeDefs.find(i=>i.value===value);
+                if(d){
+                    return d.name.split('|')[1];
+                }
+            }
+            return value;
+        }
     },
     mounted() {
         this.def.items.forEach(i=>{

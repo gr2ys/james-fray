@@ -56,9 +56,6 @@
             </template>
             <template v-slot:field="{selectedItem}">
                 <nk-form :edit="editMode" :col="1">
-                    <nk-form-item title="字段类型">
-                        {{selectedItem.inputType | formatInputType(inputTypeDefs)}}
-                    </nk-form-item>
                     <nk-form-item title="KEY">
                         {{selectedItem.key}}
                         <a-input slot="edit" size="small" v-model="selectedItem.key" @change="keyChanged" />
@@ -146,17 +143,6 @@ export default {
     }),MixinSortable(),MixinDynamicDef],
     components:{
         NkFormDesigner
-    },
-    filters:{
-        formatInputType(value,inputTypeDefs){
-            if(inputTypeDefs){
-                let d = inputTypeDefs.find(i=>i.value===value);
-                if(d){
-                    return d.name.split('|')[1];
-                }
-            }
-            return value;
-        }
     },
     data(){
         return {
