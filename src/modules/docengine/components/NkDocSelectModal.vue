@@ -154,7 +154,7 @@ export default {
     },
     beforeUpdate(){
         if(this.value && this.valueOld!==this.value){
-            this.query();
+            this.formSubmit();
         }
         this.valueOld = this.value;
     },
@@ -175,9 +175,9 @@ export default {
             this.$emit("select",row);
         },
         formSubmit(e){
-            e.preventDefault();
+            if(e)e.preventDefault();
+            if(this.$refs.grid)this.$refs.grid.clearSort();
 
-            this.$refs.grid.clearSort();
             this.params.order = undefined;
             this.params.orderField = undefined;
             if(this.sortConfig && this.sortConfig.remote && this.sortConfig.defaultSort && this.sortConfig.defaultSort.field){
@@ -185,7 +185,7 @@ export default {
                 if(column){
                     this.params.orderField = (column.params&&column.params.orderField)||column.field;
                     this.params.order = this.sortConfig.defaultSort.order;
-                    this.$refs.grid.sort(this.sortConfig.defaultSort.field, this.params.order);
+                    if(this.$refs.grid)this.$refs.grid.sort(this.sortConfig.defaultSort.field, this.params.order);
                 }
             }
 
