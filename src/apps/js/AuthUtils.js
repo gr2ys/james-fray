@@ -13,6 +13,9 @@
  */
 export default {
 
+  getUsername(){
+    return localStorage.getItem("$NK-Auth-Username")||'';
+  },
   getToken(){
     return localStorage.getItem("$NK-Auth-AccessToken")||'';
   },
@@ -28,14 +31,16 @@ export default {
       refresh: refresh > 0    //刷新有效期大于0
     };
   },
-  setToken(data){
+  setToken(username,data){
     localStorage.setItem("$NK-Auth-Expire",new Date().getTime() + data.expire);
     localStorage.setItem("$NK-Auth-Refresh",new Date().getTime() + data.refresh);
-    localStorage.setItem("$NK-Auth-AccessToken",data.accessToken);
+    localStorage.setItem("$NK-Auth-AccessToken",data.token);
+    localStorage.setItem("$NK-Auth-Username",username);
   },
   clear(){
     localStorage.removeItem("$NK-Auth-Expire");
     localStorage.removeItem("$NK-Auth-Refresh");
     localStorage.removeItem("$NK-Auth-AccessToken");
+    localStorage.removeItem("$NK-Auth-Username");
   }
 }

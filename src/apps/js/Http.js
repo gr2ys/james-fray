@@ -37,7 +37,28 @@ export default (Vue) => {
   };
   const onRequestFulfilled = config => {
     let token = AuthUtils.getToken();
-    if(token){                    config.headers.common['NK-Token'] = token; }
+    if(token){
+
+      let timestamp = new Date().getTime();
+      const str = config.url.split('?');
+      const array = str[1] ? str[1].split('&') : [];
+      array.push(`timestamp=${timestamp}`)
+      array.push(`secret=${token}`)
+
+      const unsign = str[0].substr(4)+'?'+array.sort().join('&');
+
+      const signature = crypto.createHash('sha1')
+          .update(unsign)
+          .digest('hex');
+
+
+      config.headers.common['elcube-client']    = 'web';
+      config.headers.common['elcube-user']      = AuthUtils.getUsername();
+      config.headers.common['elcube-timestamp'] = timestamp;
+      config.headers.common['elcube-nonce']     = 'web';
+      config.headers.common['elcube-signature'] = signature;
+
+    }
     return onRequestNoneToken(config)
   };
   const onRequestRejected = error => {
@@ -107,7 +128,7 @@ export default (Vue) => {
       content: error.response.data.msg,
     });
     setTimeout(()=>{
-      location.href=""
+      //location.href=""
     },1000)
   }
 
@@ -210,7 +231,7 @@ export default (Vue) => {
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
           'NK-App': 'elcube',
-          'NK-Token': AuthUtils.getToken()
+          'NK-Token': AuthUtils.getToken(),
         }
       }).then(res=>{
         AuthUtils.setToken(res.data);
@@ -246,12 +267,18 @@ export default (Vue) => {
 
   function login(username, password, verKey, verCode){
 
+    const timestamp = new Date().getTime();
+    const signature = crypto.createHash('sha1')
+        .update(`password=${sha1(password)}&timestamp=${timestamp}`).digest('hex');
+
     return new Promise((resolve, reject)=>{
       axios.post("api/authentication/token",qs.stringify({
         systemId: "NK",
+        client: "web",
         os: "Browser",
-        username: username,
-        password: sha1(password),
+        timestamp: timestamp,
+        username:  username,
+        password:  signature,
         verKey,
         verCode,
       }),{
@@ -260,7 +287,7 @@ export default (Vue) => {
         }
       }).then(res=>{
         User.state.reLogin=false;
-        AuthUtils.setToken(res.data);
+        AuthUtils.setToken(username,res.data);
         clearReLoginInterval();
         resolve.apply(this,[res]);
       }).catch(e=>{
