@@ -95,7 +95,10 @@
                                  @drag="drag(null,inputType)" @dragend="dragend" draggable="true"
                                  style="border: dashed 1px #eee;width:100%;cursor: move;">
                                 <nk-form-item v-if="inputType.key" :title="inputType.name&&inputType.name.split('|')[1]">
-                                    <component :is="inputType.key" :editMode="true"></component>
+                                    <div style="position: relative">
+                                        <div style="position: absolute;z-index: 1;left: 0;top: 0;right: 0;bottom: 0;"></div>
+                                        <component :is="inputType.key" :editMode="true"></component>
+                                    </div>
                                 </nk-form-item>
                                 <div v-else style="padding-right: 50px;">
                                     <nk-form-divider title="分隔符">

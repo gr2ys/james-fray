@@ -92,6 +92,7 @@
 <script>
 // import NkUtil from "../../utils/NkUtil";
 import NkRegistryText from "../components/NkRegistryTextEdit";
+import NkRegistryNumber from "../components/NkRegistryNumber";
 // import NkRegistryTextArea from "../components/NkRegistryTextAreaEdit";
 import NkRegistryJSON from "../components/NkRegistryJSONEdit";
 import NkRegistrySelectOptions from "../components/NkRegistrySelectOptions";
@@ -105,8 +106,11 @@ const dataType = {
         value:'NkMeterAntVArea'
     }],
     "@DICT":[{
-        title:"普通文本",
+        title:"文本",
         value:"NkRegistryText"
+    },{
+        title:"数字",
+        value:"NkRegistryNumber"
     },{
         title:"下拉选项",
         value:"NkRegistrySelectOptions"
@@ -141,6 +145,7 @@ export default {
     },
     components:{
         NkRegistryText,
+        NkRegistryNumber,
         NkRegistryJSON,
         NkRegistrySelectOptions,
         NkRegistryDataSetNote,
@@ -156,7 +161,8 @@ export default {
             selectKeys:[],
             parentNode:undefined,
             expand:false,
-            loading:false
+            loading:false,
+            dataTypeIsUndefined:false,
         }
     },
     computed:{
@@ -224,6 +230,7 @@ export default {
                 this.selectedNode = this.tree.find(c=>c.key===selectKey);
                 this.selectedNode.readonly = true;
             }
+            this.dataTypeIsUndefined = !this.selectedNode.dataType;
         },
         saveSelected(){
             this.loading = true;
@@ -292,15 +299,20 @@ export default {
             });
         },
         dataTypeChanged(){
-            const self = this;
-            this.$confirm({
-                title: '是否保留数据？',
-                onOk() {
-                },
-                onCancel(){
-                    self.$set(self.selectedNode,'content',undefined)
-                }
-            });
+            if(this.dataTypeIsUndefined){
+                this.$set(this.selectedNode,'content',undefined)
+                this.dataTypeIsUndefined = false;
+            }else{
+                const self = this;
+                this.$confirm({
+                    title: '是否保留数据？',
+                    onOk() {
+                    },
+                    onCancel(){
+                        self.$set(self.selectedNode,'content',undefined)
+                    }
+                });
+            }
         }
     }
 }
