@@ -15,10 +15,10 @@
     <div class="preview">
         <div class="background" @click="hide">
             <div class="buttons">
-                <div class="prev" @click="to(-1,$event)">
+                <div class="b" @click="to(-1,$event)">
                     <a-icon type="left" />
                 </div>
-                <div class="next" @click="to( 1,$event)">
+                <div class="b" @click="to( 1,$event)">
                     <a-icon type="right" />
                 </div>
             </div>
@@ -90,20 +90,7 @@ export default {
                 display: flex;
             }
 
-            .prev{
-                width: 50%;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                font-size: 48px;
-                cursor: pointer;
-                color: white;
-                &:hover{
-                    background-color: #fff;
-                    color: #2b2b2b;
-                }
-            }
-            .next{
+            .b{
                 width: 50%;
                 display: flex;
                 justify-content: center;

@@ -141,7 +141,8 @@ export default {
             this.$router.push("/apps/docs/create/"+docType)
         },
         selected({row, $event}){
-            if($event.target.tagName!=='A') {
+
+            if(!$event.altKey && $event.target.tagName!=='A') {
                 this.previewVisible = true;
                 this.previewParams = {
                     mode: "detail",
@@ -168,8 +169,11 @@ export default {
             })
         },
         previewClose(){
-            this.previewVisible = false;
-            this.$refs.layout.grid().clearCurrentRow();
+            this.previewParams = undefined
+            this.$nextTick(()=>{
+                this.previewVisible = false;
+                this.$refs.layout.grid().clearCurrentRow();
+            })
         }
     },
     mounted() {
