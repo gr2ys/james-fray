@@ -116,7 +116,7 @@
                                 </nk-form-item>
                                 <nk-form-item title="标题宽度">
                                     {{def.titleWidth}}
-                                    <a-input-number v-model="def.titleWidth" slot="edit" size="small" :min="20" :max="300" />
+                                    <a-input-number v-model="def.titleWidth" slot="edit" size="small" :min="60" :max="300" />
                                 </nk-form-item>
                                 <nk-form-item title="标题省略号">
                                     {{def.titleEllipsis}}
