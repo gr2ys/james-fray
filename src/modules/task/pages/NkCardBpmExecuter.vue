@@ -23,17 +23,20 @@
 
         <a-input type="textarea" v-model="completeTask.comment" :auto-size="{ minRows: 4, maxRows: 6 }" placeholder="请输入办理意见"></a-input>
 
+        <div style="margin-bottom: 25px">
+        </div>
+
         <nk-form  ref="form"  v-for="(item,index) in this.task.formFields" :key="index" >
             <nk-form-item :term="item.label">
                 <a-input
                         v-if            ="item.typeName=='string'"
                         v-model         ="param[item.id]"
                         size            ="small"
-                        style           ="width: 150px;"/>
+                        style           ="width: 70%;"/>
 
                 <a-select       v-if          ="item.typeName=='SelectFormType'"
                                 v-model         ="param[item.id]"
-                                style           ="width: 150px;"
+                                style           ="width: 70%;"
                                 size            ="small"
                                 :options        ="userIdsOp">
                 </a-select>
