@@ -19,27 +19,23 @@
                       :task-definition-key="task.taskDefinitionKey"
                       style="margin-bottom: 10px;" />
 
-        <nk-bpm-timeline :task="task" :histories="task.historicalTasks"></nk-bpm-timeline>
+        <nk-bpm-timeline :task="task" :histories="task.historicalTasks" style="margin-left: 10px;margin-top: 15px;"></nk-bpm-timeline>
+        <div style="border-top: dashed 1px #ccc;padding-bottom: 20px;"></div>
 
-        <a-input type="textarea" v-model="completeTask.comment" :auto-size="{ minRows: 4, maxRows: 6 }" placeholder="请输入办理意见"></a-input>
-
-        <div style="margin-bottom: 25px">
-        </div>
-
-        <nk-form  ref="form"  v-for="(item,index) in this.task.formFields" :key="index" >
-            <nk-form-item :term="item.label">
-                <a-input
-                        v-if            ="item.typeName=='string'"
-                        v-model         ="param[item.id]"
-                        size            ="small"
-                        style           ="width: 70%;"/>
-
-                <a-select       v-if          ="item.typeName=='SelectFormType'"
-                                v-model         ="param[item.id]"
-                                style           ="width: 70%;"
-                                size            ="small"
-                                :options        ="userIdsOp">
-                </a-select>
+        <nk-form ref="form" :col="1" v-if="completeTask.form" :edit="true">
+            <nk-form-item v-for="(item,index) in this.task.formFields"
+                          :key="index"
+                          :term="item.label"
+                          :validate-for="completeTask.form[item.id]" :required="!!(formValidations[item.id].required)">
+                <a-input             v-if="item.typeName==='string'"  slot="edit" size="small" style="width: 70%;" v-model="completeTask.form[item.id]"/>
+                <a-input-number v-else-if="item.typeName==='long'"    slot="edit" size="small" style="width: 30%;" v-model="completeTask.form[item.id]"/>
+                <a-switch       v-else-if="item.typeName==='boolean'" slot="edit" size="small" v-model="completeTask.form[item.id]"/>
+                <a-date-picker  v-else-if="item.typeName==='date'"    slot="edit" size="small" v-model="completeTask.form[item.id]" valueFormat="DD/MM/YYYY"></a-date-picker>
+                <a-select       v-else-if="item.typeName==='enum'"    slot="edit" size="small" style="width: 30%;" v-model="completeTask.form[item.id]" :options="item.options"></a-select>
+                <component     v-else :is="item.typeName"             :editMode=true v-model="completeTask.form[item.id]" :properties="item.properties" :options="item.options"></component>
+            </nk-form-item>
+            <nk-form-item title="办理意见" :required="true">
+                <a-input slot="edit" type="textarea" v-model="completeTask.comment" :auto-size="{ minRows: 4, maxRows: 6 }" placeholder="请输入办理意见"></a-input>
             </nk-form-item>
         </nk-form>
 
@@ -112,7 +108,9 @@ export default {
             userIdsOp:[],
             param:{},
             bpmnVisible: false,
-            completeTask: {},
+            completeTask: {
+                form:{}
+            },
             modal:{
                 visible:false,
                 title:undefined,
@@ -124,21 +122,12 @@ export default {
         }
     },
     created(){
-        if(this.task.userIds.length>0){
-                this.task.userIds.forEach(item=>{
-                    let op = {
-                        label:"",
-                        value:""
-                    };
-                    op.label = item.realname+"("+item.username+")";
-                    op.value = item.id;
-                    this.userIdsOp.push(op);
-                })
-        }
-        if(this.task.formFields.length>0){
+        if(this.task.formFields && this.task.formFields.length){
+            let form = {};
             this.task.formFields.forEach(item=>{
-                this.$set(this.param,item.id,item.defaultValue);
-            })
+                form[item.id]=(item.value&&item.value.value) || item.defaultValue;
+            });
+            this.completeTask.form = form;
         }
     },
     computed:{
@@ -150,24 +139,37 @@ export default {
         },
         okButtonDisabled(){
             return this.editMode || !this.modal.accountId || !(this.modal.comment && this.modal.comment.replace(/\s/g,''));
+        },
+        formValidations(){
+            const validations = {};
+            if(this.task.formFields){
+                this.task.formFields.forEach(field=>{
+                    validations[field.id]={};
+                    if(field.validationConstraints){
+                        field.validationConstraints.forEach(item=>{
+                            validations[field.id][item.name]=item.configuration;
+                        })
+                    }
+                });
+            }
+            return validations
         }
     },
     methods:{
         completeTaskOk(transition){
-            for (const key in this.param) {
-                if (this.param[key] === '' || !this.param[key]) {
-                    if(key =='userName'){
-                        this.$message.error('请选择指派办理人员');
-                        return false;
-                    }else{
-                        this.$message.error('请填写参数');
-                        return false;
-                    }
-                }
+
+            let error = undefined;
+            if((error = this.$refs.form.hasError())){
+                this.$message.error(error);
+                return;
             }
             this.$emit("input",true);
 
-            this.completeTask = Object.assign(this.completeTask,{taskId:this.task.id,transition,form:this.param,processInstanceId:this.task.processInstanceId});
+            this.completeTask = Object.assign(this.completeTask,{
+                taskId:this.task.id,
+                transition,
+                processInstanceId:this.task.processInstanceId
+            });
 
             this.$http.postJSON(`/api/task/complete`,this.completeTask)
                 .then(()=>{
