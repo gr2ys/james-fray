@@ -19,6 +19,7 @@ import User from "../stores/StateUser";
 import UI from "../stores/StateUI";
 import StateDebug from "../stores/StateDebug";
 import TextUtils from "../../utils/TextUtils";
+import {v1 as uuidv1} from "uuid";
 
 export default (Vue) => {
 
@@ -39,9 +40,19 @@ export default (Vue) => {
     let token = AuthUtils.getToken();
     if(token){
 
-      let timestamp = new Date().getTime();
+      let timestamp = Math.floor(new Date().getTime()/1000);
+
       const str = config.url.split('?');
       const array = str[1] ? str[1].split('&') : [];
+
+      if(config.headers['Content-Type']){
+        if(config.headers['Content-Type'].indexOf('application/x-www-form-urlencoded;')>-1){
+          if(config.data){
+            config.data.split('&').forEach(item=>array.push(item))
+          }
+        }
+      }
+
       array.push(`timestamp=${timestamp}`)
       array.push(`secret=${token}`)
 
@@ -55,7 +66,7 @@ export default (Vue) => {
       config.headers.common['elcube-client']    = 'web';
       config.headers.common['elcube-user']      = AuthUtils.getUsername();
       config.headers.common['elcube-timestamp'] = timestamp;
-      config.headers.common['elcube-nonce']     = 'web';
+      config.headers.common['elcube-nonce']     = uuidv1();
       config.headers.common['elcube-signature'] = signature;
 
     }
@@ -267,7 +278,7 @@ export default (Vue) => {
 
   function login(username, password, verKey, verCode){
 
-    const timestamp = new Date().getTime();
+    const timestamp = Math.floor(new Date().getTime()/1000);
     const signature = crypto.createHash('sha1')
         .update(`password=${sha1(password)}&timestamp=${timestamp}`).digest('hex');
 
