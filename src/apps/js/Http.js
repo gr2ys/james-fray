@@ -59,6 +59,7 @@ export default (Vue) => {
       array.push(`secret=${token}`)
       array.push(`nonce=${nonce}`)
 
+      // substr(4) 移除/api 前缀
       const unsign = str[0].substr(4)+'?'+array.sort().join('&');
 
       const signature = crypto.createHash('sha1')

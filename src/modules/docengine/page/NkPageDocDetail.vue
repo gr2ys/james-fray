@@ -642,7 +642,9 @@ export default {
             this.loading = true;
             this.docState = state;
             this.doc.docState = this.docState;
-            this.$http.postJSON(`/api/doc/update`, this.doc)
+            let reqData = Object.assign({},this.doc);
+            reqData.def = undefined;
+            this.$http.postJSON(`/api/doc/update`, reqData)
                 .then((response) => {
                     if(this.debugId){
                         this.$message.info("Tips: 调试模式下，单据未持久化")
