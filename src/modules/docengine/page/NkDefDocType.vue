@@ -97,8 +97,14 @@
                                  :class="{'history-item':true,active:i.version===def.version}"
                                  @click="toVersion(i)">
                             <div>
-                                <span>{{i.version | formatVersion}}</span>
-                                <a-tag>{{i.state}}</a-tag>
+                                <span>
+                                    <a-tag v-if="i.state==='Active'"   color="green"  class="version-tag">{{i.state.charAt(0)}}</a-tag>
+                                    <a-tag v-if="i.state==='InActive'" color="orange" class="version-tag">{{i.state.charAt(0)}}</a-tag>
+                                    <a-tag v-if="i.state==='History'"  class="version-tag">{{i.state.charAt(0)}}</a-tag>
+                                    {{i.version | formatVersion}}
+                                </span>
+
+                                <a v-if="def.version!==i.version" class="diff" @click="diffVersion(i,$event)">Diff</a>
                             </div>
                             <p v-if="i.versionDesc">{{i.versionDesc}}</p>
                     </a-list-item>
@@ -158,6 +164,24 @@
         <a-modal v-model="visibleCreateRandom" centered title="请输入生成的单据数量" @ok="doRandom" width="320px" :confirm-loading="createRandomLoading">
             <a-input-number v-model="createRandomCount" placeholder="请输入生成的单据数量" style="width:100%"></a-input-number>
         </a-modal>
+        <a-modal v-model="visibleDiff" centered title="版本对比" width="80%">
+            <div style="text-align: right;margin-bottom: 10px;margin-top: -10px;">
+                <a-radio-group v-model="diffMode" size="small" button-style="solid">
+                    <a-radio-button value="unified">
+                        Unified
+                    </a-radio-button>
+                    <a-radio-button value="split">
+                        Split
+                    </a-radio-button>
+                </a-radio-group>
+            </div>
+            <nk-diff :data="diff" :mode="diffMode" />
+            <template slot="footer">
+                <a-button key="back" type="primary" @click="visibleDiff=false">
+                    关闭
+                </a-button>
+            </template>
+        </a-modal>
     </nk-page-layout>
 </template>
 
@@ -174,6 +198,8 @@ import NkDefDocTypeBPM from "./NkDefDocTypeBPM";
 import NkDefDocTypeCards from "./NkDefDocTypeCards";
 import NkUtil from "../../../utils/NkUtil";
 import {mapState} from "vuex";
+
+import {diffJson} from "diff";
 
 const defaultCards = [
     {key:"doc",     name:"基本信息",    defComponentNames: [NkDefDocTypeBase,    NkDefDocTypeStatus,NkDefDocTypeHelpDoc]},
@@ -287,6 +313,10 @@ export default {
             visibleCreateRandom:false,
             createRandomLoading:false,
             createRandomCount:10,
+
+            visibleDiff:false,
+            diff:undefined,
+            diffMode: 'unified',
         }
     },
     computed:{
@@ -436,6 +466,18 @@ export default {
                 this.$emit('replace',`/apps/def/doc/detail/${i.docType}/${i.version}`);
             }
         },
+        diffVersion(i,e){
+            e.stopPropagation();
+            this.visibleDiff = true;
+            this.diff = undefined;
+            this.$http.get(`/api/def/doc/type/detail/${i.docType}/${i.version}`)
+                .then(res=>{
+                    this.diff = diffJson(res.data,this.def,{});
+                    // diff.forEach(item=>{
+                    //     console.log(item.value)
+                    // });
+                });
+        },
         valid(){
             return new Promise((resolve)=>{
                 if(!this.def.docType){
@@ -525,6 +567,18 @@ export default {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+        }
+        .version-tag{
+            width: 18px;
+            text-align: center;
+            padding: 0;
+        }
+        a.diff{
+            user-select: none;
+            display: none;
+        }
+        &:hover a.diff{
+            display: block;
         }
     }
 

@@ -45,6 +45,7 @@ import 'highlight.js/styles/github.css';
 import NkADatePicker from "./NkADatePicker";
 import NkARangePicker from "./NkARangePicker";
 import NkAInputPercent from "./NkAInputPercent";
+import NkDiff from "./NkDiff";
 
 function install(Vue){
   Vue.component("nk-logo", NkLogo);
@@ -54,6 +55,7 @@ function install(Vue){
   Vue.component("nk-empty", NkEmpty);
 
   Vue.component("nk-edit-slot", NkEditSlot);
+  Vue.component("nk-diff",NkDiff);
 
   Vue.component("nk-form", NkForm);
   Vue.component("nk-form-item", NkForm.Item[0]);
