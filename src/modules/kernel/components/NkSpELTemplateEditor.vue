@@ -22,7 +22,7 @@
                 <a-button slot="enterButton">测试</a-button>
             </a-input-search>
             <div v-if="error" class="error">{{error}}</div>
-            <div v-if="result" class="result">
+            <div v-if="result!==undefined" class="result">
                 <label style="font-weight: bold;">Result:</label>
                 <div :class="{overflow:component==='vxe-modal'}">
                     <json-viewer
@@ -116,17 +116,30 @@ export default {
             }
         },
         test(){
-            this.$http.post("/api/debug/spel/test",qs.stringify({
-                el: this.el,
-                docId : this.docId,
-                isTemplate : true
-            })).then(res=>{
-                this.error = res.data.errorMessage;
+            if(!this.el||!this.el.trim()){
+                this.error = '表达式不能为空';
                 this.result = undefined;
-                if(res.data.result){
-                    this.result = JSON.parse(res.data.result);
-                }
-            })
+                return;
+            }
+            try{
+                this.parse(this.el)
+                this.error = undefined;
+                this.$http.post("/api/debug/spel/test",qs.stringify({
+                    el: this.el,
+                    docId : this.docId,
+                    isTemplate : true
+                })).then(res=>{
+                    this.error = res.data.errorMessage;
+                    if(res.data.result){
+                        this.result = JSON.parse(res.data.result);
+                    }else{
+                        this.result = res.data.result;
+                    }
+                })
+            }catch (e){
+                this.error = e;
+                this.result = undefined;
+            }
         },
         parse(value,space){
             const v = value && value.replace(/\s/g,'');

@@ -22,7 +22,7 @@
                 <a-button slot="enterButton">测试</a-button>
             </a-input-search>
             <div v-if="error" class="error">{{error}}</div>
-            <div v-if="result" class="result">
+            <div v-if="result!==undefined" class="result">
                 <label style="font-weight: bold;">Result:</label>
                 <div :class="{overflow:component==='vxe-modal'}">
                     <json-viewer
@@ -112,10 +112,7 @@ export default {
                 docId : this.docId
             })).then(res=>{
                 this.error = res.data.errorMessage;
-                this.result = undefined;
-                if(res.data.result){
-                    this.result = res.data.result;
-                }
+                this.result = res.data.result;
             })
         }
     }
