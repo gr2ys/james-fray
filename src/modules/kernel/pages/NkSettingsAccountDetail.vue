@@ -94,24 +94,34 @@
                 header-cell-class-name="headerCellClassName"
                 :row-class-name="rowClassName"
                 :data="user.secrets">
-                <vxe-table-column   title="类型"    field="type" width="10%"/>
-                <vxe-table-column   title="Code"   field="code" width="30%" />
-                <vxe-table-column   title="Secret" field="secret" width="10%" >
+                <vxe-table-column   title="T"      field="type" width="10%"/>
+                <vxe-table-column   title="Key"    field="code" width="30%" />
+                <vxe-table-column   title="Secret" field="secret" width="20%" >
                     <template>
                         ********
                     </template>
                 </vxe-table-column>
-                <vxe-table-column   title="Name"    field="name" width="15%" />
-                <vxe-table-column   title="创建时间" field="createdTime" width="13%" formatter="nkDatetimeFriendly" />
-                <vxe-table-column   title="更新时间" field="updatedTime" width="13%" formatter="nkDatetimeFriendly" />
-                <vxe-table-column   />
+                <vxe-table-column   title="Desc"    field="name" width="15%" />
+                <vxe-table-column   title="Updated" field="updatedTime" width="13%" formatter="nkDatetimeFriendly" />
+                <vxe-table-column   >
+                    <template v-slot="{row}">
+                        <a-popconfirm title="删除密钥可能会影响第三方系统的正常运行，确认删除？" placement="topRight" @confirm="removeAppKey(row)">
+                            <a-button type="link">删除</a-button>
+                        </a-popconfirm>
+                    </template>
+                </vxe-table-column>
             </vxe-table>
+            <a-popconfirm slot="extra" title="创建的密钥将用于访问本系统的系统，确认创建？" placement="topRight" @confirm="createAppKey">
+                <a-button size="small" type="link" :loading="createAppKeyLoading">创建AppKey</a-button>
+            </a-popconfirm>
         </nk-card>
     </nk-page-layout>
 </template>
 
 <script>
 import moment from "moment";
+import { v4 as uuidv4 } from 'uuid';
+import { encode } from 'js-base64';
 export default {
     name: "NkMe",
     data(){
@@ -121,7 +131,8 @@ export default {
             password:undefined,
             newPassword:undefined,
             confirmPassword:undefined,
-            limits:undefined
+            limits:undefined,
+            createAppKeyLoading:false
         }
     },
     computed:{
@@ -191,6 +202,40 @@ export default {
             if(row.disabled){
                 return "disabled"
             }
+        },
+        removeAppKey(row){
+            this.$http.postJSON('/api/settings/auth/accounts/secret/remove',row)
+                .then(()=>{
+                    this.user.secrets.splice(this.user.secrets.indexOf(row),1);
+                });
+        },
+        createAppKey(){
+
+            this.createAppKeyLoading = true;
+
+            const key    = uuidv4().replaceAll('-','').substring(0, 16).toUpperCase();
+            const secret = encode(uuidv4().replaceAll('-','').toUpperCase());
+
+            this.$http.postJSON('/api/settings/auth/accounts/secret',{code: key,secret,accountId:this.user.id,name:'AppKey'})
+                .then(()=>{
+                    const h = this.$createElement;
+                    this.$info({
+                        title: '密钥已创建，请记录',
+                        width: 580,
+                        centered:true,
+                        content: h('nk-form', {style:{'margin-top':'30px'},props:{col:1}}, [
+                            h('nk-form-item', {props:{title:'KEY',width:80}}, key),
+                            h('nk-form-item', {props:{title:'SECRET',width:80}}, secret),
+                        ]),
+                        onOk() {
+                        },
+                    });
+                    this.createAppKeyLoading = false;
+                    this.$http.get('/api/settings/auth/accounts/detail?username='+this.$route.params.username)
+                        .then(res=>{
+                            this.user = res.data;
+                        });
+                });
         }
     }
 }
