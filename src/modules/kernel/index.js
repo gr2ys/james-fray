@@ -26,6 +26,7 @@ import NkDefScriptDetail from "./pages/NkDefScriptDetail";
 
 import NkDevOpsCache from "./pages/NkDevOpsCache";
 import NkDevOpsDeploy from "./pages/NkDevOpsDeploy";
+import NkDevOpsScheduled from "./pages/NkDevOpsScheduled";
 
 import NkSettingsAuthLimit from "./pages/NkSettingsAuthLimit";
 import NkSettingsAuthPerm from "./pages/NkSettingsAuthPerm";
@@ -175,6 +176,14 @@ const routes = [
         component: NkDevOpsCache,
         meta:{
           title: "数据缓存",
+        }
+      },
+      {
+        name: "计划任务",
+        path: 'scheduled',
+        component: NkDevOpsScheduled,
+        meta:{
+          title: "计划任务",
         }
       },
     ]
