@@ -53,7 +53,11 @@ export default {
                 return this.value && moment(this.value * 1000)
             },
             set(v){
-                this.$emit("input",v && v.unix());
+                if(this.showTime){
+                    this.$emit("input",v && v.unix());
+                }else{
+                    this.$emit("input",v && v.startOf('day').unix());
+                }
             }
         }
     }
