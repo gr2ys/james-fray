@@ -12,7 +12,7 @@
 	along with ELCube.  If not, see <https://www.gnu.org/licenses/>.
 -->
 <template>
-    <nk-page-layout title="计划管理" sub-title="管理计划任务">
+    <nk-page-layout title="计划管理" sub-title="管理计划任务" :loading="loading">
 
         <a-layout>
             <a-layout-sider theme="light" bordered width="300">
@@ -31,24 +31,46 @@
                 </a-list>
             </a-layout-sider>
             <a-layout-content>
-                <nk-card class="card" title="计划详情" style="margin-left: 20px;">
-
+                <nk-card class="card" title="执行任务" style="margin-left: 20px;">
                     <a-button slot="extra" size="small" type="primary" @click="execute">运行</a-button>
-
                     <a-textarea v-model="options" placeholder="运行参数" :rows="3"></a-textarea>
-
-                    <nk-form v-if="jobDetail" :col="1">
-                        <template v-for="(trigger,index) in jobDetail.triggers">
-                            <nk-form-divider :key="'a'+index" :title="trigger.key.name" ></nk-form-divider>
-                            <nk-form-item    :key="'b'+index" :width="140" title="startTime">{{trigger.startTime | nkDatetimeISO}}</nk-form-item>
-                            <nk-form-item    :key="'c'+index" :width="140" title="previousFireTime">{{trigger.previousFireTime | nkDatetimeISO}}</nk-form-item>
-                            <nk-form-item    :key="'d'+index" :width="140" title="nextFireTime">{{trigger.nextFireTime | nkDatetimeISO}}</nk-form-item>
-                            <nk-form-item    :key="'e'+index" :width="140" title="cronExpression" v-if="trigger.cronExpression">{{trigger.cronExpression}}</nk-form-item>
-                            <nk-form-item    :key="'f'+index" :width="140" title="expressionSummary" v-if="trigger.cronExpression"><pre>{{trigger.expressionSummary}}</pre></nk-form-item>
-                        </template>
-                    </nk-form>
-
                 </nk-card>
+
+                <nk-card class="card" title="添加计划" style="margin-left: 20px;">
+                    <nk-form :col="1">
+                        <nk-form-item :width="140" title="name">
+                            <a-input size="small" v-model="trigger.name"></a-input>
+                        </nk-form-item>
+                        <nk-form-item :width="140" title="cron">
+<!--                            <a-input size="small" v-model="trigger.cron"></a-input>-->
+                            <div style="display: flex">
+                                <a-input size="small" addon-after="秒" style="width: 16%" v-model="trigger.s" placeholder="秒"></a-input>
+                                <a-input size="small" addon-after="分" style="width: 16%" v-model="trigger.m" placeholder="分"></a-input>
+                                <a-input size="small" addon-after="时" style="width: 16%" v-model="trigger.h" placeholder="时"></a-input>
+                                <a-input size="small" addon-after="日" style="width: 16%" v-model="trigger.d" placeholder="日"></a-input>
+                                <a-input size="small" addon-after="月" style="width: 16%" v-model="trigger.M" placeholder="月"></a-input>
+                                <a-input size="small" addon-before="星期" style="width: 20%" v-model="trigger.w" placeholder="星期"></a-input>
+                            </div>
+                        </nk-form-item>
+                    </nk-form>
+                    <a-button slot="extra" type="primary" size="small" @click="addTrigger" :disabled="(!trigger.name || !cron)">添加计划</a-button>
+                </nk-card>
+                <a-list v-if="jobDetail" item-layout="horizontal" :data-source="jobDetail.triggers" style="margin-left: 20px;"  :rowKey="rowKey">
+                    <div slot="header" style="padding: 2px 14px;">执行计划</div>
+                    <a-list-item slot="renderItem" slot-scope="t">
+                        <nk-form :col="1">
+                            <nk-form-item    :width="180" title="name" >{{t.key.name}}</nk-form-item>
+                            <nk-form-item    :width="180" title="startTime">{{t.startTime | nkDatetimeISO}}</nk-form-item>
+                            <nk-form-item    :width="180" title="previousFireTime">{{t.previousFireTime | nkDatetimeISO}}</nk-form-item>
+                            <nk-form-item    :width="180" title="nextFireTime">{{t.nextFireTime | nkDatetimeISO}}</nk-form-item>
+                            <nk-form-item    :width="180" title="cronExpression" v-if="t.cronExpression">{{t.cronExpression}}</nk-form-item>
+<!--                            <nk-form-item    :width="180" title="expressionSummary" v-if="t.cronExpression"><pre>{{t.expressionSummary}}</pre></nk-form-item>-->
+                        </nk-form>
+                        <div slot="extra" style="border-left: dashed 1px #ccc;">
+                            <a-button type="link" style="height: 100px;width: 100px;" @click="removeTrigger(t)">移除计划</a-button>
+                        </div>
+                    </a-list-item>
+                </a-list>
             </a-layout-content>
         </a-layout>
 
@@ -56,18 +78,38 @@
 </template>
 
 <script>
-
+    const defaultTrigger = {
+        name: undefined,
+        s:'0',
+        m:'*',
+        h:'*',
+        d:'*',
+        M:'*',
+        w:'?',
+    };
+    import qs from 'qs';
     export default {
         data() {
             return {
+                loading:false,
                 filter:undefined,
                 jobs:[],
                 item:{},
                 jobDetail:undefined,
-                options:undefined
+                options:undefined,
+                trigger:Object.assign({},defaultTrigger)
+            }
+        },
+        computed:{
+            cron(){
+                if(this.trigger.s&&this.trigger.m&&this.trigger.h&&this.trigger.d&&this.trigger.M&&this.trigger.w){
+                    return [this.trigger.s,this.trigger.m,this.trigger.h,this.trigger.d,this.trigger.M,this.trigger.w].join(' ');
+                }
+                return undefined;
             }
         },
         created() {
+            this.loading=true;
             this.$http.get('/api/ops/scheduled/jobs')
                 .then((res)=>{
                     this.jobs = res.data;
@@ -78,13 +120,16 @@
         },
         methods: {
             itemClick(i){
+                this.loading=true;
                 this.item = i;
                 this.$http.get(`/api/ops/scheduled/job/${i.group}/${i.name}`)
                     .then((res)=>{
                         this.jobDetail = res.data;
+                        this.loading=false;
                     })
             },
             execute(){
+                this.loading=true;
                 this.$http.postJSON(`/api/ops/scheduled/execute/${this.item.group}/${this.item.name}`,this.options||'')
                     .then(()=>{
                         this.options = undefined;
@@ -92,7 +137,28 @@
                             message:"提示",
                             description:"任务已提交"
                         });
+                        this.loading=false;
                     })
+            },
+            addTrigger(){
+                this.loading=true;
+                this.$http.post(`/api/ops/scheduled/trigger/add/${this.item.group}/${this.item.name}`,qs.stringify({
+                    name:this.trigger.name,
+                    cron:this.cron
+                })).then(()=>{
+                    this.trigger = Object.assign({},defaultTrigger);
+                    this.itemClick(this.item);
+                })
+            },
+            removeTrigger(trigger){
+                this.loading=true;
+                this.$http.post(`/api/ops/scheduled/trigger/remove`,qs.stringify(trigger.key))
+                    .then(()=>{
+                        this.itemClick(this.item);
+                    })
+            },
+            rowKey(e){
+                return e.key
             }
         }
     }
