@@ -210,7 +210,7 @@ export default {
             }
             const errMap = await this.$refs.xTable.fullValidate(true).catch(errMap => errMap)
             if (errMap) {
-                return `${this.card.cardName}-${errMap.column.title} ${errMap.rule.$options.message||errMap.rule.$options.content}`;
+                return `${this.card.cardName}-${errMap[Object.keys(errMap)[0]][0].column.title} ${errMap[Object.keys(errMap)[0]][0].rule.$options.message||errMap[Object.keys(errMap)[0]][0].rule.$options.content}`;
             }
             return false;
         },
