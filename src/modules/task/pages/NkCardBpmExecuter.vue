@@ -21,7 +21,6 @@
 
         <nk-bpm-timeline :task="task" :histories="task.historicalTasks" style="margin-left: 10px;margin-top: 15px;"></nk-bpm-timeline>
 
-        <div v-if="task && completeTask" style="border-top: dashed 1px #ccc;padding-bottom: 20px;"></div>
         <nk-form ref="form" :col="1" v-if="task && this.task.formFields && completeTask && completeTask.form" :edit="true">
             <nk-form-item v-for="(item) in this.task.formFields"
                           :key="item.id"
