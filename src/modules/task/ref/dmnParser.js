@@ -94,7 +94,8 @@ function parseDecision(elements, id, inputs, outputs, cache){
                     if(!inputsItem.find(i=>i.key===input.id)){
                         inputsItem.push({
                             key:  input.id,
-                            name: input.name
+                            name: input.name,
+                            type: 'string'
                         });
                     }
                 }
