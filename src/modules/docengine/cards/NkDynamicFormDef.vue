@@ -12,13 +12,17 @@
 	along with ELCube.  If not, see <https://www.gnu.org/licenses/>.
 -->
 <template>
-    <nk-def-card :title="card.cardName+':卡片设计'">
+    <nk-def-card>
+        <div slot="title" style="display: flex;align-items: center;justify-content: space-between;padding: 0 10px 0 0;">
+            {{card.cardName+':卡片设计'}}
+            <a-input placeholder="搜索字段Key、描述" size="small" style="width: 40%;" v-model="keyword" allow-clear></a-input>
+        </div>
         <span slot="extra">
             <a-button-group size="small" style="margin-right: 10px;">
                 <a-button @click="reviewEditMode=false"           :type="reviewEditMode?'default':'primary'">显示</a-button>
                 <a-button @click="reviewEditMode=true"            :type="reviewEditMode?'primary':'default'">编辑</a-button>
             </a-button-group>
-            <a-button size="small" @click="showHideFiled=!showHideFiled"   :type="showHideFiled?'primary':'default'">隐藏的字段</a-button>
+            <a-button size="small" @click="showHideFiled=!showHideFiled"   :type="showHideFiled?'primary':'default'">展示全部</a-button>
         </span>
         <div style="display: flex;width: 100%;">
             <div style="width: 100%;max-height: 600px;overflow-y: auto;">
@@ -36,6 +40,7 @@
                                                      'nk-primary-border-color-important':item._selected,
                                                      'drop':item._drop,
                                                      'hide':item.control < 0,
+                                                     'searched': keyword && ((item.key&&item.key.indexOf(keyword) > -1) || (item.name&&item.name.indexOf(keyword) > -1))
                                                  }"
                                                  style="cursor: move"
                                                  :title="item.name">
@@ -48,14 +53,16 @@
                                                  :options="item" @nk-dragover="dragover" @drag="drag(item)" @dragend="dragend" @click="selectItem($event,item)"
                                                  :draggable="editMode?'true':'false'"
                                                  :class="{
-                                                       'b':true,
-                                                       'selected':item._selected,
-                                                       'nk-primary-border-color-important':item._selected,
-                                                       'drop':item._drop,
-                                                       'hide':item.control < 0,
+                                                        'b':true,
+                                                        'selected':item._selected,
+                                                        'nk-primary-border-color-important':item._selected,
+                                                        'drop':item._drop,
+                                                        'hide':item.control < 0,
+                                                        'searched': keyword && ((item.key&&item.key.indexOf(keyword) > -1) || (item.name&&item.name.indexOf(keyword) > -1))
                                                    }"
                                                  :title="item.name"
                                                  :width="def.titleWidth"
+                                                 :ellipsis="def.titleEllipsis"
                                                  :col="item.col||1"
                                                  :edit="reviewEditMode && item.control > 0"
                                                  style="position: relative;cursor: move"
@@ -107,6 +114,10 @@
                                 <nk-form-item title="标题宽度">
                                     {{def.titleWidth}}
                                     <a-input-number v-model="def.titleWidth" slot="edit" size="small" :min="20" :max="300" />
+                                </nk-form-item>
+                                <nk-form-item title="标题省略号">
+                                    {{def.titleEllipsis}}
+                                    <a-switch v-model="def.titleEllipsis" slot="edit" size="small" />
                                 </nk-form-item>
                                 <slot name="header"></slot>
                             </nk-form>
@@ -224,6 +235,7 @@ export default {
     },
     data(){
         return {
+            keyword: undefined,
             dropItem: undefined,
             selectedItem: undefined,
             activeKey: this.editMode ? 'lab' : 'card',
@@ -362,6 +374,9 @@ export default {
     .hide{
         opacity: 0.3;
         background-color: #ddd;
+    }
+    .searched{
+        background-color: #ffe58f;
     }
     ::v-deep .empty::before{
         content: '-'

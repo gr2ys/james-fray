@@ -45,6 +45,10 @@ export default {
             type: Number,
             default: 120
         },
+        ellipsis:{
+            type: Boolean,
+            default: false,
+        },
         title: {
             type: String,
             required: false
@@ -130,6 +134,9 @@ export default {
                 arr.push(this.align)
             if(this.term || this.title)
                 arr.push('hasContent')
+            if(this.ellipsis){
+                arr.push('ellipsis')
+            }
             return arr;
         },
         contentClass(){
@@ -225,6 +232,12 @@ export default {
             word-break:break-all;
             white-space: pre-wrap;
             overflow: hidden;
+        }
+
+        &.ellipsis > {
+            white-space: nowrap;
+            display: block;
+            text-overflow: ellipsis;
         }
 
         &.left{

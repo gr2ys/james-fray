@@ -27,6 +27,7 @@
                                :col="item.col"
                                :edit="editMode && item.control > 0"
                                :width="def.titleWidth"
+                               :ellipsis="def.titleEllipsis"
                                :content-align="item.alignRight?'right':''"
 
                                :validate-for="data[item.key]"
