@@ -23,9 +23,11 @@
         :init-rows="custom.defaultRows"
         :border="custom.border"
         :sortConfig="custom.sortConfig"
+        :exportConfig="custom.exportConfig"
         :lazy="true"
         :selectable="false"
         @change="search"
+        @exportExcel="exportExcel"
         @suggest="suggest"
         @click="selected"
         @setTab="$emit('setTab',$event)"
@@ -46,12 +48,13 @@
         </a-button-group>
 
         <nk-page-preview v-if="custom.preview" :params="previewParams" v-model="previewVisible" @close="previewClose"></nk-page-preview>
+        <iframe ref="download" style="display: none"></iframe>
     </nk-query-layout>
 </template>
 
 <script>
 import NkPagePreview from "../../docengine/page/NkPagePreview";
-import {mapGetters} from "vuex";
+import {mapMutations,mapGetters} from "vuex";
 import NkUtil from "@/utils/NkUtil";
 
 export default {
@@ -86,6 +89,7 @@ export default {
         }
     },
     methods:{
+        ...mapMutations('UI',['doLoading']),
         loadCustom(){
             this.$http.get(`/api/webapp/menu/${this.$route.params.id}`)
                 .then(res=>{
@@ -102,7 +106,7 @@ export default {
                         columns:[],
                         sortConfig:undefined,
                         border:undefined,
-                        creatable:undefined
+                        creatable:undefined,
                     },NkUtil.parseJSON(res.data));
                     this.$emit("setTab",this.custom.title);
 
@@ -155,6 +159,32 @@ export default {
                     if(this.$refs.layout)
                         this.$refs.layout.setData(res.data)
                 });
+            }
+        },
+        exportExcel(params){
+            this.params = params;
+
+            if(this.custom.postSql){
+                // this.$http.postJSON(`/api/data/analyse/query`,Object.assign({
+                //         sqlList: (this.custom.postSql instanceof Array) ? this.custom.postSql : [this.custom.postSql],
+                //         $debug: this.custom.$debug,
+                //     },params)
+                // ).then((res)=>{
+                //     if(this.$refs.layout)
+                //         this.$refs.layout.setData(res.data)
+                // });
+            }else{
+                this.doLoading(true)
+                this.$http.postJSON(`/api/doc/export/${this.custom.index}`,Object.assign({
+                        postCondition: this.custom.postCondition,
+                        $debug: this.custom.$debug,
+                        columns: this.custom.columns
+                    },params)
+                ).then((res)=>{
+                    this.$refs.download.setAttribute("src",`/api/doc/download/${res.data}/${this.custom.title}?${new Date().getTime()}`);
+                }).finally(()=>{
+                    this.doLoading(false)
+                })
             }
         },
         selected({row,$event}){

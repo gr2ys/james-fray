@@ -79,6 +79,9 @@
                             <a-button type="primary" html-type="submit" style="width: 46px;">
                                 <a-icon type="search" />
                             </a-button>
+                            <a-button v-if="exportConfig && exportConfig.enable" type="default" @click="doExport" style="width: 46px;">
+                                <a-icon type="export" />
+                            </a-button>
                             <a-button type="default" @click="reset({})" style="width: 46px;">
                                 <a-icon type="rollback" />
                             </a-button>
@@ -182,7 +185,8 @@ export default {
                     orders: ['desc', 'asc', null]
                 };
             }
-        }
+        },
+        exportConfig:Object
     },
     data(){
         return {
@@ -320,6 +324,7 @@ export default {
         setSuggest(suggest){
             this.suggest = suggest;
         },
+
         /**
          * 表单提交
          */
@@ -369,6 +374,10 @@ export default {
                     this.emitChange()
                 }
             }
+        },
+
+        doExport(){
+            this.$emit("exportExcel", this.params)
         },
         /**
          * 执行参数更新，并通知父组件，由父组件执行搜索
