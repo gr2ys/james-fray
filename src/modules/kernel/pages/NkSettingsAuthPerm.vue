@@ -44,7 +44,7 @@
                   :data-source="dataSourceResource"
                   placeholder="系统资源"
                   @select="autoComplete(item,'permResource',$event)"
-                  @change="item.permResource=item.permResource&&item.permResource.toUpperCase()"
+                  @change="item.permResource=item.permResource&&(!item.permResource.startsWith('$')?item.permResource.toUpperCase():item.permResource)"
               />
             </nk-form-item>
             <nk-form-item term="操作">
@@ -140,7 +140,7 @@ export default {
         "SETTINGS<设置>",
         "SYS<系统>",
       ]
-      let res = (this.item.permResource && this.item.permResource.trim().toUpperCase())||'';
+      let res = (this.item.permResource && (!this.item.permResource.startsWith('$')?this.item.permResource.trim().toUpperCase():this.item.permResource))||'';
       let ret = list.filter(i=>i.startsWith(res));
       if(res)
         ret.splice(0,0,res);
