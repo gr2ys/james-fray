@@ -25,13 +25,14 @@ export default (defaultValue)=>{
         const card = this.docDef.cards.find(card=>card.cardKey===this.cardKey);
         if(!card.config){
 
+          let config = undefined;
           if(typeof defaultValue==='function'){
-            defaultValue = defaultValue();
+            config = defaultValue();
           }else if(defaultValue){
-            defaultValue = JSON.parse(JSON.stringify(defaultValue));
+            config = JSON.parse(JSON.stringify(defaultValue));
           }
 
-          this.$set(card,'config',defaultValue);
+          this.$set(card,'config',config);
         }
         return this.docDef.cards.find(card=>card.cardKey===this.cardKey);
       },

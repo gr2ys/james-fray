@@ -476,8 +476,11 @@ export default {
         init(){
         },
         menuClick(menu){
-            this.mavonEdit = false;
-            this.selected = menu;
+            this.selected = {};
+            this.$nextTick(()=>{
+              this.mavonEdit = false;
+              this.selected = menu;
+            })
         },
         doRun(){
             this.loading = true;

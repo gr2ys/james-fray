@@ -231,7 +231,11 @@ function dragover(e) {
 }
 
 export default {
-    mixins:[new MixinDef({}),MixinSortable(),MixinDynamicDef],
+    mixins:[new MixinDef({
+      width:60,
+      col:2,
+      titleWidth:140
+    }),MixinSortable(),MixinDynamicDef],
     filters:{
         formatInputType(value,inputTypeDefs){
             if(inputTypeDefs){
@@ -298,6 +302,7 @@ export default {
                         key : 'key'+this.def.items.length,
                         name: '字段'+this.def.items.length,
                         col:1,
+                        width:10,
                         inputType: inputType.value,
                         calcTrigger:'',
                         calcOrder:1,

@@ -228,7 +228,10 @@ function dragover(e) {
 }
 
 export default {
-    mixins:[new MixinDef({}),MixinSortable(),MixinDynamicDef],
+    mixins:[new MixinDef({
+      col:2,
+      titleWidth:140
+    }),MixinSortable(),MixinDynamicDef],
     filters:{
         formatInputType(value,inputTypeDefs){
             if(inputTypeDefs){
