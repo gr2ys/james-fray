@@ -163,7 +163,7 @@
             </a-tooltip>
 
             <!--文档-->
-            <a-tooltip title="查看文档">
+            <a-tooltip v-if="!preview" title="查看文档">
                 <a-button :type="'default'" @click="autoShowDocHelper">
                     <nk-help-link/>
                 </a-button>
