@@ -11,7 +11,7 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with ELCube.  If not, see <https://www.gnu.org/licenses/>.
  */
-import translations from './translationsGerman';
+import translations from './NkCamundaTranslationsGerman';
 export default function customTranslate(template, replacements) {
     replacements = replacements || {};
     template = translations[template] || template;
