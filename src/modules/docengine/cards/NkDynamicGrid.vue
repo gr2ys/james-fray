@@ -98,6 +98,7 @@ export default {
         return {
             loading: false,
             trigger: false,
+            triggerKeys: [],
             calcLock: false
         }
     },
@@ -169,7 +170,10 @@ export default {
             if(this.trigger&&!this.calcLock){
                 this.trigger = false;
                 this.calcLock = true;
-                this.nk$calc();
+                this.nk$calc({
+                    triggerKeys:this.triggerKeys
+                });
+                this.triggerKeys = [];
             }
         },
         xTableRemove(data,seq){
@@ -193,6 +197,9 @@ export default {
             // 单元格内容改变后，如果需要触发计算，则先记录状态，等退出行编辑模式后再触发
             if(item.calcTrigger){
                 this.trigger = true;
+                if(this.triggerKeys.indexOf(item.key)===-1){
+                    this.triggerKeys.push(item.key);
+                }
             }
             this.$refs.xTable.updateStatus(scope);
         },
