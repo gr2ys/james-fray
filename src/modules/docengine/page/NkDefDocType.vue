@@ -87,7 +87,7 @@
                         版本记录
                         <a @click="openDefTree">Graph</a>
                     </div>
-                    <div v-if="historiesMore" slot="footer" style="text-align: center;color: #999;cursor: pointer;" @click="loadHistories">
+                    <div v-if="historiesMore" slot="footer" style="text-align: center;color: #999;cursor: pointer;" @click="loadHistories()">
                         加载更多...
                     </div>
                     <a-list-item slot="renderItem"
