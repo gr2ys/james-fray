@@ -116,7 +116,9 @@ export default function(VueRouter,moduleRoutes,loginPage,defaultPage) {
           next();
           updateMeta(to);
         }else if(from.path==='/'){
-          next({path: '/'})
+          console.log(from.path)
+          console.log(to.path)
+          next({path: '/?redirect='+to.path})
         }else{
           router.app.$http.reLogin(()=>{
             next();

@@ -48,7 +48,7 @@ export default {
             this.loginInfo = e;
         },
         success(){
-            this.$router.push("/apps/default")
+            this.$router.push((this.$route.query&&this.$route.query.redirect)||"/apps/default")
         },
         login(){
             this.$refs.form.login();
