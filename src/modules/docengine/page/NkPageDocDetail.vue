@@ -155,6 +155,13 @@
                 </a-dropdown>
             </a-tooltip>
 
+            <!--复制-->
+            <a-tooltip   v-if="!editMode && doc.refObjectId===doc.docId" title="复制">
+                <a-button type="default" @click="toCopy">
+                    <a-icon type="copy" />
+                </a-button>
+            </a-tooltip>
+
             <!--历史-->
             <a-tooltip v-if="!editMode" title="变更历史">
                 <a-button :type="histories?'primary':'default'"
@@ -477,7 +484,8 @@ export default {
                 const req = {
                     docType:this.contextParams.docId,
                     refObjectId:this.$route.query.ref,
-                    preDocId:this.$route.query.pre||this.$route.query.ref
+                    preDocId:this.$route.query.pre||this.$route.query.ref,
+                    copyFromId:this.$route.query.copyFromId,
                 }
                 this.$http.post("/api/doc/pre/create",qs.stringify(req))
                     .then(response=>{
@@ -556,6 +564,14 @@ export default {
                             });
                     },10*1000);
                 });
+        },
+        toCopy(){
+            this.$router.push({
+                path:`/apps/docs/create/${this.doc.def.docType}`,
+                query:{
+                    copyFromId:this.doc.docId
+                }
+            });
         },
         async doSave(state) {
 
@@ -722,9 +738,9 @@ export default {
             this.histories=undefined;
             this.clearCheckTimer()
         },
-        toCreateDoc(defDoc){
+        toCreateDoc(def){
             this.$router.push({
-                path:`/apps/docs/create/${defDoc.docType}`,
+                path:`/apps/docs/create/${def.docType}`,
                 query:{
                     pre:this.doc.docId
                 }

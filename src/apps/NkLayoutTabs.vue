@@ -55,13 +55,12 @@
                         </div>
                     </div>
                     <a-menu ref="contextMenu" slot="overlay" @click="contextClick">
-                        <a-menu-item key="forceRefresh" v-if="!debugId && dropdownConfig.refresh&&hasAuthority('SYS:Debug')">
-                            强制加载
-                        </a-menu-item>
-                        <a-menu-divider                 v-if="!debugId && dropdownConfig.refresh&&hasAuthority('SYS:Debug')" />
                         <a-menu-item key="refresh"      v-if="dropdownConfig.refresh">
                             刷新
                         </a-menu-item>
+<!--                        <a-menu-item key="forceRefresh" v-if="!debugId && dropdownConfig.refresh&&hasAuthority('SYS:Debug')">-->
+<!--                            刷新F-->
+<!--                        </a-menu-item>-->
                         <a-menu-item key="openWin"      v-if="dropdownConfig.refresh">
                             在新页面中打开
                         </a-menu-item>
@@ -174,7 +173,11 @@ export default {
             }
         },
         itemDblClick(tab){
-            this.$emit('item-refresh',tab)
+            if(this.hasAuthority('SYS:Debug')){
+                this.$emit('item-force-refresh',tab)
+            }else{
+                this.$emit('item-refresh',tab)
+            }
         },
         itemClose(e){
             this.$emit("close",e);

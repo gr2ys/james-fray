@@ -100,9 +100,9 @@ export default {
                 {key:'stateChanged',        name:'[更新]stateChanged',        ref:'docCycleInterceptor'},
                 {key:'afterUpdateCommit',   name:'[更新]afterUpdateCommit',   ref:'docCycleInterceptor'},
 
-                {key:'beforeDelete',        name:'[删除]beforeDelete',        ref:'docCycleInterceptor'},
-                {key:'afterDeleted',        name:'[删除]afterDeleted',        ref:'docCycleInterceptor'},
-                {key:'afterDeleteCommit',   name:'[删除]afterDeleteCommit',   ref:'docCycleInterceptor'},
+                {key:'beforeDelete',        name:'[删除]beforeDelete',        ref:'docCycleInterceptor', disabled:true},
+                {key:'afterDeleted',        name:'[删除]afterDeleted',        ref:'docCycleInterceptor', disabled:true},
+                {key:'afterDeleteCommit',   name:'[删除]afterDeleteCommit',   ref:'docCycleInterceptor', disabled:true},
             ]
         }
     },
