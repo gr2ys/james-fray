@@ -1,7 +1,7 @@
 <template>
 
-    <a-spin :spinning="!inputTypeDefs">
-        <div style="display: flex;">
+    <a-spin :spinning="!inputTypeDefs" >
+        <div style="display: flex;position: relative">
             <!--设计区域-->
             <div style="width: 100%;max-height: 600px;overflow-y: auto;">
                 <a-card :title="title||'表单设计器'">
@@ -63,12 +63,6 @@
                             </template>
                         </nk-form>
                     </div>
-                    <div style="width: 100%;height: 100px;display:flex;justify-content: space-around;align-items: center;font-size: 18px;color: #999999;opacity: 0.5;" :style="{
-                        'background-color':dropItem?'#ffa39e':'',
-                        'border':dropItem?'#f5222d dashed 1px':'',
-                    }" @dragenter="dragenterTrash">
-                        {{dropItem?'拖到此处移除字段':''}}
-                    </div>
                 </a-card>
             </div>
 
@@ -110,6 +104,15 @@
                         </div>
                     </a-tab-pane>
                 </a-tabs>
+            </div>
+            <div v-if="dropItem" style="
+                position: absolute;
+                top: 0;left: 0;z-index: 1000;
+                width: calc(100% - 300px);height: 43px;display:flex;justify-content: space-around;align-items: center;font-size: 18px;color: #999999;opacity: 0.5;" :style="{
+                        'background-color':dropItem?'#ffa39e':'',
+                        'border':dropItem?'#f5222d dashed 1px':'',
+                    }" @dragenter="dragenterTrash">
+                {{dropItem?'拖到此处移除字段':''}}
             </div>
         </div>
     </a-spin>
@@ -185,9 +188,13 @@ export default {
                 this.dropItem = item;
                 this.$set(this.dropItem,'_drop',true);
             }else{
+                let key,index=0;
+                do{
+                    key = 'key'+index++;
+                }while(this.def.items.find(i=>i.key===key));
                 this.dropItem = {
-                    key : 'key'+this.def.items.length,
-                    name: (inputType.name&&inputType.name.split('|')[1])+this.def.items.length,
+                    key,
+                    name: (inputType.name&&inputType.name.split('|')[1])+(--index),
                     col:1,
                     inputType: inputType.value,
                     calcTrigger:'',
