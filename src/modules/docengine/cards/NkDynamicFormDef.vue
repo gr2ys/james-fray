@@ -37,6 +37,7 @@
                                               :draggable="editMode?'true':'false'"
                                               :class="{'b':true,'selected':item._selected,'drop':item._drop}"
                                               :title="item.name"
+                                              :width="def.titleWidth"
                                               :col="item.col"
                                               style="position: relative;cursor: move"
                                 >
@@ -51,7 +52,7 @@
                 </a-card>
             </div>
 
-            <div class="propertiesPanel" style="width: 350px;flex-shrink: 0;border: solid 1px #e8e8e8;">
+            <div class="propertiesPanel" style="width: 300px;flex-shrink: 0;border: solid 1px #e8e8e8;">
                 <a-tabs v-model="activeKey">
                     <a-tab-pane v-if="editMode" key="lab" tab="组件库" style="margin-top: -14px;">
                         <div style="max-height: 500px;overflow-y: auto;">
@@ -83,6 +84,9 @@
                     </a-tab-pane>
                     <a-tab-pane v-if="selectedItem" key="field" :tab="selectedItem.name">
                         <nk-form :edit="editMode" :col="1">
+                            <nk-form-item title="字段类型">
+                                {{selectedItem.inputType | formatInputType(inputTypeDefs)}}
+                            </nk-form-item>
                             <nk-form-item title="KEY">
                                 {{selectedItem.key}}
                                 <a-input slot="edit" size="small" v-model="selectedItem.key" @change="keyChanged" />
@@ -127,11 +131,11 @@
                                     <a-select-option :key="-1">隐藏</a-select-option>
                                 </a-select>
                             </nk-form-item>
-                            <nk-form-item title="控制 SpEL 表达式">
+                            <nk-form-item title="控制 SpEL">
                                 {{selectedItem.spELControl}}
                                 <nk-sp-el-editor slot="edit" v-model="selectedItem.spELControl"></nk-sp-el-editor>
                             </nk-form-item>
-                            <nk-form-item title="值 SpEL 条件">
+                            <nk-form-item title="值条件 SpEL ">
                                 {{selectedItem.spELTriggers}}
                                 <a-select slot="edit" size="small" v-model="selectedItem.spELTriggers" mode="multiple" >
                                     <a-select-option key="ALWAYS">ALWAYS</a-select-option>
@@ -139,7 +143,7 @@
                                     <a-select-option key="BLANK">BLANK</a-select-option>
                                 </a-select>
                             </nk-form-item>
-                            <nk-form-item title="值 SpEL 表达式">
+                            <nk-form-item title="值 SpEL">
                                 {{selectedItem.spELContent}}
                                 <nk-sp-el-editor slot="edit" v-model="selectedItem.spELContent"></nk-sp-el-editor>
                             </nk-form-item>
@@ -171,6 +175,17 @@ function dragover(e) {
 
 export default {
     mixins:[new MixinDef({}),MixinSortable(),MixinDynamicDef],
+    filters:{
+        formatInputType(value,inputTypeDefs){
+            if(inputTypeDefs){
+                let d = inputTypeDefs.find(i=>i.key===value);
+                if(d){
+                    return d.name.split('|')[1];
+                }
+            }
+            return value;
+        }
+    },
     data(){
         return {
             dropItem: undefined,
