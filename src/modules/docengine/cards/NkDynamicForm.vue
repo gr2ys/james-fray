@@ -46,6 +46,7 @@
                                    :input-options="item.inputOptions"
                                    :style="item.style"
                                    @change="itemChange($event,item)"
+                                   @call="itemCall($event,item)"
                         ></component>
                     </template>
                 </nk-form-item>
@@ -71,6 +72,13 @@ export default {
                     triggerKey:item.key
                 });
             }
+        },
+        itemCall(e,item){
+            this.nk$call({
+                triggerKey:item.key
+            }).then(res=>{
+                console.log(res)
+            });
         },
         hasError(){
             return this.$refs.form.hasError();

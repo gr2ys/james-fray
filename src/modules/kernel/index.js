@@ -41,6 +41,8 @@ import NkPageDataTable from "./pages/NkPageDataTable";
 
 import {GridItem, GridLayout} from "vue-grid-layout";
 
+import StateDict from "./stores/StateDict";
+
 const install = function (Vue) {
 
   Vue.component("grid-layout",                GridLayout);
@@ -53,6 +55,8 @@ const install = function (Vue) {
   Vue.component('nk-sp-el-template-editor',   NkSpELTemplateEditor);
   Vue.component('nk-sp-el-view',              NkSpELView);
 };
+
+const stores = {Dict:StateDict}
 
 const routes = [
   {
@@ -202,6 +206,7 @@ const routes = [
 export default {
   install,
   routes,
+  stores,
   sfc: {}
 }
 

@@ -119,7 +119,7 @@ let globalOptions = {
 
 // 加载各个模块，并将模块的routes和stores合并
 let routes      = Kernel.routes,
-    stores      = Stores,
+    stores      = {...Stores,...Kernel.stores},
     sfc         = {
         MixinSortable,
         NkFormat,
@@ -180,6 +180,7 @@ const run = (options)=>{
 
     const sfcLoader = new SfcLoader(Vue, {
         'vue'             : Vue,
+        'vuex'            : Vuex,
         'ant-design-vue'  : Antd,
         '@antv/g2plot'    : g2plot,
         'eval5'           : eval5,
