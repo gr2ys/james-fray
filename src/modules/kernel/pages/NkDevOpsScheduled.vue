@@ -24,8 +24,8 @@
                                  :class="i===item?'selected':''">
 
                         <div>
-                            <label style="display: block;font-size: 12px;margin-bottom: 5px;">{{i.name}}</label>
-                            <span style="color: #aaa">{{i.group}}</span>
+                            <label style="display: block;font-size: 12px;margin-bottom: 5px;">{{i.key.name}}</label>
+                            <span style="color: #aaa">{{i.description}}</span>
                         </div>
                     </a-list-item>
                 </a-list>
@@ -63,8 +63,10 @@
                             <nk-form-item    :width="180" title="startTime">{{t.startTime | nkDatetimeISO}}</nk-form-item>
                             <nk-form-item    :width="180" title="previousFireTime">{{t.previousFireTime | nkDatetimeISO}}</nk-form-item>
                             <nk-form-item    :width="180" title="nextFireTime">{{t.nextFireTime | nkDatetimeISO}}</nk-form-item>
-                            <nk-form-item    :width="180" title="cronExpression" v-if="t.cronExpression">{{t.cronExpression}}</nk-form-item>
-<!--                            <nk-form-item    :width="180" title="expressionSummary" v-if="t.cronExpression"><pre>{{t.expressionSummary}}</pre></nk-form-item>-->
+                            <nk-form-item    :width="180" title="cronExpression" v-if="t.cronExpression">
+                                {{t.cronExpression}} <a-button v-if="t.expressionSummary&&!t.expressionSummary2" type="link" size="small" @click="$set(t,'expressionSummary2',t.expressionSummary)">解读</a-button>
+                                <pre v-if="t.expressionSummary2">{{t.expressionSummary2}}</pre>
+                            </nk-form-item>
                         </nk-form>
                         <div slot="extra" style="border-left: dashed 1px #ccc;">
                             <a-button type="link" style="height: 100px;width: 100px;" @click="removeTrigger(t)">移除计划</a-button>
@@ -122,7 +124,7 @@
             itemClick(i){
                 this.loading=true;
                 this.item = i;
-                this.$http.get(`/api/ops/scheduled/job/${i.group}/${i.name}`)
+                this.$http.get(`/api/ops/scheduled/job/${i.key.group}/${i.key.name}`)
                     .then((res)=>{
                         this.jobDetail = res.data;
                         this.loading=false;
@@ -130,7 +132,7 @@
             },
             execute(){
                 this.loading=true;
-                this.$http.postJSON(`/api/ops/scheduled/execute/${this.item.group}/${this.item.name}`,this.options||'')
+                this.$http.postJSON(`/api/ops/scheduled/execute/${this.item.key.group}/${this.item.key.name}`,this.options||'')
                     .then(()=>{
                         this.options = undefined;
                         this.$notification.info({
@@ -142,7 +144,7 @@
             },
             addTrigger(){
                 this.loading=true;
-                this.$http.post(`/api/ops/scheduled/trigger/add/${this.item.group}/${this.item.name}`,qs.stringify({
+                this.$http.post(`/api/ops/scheduled/trigger/add/${this.item.key.group}/${this.item.key.name}`,qs.stringify({
                     name:this.trigger.name,
                     cron:this.cron
                 })).then(()=>{
