@@ -31,7 +31,7 @@
                                :content-style="item.style"
 
                                :validate-for="data[item.key]"
-                               :required="item.required"
+                               :required="true"
                                :len="item.inputOptions&&((!!item.inputOptions.maxLength)||(!!item.inputOptions.minLength))"
                                :min="item.inputOptions&&(item.inputOptions.min||item.inputOptions.minLength)"
                                :max="item.inputOptions&&(item.inputOptions.max||item.inputOptions.maxLength)"

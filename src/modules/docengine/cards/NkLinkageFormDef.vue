@@ -150,7 +150,7 @@ export default {
                 inputType: this.inputTypeDefs[0].value,
                 calcTrigger:'',
                 calcOrder:1,
-                required:false,
+                required:true,
                 control:1,
                 spELContent:'',
                 spELTriggers:[],
