@@ -66,7 +66,7 @@ export default {
             columns:[
                 { type:  'seq',                         title: '#',         width: '5%'},
                 { field: 'classify',                    title: '分类',       width: '8%',  sortable:true,formatter:['nkFromList',classifies] },
-                { field: 'docTypeDesc',                 title: '单据类型',    width: '15%', sortable:true },
+                { field: 'docTypeDesc',                 title: '模型类型',    width: '15%', sortable:true },
                 { type:  'html', field: 'docName',       title: '名称',       width: '20%', sortable:true, params:{ orderField: 'docName.original' }},
                 { type:  'html', field: 'partnerName',   title: '交易伙伴',    width: '20%', sortable:true, params:{ orderField: 'partnerName.original' }},
                 { field: 'docStateDesc',                title: '状态',       width: '12%', sortable:true},
@@ -82,7 +82,7 @@ export default {
                     formatter: ['nkFromList',classifies]
                 },
                 {
-                    name:'单据类型',
+                    name:'模型类型',
                     field:'docTypeDesc',
                     component:'nk-search-options-multiple',
                     min:240,

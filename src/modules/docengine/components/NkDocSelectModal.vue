@@ -92,7 +92,7 @@ export default {
                             placeholder:'请输入关键字'
                         }],
                     columns:[{
-                        title:'单据类型',
+                        title:'类型',
                         field:'docType',
                         width: '15%'
                     },{

@@ -131,8 +131,8 @@ export default {
     dataSourceResource(){
       const list = [
         "*<所有资源>",
-        "@*<所有单据类型>",
-        "@<单据类型>",
+        "@*<所有模型>",
+        "@<模型类型>",
         "#*<所有数据源>",
         "#<数据源>",
         "DEF<配置>",
@@ -156,7 +156,7 @@ export default {
           list = ["*<查询>"];
         }else
         if(this.item.permResource.startsWith("DEF")){
-          list = ["*<全部操作>","REGISTRY<基础配置>","COMPONENT<组件开发>","BPM<工作流配置>","DMN<决策引擎配置>","DOCTYPE<单据类型配置>"];
+          list = ["*<全部操作>","REGISTRY<基础配置>","COMPONENT<组件开发>","BPM<工作流配置>","DMN<决策引擎配置>","DOCTYPE<模型配置>"];
         }else
         if(this.item.permResource.startsWith("DEVOPS")){
           list = ["*<全部操作>","DEPLOY<部署>","BPM<工作流实例管理>","DATASYNC<数据同步管理>","CACHE<缓存管理>"];

@@ -278,7 +278,7 @@ export default {
         Promise.all(promises)
             .then((res)=>{
                 if(this.isCreate){
-                    this.$emit('setTab',`新建单据类型`);
+                    this.$emit('setTab',`新建组件`);
                     this.editMode = true;
                 }else{
                     this.disabledOnlineEditing = res[0].data;

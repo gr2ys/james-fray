@@ -12,7 +12,7 @@
 	along with ELCube.  If not, see <https://www.gnu.org/licenses/>.
 -->
 <template>
-    <nk-page-layout :title="def.docType || '单据类型'" :sub-title="def.docName" :spinning="loading">
+    <nk-page-layout :title="def.docType || '模型'" :sub-title="def.docName" :spinning="loading">
 
         <div slot="top" v-if="def.debug" style="padding: 10px 10px 0 10px;">
             <a-alert message="单据配置正在调试" type="warning" show-icon />
@@ -318,7 +318,7 @@ export default {
                 this.options = res[0].data;
                 if(this.isCreate){
                     this.editMode = true;
-                    this.$emit('setTab',`新建单据类型`);
+                    this.$emit('setTab',`新建模型`);
                     if(res[1] && res[1].data){
                         this.def = res[1].data
                         this.def.docName = this.def.docName+'-副本';
@@ -332,7 +332,7 @@ export default {
                     this.histories = res[2].data;
                     this.historiesMore = res[2].data.length === 10;
                     this.editMode = this.def.state === 'InActive' || this.editMode;
-                    this.$emit('setTab',`单据类型:${this.def.docType}`);
+                    this.$emit('setTab',`模型类型:${this.def.docType}`);
                 }
                 this.loading = false;
             })
@@ -434,7 +434,7 @@ export default {
         valid(){
             return new Promise((resolve)=>{
                 if(!this.def.docType){
-                    this.$message.error("单据类型不能为空"); return;
+                    this.$message.error("模型类型不能为空"); return;
                 }
                 if(!this.def.docName){
                     this.$message.error("单据描述不能为空"); return;
