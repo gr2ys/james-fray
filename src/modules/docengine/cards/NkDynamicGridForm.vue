@@ -62,7 +62,7 @@
                         <i class="vxe-icon--info"></i>
                     </span>
                     <span v-if="editMode&&!def.disabledRemove" class="btn" @click="xTableRemove(seq)">
-                        <i class="vxe-icon--remove"></i>
+                        <a-icon type="delete" />
                     </span>
                 </template>
             </vxe-column>

@@ -89,10 +89,10 @@
                     <vxe-table-column>
                         <template v-slot="{seq,row}">
                             <span class="drag-btn" style="margin-right: 10px;">
-                                <i class="vxe-icon--menu"></i>
+                                <a-icon type="swap" rotate="90" />
                             </span>
                             <span style="margin-right: 10px;" @click="$nkSortableRemove(json.searchItemsDefault,seq)">
-                                <i class="vxe-icon--remove"></i>
+                                <a-icon type="delete" />
                             </span>
                         </template>
                     </vxe-table-column>
@@ -148,10 +148,10 @@
                     <vxe-table-column>
                         <template v-slot="{seq,row}">
                             <span class="drag-btn" style="margin-right: 10px;">
-                                <i class="vxe-icon--menu"></i>
+                                <a-icon type="swap" rotate="90" />
                             </span>
                             <span style="margin-right: 10px;" @click="$nkSortableRemove(json.searchItemsMoreDef,seq)">
-                                <i class="vxe-icon--remove"></i>
+                                <a-icon type="delete" />
                             </span>
                         </template>
                     </vxe-table-column>
@@ -210,10 +210,10 @@
                     <vxe-table-column>
                         <template v-slot="{seq,row}">
                             <span class="drag-btn" style="margin-right: 10px;">
-                                <i class="vxe-icon--menu"></i>
+                                <a-icon type="swap" rotate="90" />
                             </span>
                             <span style="margin-right: 10px;" @click="$nkSortableRemove(json.columns,seq)">
-                                <i class="vxe-icon--remove"></i>
+                                <a-icon type="delete" />
                             </span>
                         </template>
                     </vxe-table-column>

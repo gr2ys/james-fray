@@ -65,7 +65,7 @@
             <vxe-table-column   title=""    field=""     width="10%">
                 <template v-slot="{seq,items}">
                     <span v-if="editMode" @click="$nkSortableRemove(docDef.dataSyncs, seq)">
-                        <i class="vxe-icon--remove"></i>
+                        <a-icon type="delete" />
                     </span>
                 </template>
             </vxe-table-column>

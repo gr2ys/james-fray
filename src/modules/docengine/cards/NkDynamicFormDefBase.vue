@@ -75,10 +75,10 @@
                               field="">
                 <template v-slot="{seq,items}">
                     <span v-if="editMode && sortable" class="drag-btn" style="margin-left: 10px;">
-                        <i class="vxe-icon--menu"></i>
+                        <a-icon type="swap" rotate="90" />
                     </span>
                     <span v-if="editMode" style="margin-left: 10px;" @click="$nkSortableRemove(def.items,seq)">
-                        <i class="vxe-icon--remove"></i>
+                        <a-icon type="delete" />
                     </span>
                 </template>
                 <template #content="{ row }">

@@ -122,7 +122,7 @@
                                 <vxe-column title="Action">
                                     <template v-slot="{seq}">
                                         <span v-if="editMode" style="margin-left: 10px;" @click="removePerm(seq)">
-                                            <i class="vxe-icon--remove"></i>
+                                            <a-icon type="delete" />
                                         </span>
                                     </template>
                                 </vxe-column>

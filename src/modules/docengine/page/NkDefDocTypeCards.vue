@@ -64,13 +64,13 @@
                                 :edit-render="{name:'$switch',props: {'open-value':1,'close-value':0}}"
             />
             <vxe-table-column   title=""            field=""               >
-                <template v-slot="{seq,row}">
+                <template v-slot:default="{seq,row}">
                     <span v-if="editMode" class="drag-btn" style="margin-right: 10px;">
-                            <i class="vxe-icon--menu"></i>
+                            <a-icon type="swap" rotate="90" />
                         </span>
                     <span v-if="editMode" style="margin-right: 10px;" @click="$nkSortableRemove(docDef.cards,seq)">
-                            <i class="vxe-icon--remove"></i>
-                        </span>
+                            <a-icon type="delete" />
+                    </span>
                 </template>
             </vxe-table-column>
         </vxe-table>
