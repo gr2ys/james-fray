@@ -85,6 +85,7 @@
                 <a-list item-layout="horizontal" :data-source="histories" style="margin-top: 2px">
                     <div slot="header">
                         版本记录
+                        <a @click="openDefTree">Graph</a>
                     </div>
                     <div v-if="historiesMore" slot="footer" style="text-align: center;color: #999;cursor: pointer;" @click="loadHistories">
                         加载更多...
@@ -212,6 +213,18 @@
             </a-skeleton>
             <a-textarea placeholder="请输入版本描述" style="height: 80px;" v-model="def.versionDesc"></a-textarea>
         </a-modal>
+
+
+        <a-modal v-model="visibleDefTree" centered width="80%" title="版本历史"
+                 :destroyOnClose="true"
+        >
+            <nk-doc-def-tree v-if="historiesRoot" :data="historiesRoot" @g-click="gClick"></nk-doc-def-tree>
+            <template slot="footer">
+                <a-button key="back" type="primary" @click="visibleDefTree=false">
+                    关闭
+                </a-button>
+            </template>
+        </a-modal>
     </nk-page-layout>
 </template>
 
@@ -226,6 +239,7 @@ import NkDefDocTypeIndex from "./NkDefDocTypeIndex";
 import NkDefDocTypeDataSyncs from "./NkDefDocTypeDataSyncs";
 import NkDefDocTypeBPM from "./NkDefDocTypeBPM";
 import NkDefDocTypeCards from "./NkDefDocTypeCards";
+import NkDocDefTree from "../components/NkDocDefTree";
 import NkUtil from "../../../utils/NkUtil";
 import {mapMutations, mapState} from "vuex";
 
@@ -273,6 +287,7 @@ const markdownOption = {
 
 export default {
     components:{
+        NkDocDefTree
     },
     filters:{
         formatVersion : (v)=>{
@@ -352,6 +367,9 @@ export default {
             visibleActiveDiff:false,
             confirmLoadingActive:false,
             versionConflict:false,
+
+            visibleDefTree:false,
+            historiesRoot:undefined,
         }
     },
     computed:{
@@ -480,6 +498,7 @@ export default {
             this.diffMerged = JSON.parse(value);
         },
         doConfirmActive(){
+            this.diffMerged.versionDesc=this.def.versionDesc;
             this.valid().then(()=>{
                 this.confirmLoadingActive=true;
                 this.$http.postJSON(`/api/def/doc/type/active`,this.diffMerged)
@@ -625,6 +644,54 @@ export default {
                 case "doRandom":this.visibleCreateRandom = true;break;
                 case "showHistory":break;
             }
+        },
+        openDefTree(){
+            this.visibleDefTree = true;
+            this.historiesRoot = undefined;
+            this.$http.get(`/api/def/doc/type/list/${this.def.docType}/1?rows=1000`)
+                .then(res=>{
+                    let list = res.data;
+                    let root = [];
+
+                    list.forEach(item=>{
+                        if(item.prevVersion){
+                            const prev = list.find(i=>i.version===item.prevVersion);
+                            if(prev){
+                                if(item.version===this.def.version){
+                                    item.color='red'
+                                }
+                                prev.children = prev.children||[];
+                                prev.children.push(item);
+
+                                if(!prev.prevVersion){
+                                    if(root.indexOf(prev)===-1)
+                                        root.push(prev);
+                                }
+                            }else{
+                                if(root.indexOf(item)===-1)
+                                    root.push(item);
+                            }
+                        }else{
+                            if(root.indexOf(item)===-1)
+                                root.push(item);
+                        }
+                    })
+
+                    if(root.length===1){
+                        this.historiesRoot = root[0];
+                    }else if(root.length===0){
+                        this.historiesRoot = {};
+                    }else{
+                        this.historiesRoot = {
+                            version: this.def.docType,
+                            versionDesc: this.def.docName,
+                            children: root
+                        };
+                    }
+                });
+        },
+        gClick(e){
+            this.toVersion(e.item.getModel())
         }
     },
 }

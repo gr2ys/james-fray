@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@antv/g2plot": "^2.3.39",
+    "@antv/g6": "^4.6.18",
     "@antv/layout": "^0.1.31",
     "@antv/x6": "^1.29.6",
     "ant-design-vue": "^1.5.6",
