@@ -226,13 +226,14 @@ export default {
                 if(this.triggerKeys.indexOf(item.key)===-1){
                     this.triggerKeys.push(item.key);
                 }
-                this.itemCalc();
+                this.itemCalc(item.key);
             }
         },
-        itemCalc(){
+        itemCalc(triggerKey){
             this.confirmLoading = true;
             this.nk$call({
-                selectedItem:this.selectedItem
+                selectedItem:this.selectedItem,
+                triggerKey
             }).then(res=>{
                 this.selectedItem=res.selectedItem;
                 this.modalFields =res.fieldsDef;
