@@ -4,13 +4,13 @@
             <div v-for="(line,index) in list" :key="index" class="line" :class="{unified:mode.toLowerCase()==='unified'}">
 
                 <template v-if="line.added || line.removed">
-                    <div class="code" v-if="line.removed" :class="{removed:line.removed}">
+                    <div class="code" v-if="line.removed" :class="{removed:line.removed,ignore:line.disabled}">
                         <pre class="lineNumber">{{line.lLineNum}}</pre>
                         <pre class="lineNumber"></pre>
                         <pre>{{line.lValue}}</pre>
                     </div>
 
-                    <div class="code" v-if="line.added" :class="{added:line.added}">
+                    <div class="code" v-if="line.added" :class="{added:line.added,ignore:line.disabled}">
                         <pre class="lineNumber"></pre>
                         <pre class="lineNumber">{{line.rLineNum}}</pre>
                         <pre>{{line.rValue}}</pre>
@@ -28,17 +28,23 @@
         </template>
         <template v-else>
             <div v-for="(line,index) in list" :key="index" class="line">
-                <div class="code l" :class="{removed:line.removed}">
+                <div class="code l" :class="{removed:line.removed,ignore:line.disabled}">
                     <pre>{{line.lValue}}</pre>
                     <pre class="lineNumber">{{line.lLineNum}}</pre>
-                    <div class="opt" v-if="mergeable && !line.merged" @click="merge(line,index)">
-                        <a-icon v-if="line.removed" type="double-right" />
-                    </div>
-                    <div class="opt" v-if="mergeable &&  line.merged" @click="undoMerge(line,index)">
-                        <a-icon type="undo" />
-                    </div>
+
+                    <template v-if="mergeable">
+                        <div class="opt" v-if="line.disabled"></div>
+                        <div class="opt p" v-else-if="(line.added||line.removed)&&!line.merged" @click="merge(line,index)">
+                            <a-icon type="double-right" />
+                        </div>
+                        <div class="opt p" v-else-if="line.merged" @click="undoMerge(line,index)">
+                            <a-icon type="undo" />
+                        </div>
+                        <div class="opt" v-else>
+                        </div>
+                    </template>
                 </div>
-                <div class="code r" :class="{added  :line.added}">
+                <div class="code r" :class="{added  :line.added,ignore:line.disabled}">
                     <pre class="lineNumber">{{line.rLineNum}}</pre>
                     <pre>{{line.rValue}}</pre>
                 </div>
@@ -69,7 +75,10 @@ export default {
         let removedPrev = undefined;
 
         this.data && this.data.forEach(line=>{
-            let item = {};
+            let item = {
+                ignore:line.ignore,
+                disabled:line.disabled
+            };
             if(line.added){
                 item = removedPrev||item;
                 item.rValue   = line.value;
@@ -155,7 +164,10 @@ export default {
                 align-items: center;
                 background-color: #eee;
                 user-select: none;
-                cursor: pointer;
+
+                &.p{
+                    cursor: pointer;
+                }
             }
 
             pre{
@@ -179,12 +191,17 @@ export default {
             }
             &.added{
                 &,pre.lineNumber,.opt{
-                    background-color: rgb(206, 245, 215);
+                    background-color: #CEF5D7;
                 }
             }
             &.removed{
                 &,pre.lineNumber,.opt{
-                    background-color: rgb(241, 200, 205);
+                    background-color: #F1C8CD;
+                }
+            }
+            &.ignore{
+                &,pre.lineNumber,.opt{
+                    background-color: #ddd;
                 }
             }
             &.l{

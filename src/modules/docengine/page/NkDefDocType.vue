@@ -243,7 +243,7 @@ import NkDocDefTree from "../components/NkDocDefTree";
 import NkUtil from "../../../utils/NkUtil";
 import {mapMutations, mapState} from "vuex";
 
-import {diffJson} from "diff";
+import diffJson from "../components/docDefDiff";
 
 const defaultCards = [
     {key:"doc",     name:"基本信息",    defComponentNames: [NkDefDocTypeBase,    NkDefDocTypeStatus,NkDefDocTypeHelpDoc]},
@@ -284,6 +284,49 @@ const markdownOption = {
     subfield: true, // 单双栏模式
     preview: false, // 预览
 };
+
+const diffOptions = {
+    stringifyReplacer(k,v){
+        if(k==='_X_ROW_KEY'){
+            return undefined;
+        }
+        return v;
+    }
+};
+const diffDisabledPrefixes = [
+    '  "prevVersion"',
+    '  "state"',
+    '    "state"',
+    '      "state"',
+    '  "version": "',
+    '    "version": "',
+    '      "version": "',
+    '  "versionDesc": "',
+    '  "updatedTime": ',
+    '    "updatedTime": ',
+    '      "updatedTime": ',
+    '  "createdTime": ',
+];
+const diffClear = line=>{
+    if((line.added||line.removed) && line.value){
+        let disabled = true;
+        const items = line.value.split('\n');
+        for(let j in items){
+            if(items[j]){
+                let itemDisabled = false;
+                for(let i in diffDisabledPrefixes){
+                    if(items[j].startsWith(diffDisabledPrefixes[i])){
+                        itemDisabled = true;
+                        break;
+                    }
+                }
+                disabled = disabled&&itemDisabled;
+            }
+        }
+        line.disabled = disabled;
+    }
+    return line;
+}
 
 export default {
     components:{
@@ -495,25 +538,44 @@ export default {
             }
         },
         diffChange(value){
-            this.diffMerged = JSON.parse(value);
+            try{
+                this.diffMerged = JSON.parse(value);
+                this.diffMerged.docType        = this.def.docType;
+                this.diffMerged.docClassify    = this.def.docClassify;
+                this.diffMerged.version        = this.def.version;
+                this.diffMerged.versionHead    = this.def.versionHead;
+                this.diffMerged.prevVersion    = this.def.prevVersion;
+                this.diffMerged.createdTime    = this.def.createdTime;
+                this.diffMerged.createdAccount = this.def.createdAccount;
+            }catch (e){
+                this.diffMerged = undefined;
+                this.$message.error("配置无效："+e);
+            }
         },
         doConfirmActive(){
-            this.diffMerged.versionDesc=this.def.versionDesc;
-            this.valid().then(()=>{
-                this.confirmLoadingActive=true;
-                this.$http.postJSON(`/api/def/doc/type/active`,this.diffMerged)
-                    .then((res)=>{
-                        this.editMode = false;
-                        this.def = res.data;
-                        this.visibleActiveDiff = false;
-                        this.$message.info("配置已激活");
-                        this.loadHistories(true);
-                    })
-                    .finally(()=>{
-                        this.loading = false;
-                        this.confirmLoadingActive=false;
-                    })
-            });
+            if(this.diffMerged){
+                this.diffMerged.versionDesc=this.def.versionDesc;
+                this.valid().then(()=>{
+                    this.confirmLoadingActive=true;
+                    this.$http.postJSON(`/api/def/doc/type/active`,this.diffMerged)
+                        .then((res)=>{
+                            this.editMode = false;
+                            this.def = res.data;
+                            this.visibleActiveDiff = false;
+                            this.$message.info("配置已激活");
+                            this.loadHistories(true);
+                        })
+                        .finally(()=>{
+                            this.loading = false;
+                            this.confirmLoadingActive=false;
+                        })
+                });
+            }else{
+                this.$error({
+                    title: '错误',
+                    content: '配置无效',
+                });
+            }
         },
         doActive(){
             let self = this;
@@ -522,9 +584,10 @@ export default {
             this.$http.get(`/api/def/doc/type/detail/${this.def.docType}/@`)
                 .then(res=>{
                     if(res.data){ // 如果激活的版本存在 且 父版本不一致
+                        const old = res.data;
                         this.visibleActiveDiff = true;
-                        this.versionConflict = res.data.version!==this.def.prevVersion
-                        this.diff = diffJson(res.data,this.def,{});
+                        this.versionConflict = old.version!==this.def.prevVersion
+                        this.diff = diffJson(old,this.def,diffOptions).map(diffClear);
                         this.loading = false;
                     }else{
                         this.$confirm({
@@ -585,7 +648,7 @@ export default {
             this.diff = undefined;
             this.$http.get(`/api/def/doc/type/detail/${i.docType}/${i.version}`)
                 .then(res=>{
-                    this.diff = diffJson(res.data,this.def,{});
+                    this.diff = diffJson(res.data,this.def,diffOptions).map(diffClear);
                 });
         },
         valid(){
