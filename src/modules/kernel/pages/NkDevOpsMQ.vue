@@ -130,6 +130,8 @@
                         this.messages = res.data;
                         if(this.messages[0]){
                             this.$set(this.selected,'messageCount', this.messages[0].message_count + 1);
+                        }else{
+                            this.$set(this.selected,'messageCount', undefined);
                         }
                         this.loading=false;
                     })
