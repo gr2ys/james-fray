@@ -22,6 +22,15 @@
         <nk-bpm-timeline :task="task" :histories="task.historicalTasks"></nk-bpm-timeline>
 
         <a-input type="textarea" v-model="completeTask.comment" :auto-size="{ minRows: 4, maxRows: 6 }" placeholder="请输入办理意见"></a-input>
+
+        <nk-form  ref="form"  v-for="(item,index) in task.formFields" :key="index" >
+            <nk-form-item :term="item.label" :required="true"
+                          :validateFor="item.id">
+                {{item.value.value}}
+                <a-input size="small" v-model="form[item.id]"></a-input>
+            </nk-form-item>
+        </nk-form>
+
         <div slot="actions" style="padding: 0 20px 0;text-align: right">
             <a-button-group v-if="task">
                 <a-popconfirm v-for="transition in task.transitions"
@@ -88,6 +97,7 @@ export default {
     },
     data(){
         return {
+            form:{},
             bpmnVisible: false,
             completeTask: {},
             modal:{
@@ -114,7 +124,9 @@ export default {
     methods:{
         completeTaskOk(transition){
             this.$emit("input",true);
-            this.completeTask = Object.assign(this.completeTask,{taskId:this.task.id,transition});
+
+            this.completeTask = Object.assign(this.completeTask,{taskId:this.task.id,transition,form:this.form,processInstanceId:this.task.processInstanceId});
+
             this.$http.postJSON(`/api/task/complete`,this.completeTask)
                 .then(()=>{
                     this.$emit("complete",true);
