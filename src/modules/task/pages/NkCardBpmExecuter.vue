@@ -20,9 +20,9 @@
                       style="margin-bottom: 10px;" />
 
         <nk-bpm-timeline :task="task" :histories="task.historicalTasks" style="margin-left: 10px;margin-top: 15px;"></nk-bpm-timeline>
-        <div style="border-top: dashed 1px #ccc;padding-bottom: 20px;"></div>
 
-        <nk-form ref="form" :col="1" v-if="completeTask.form" :edit="true">
+        <div v-if="task && completeTask" style="border-top: dashed 1px #ccc;padding-bottom: 20px;"></div>
+        <nk-form ref="form" :col="1" v-if="task && completeTask && completeTask.form" :edit="true">
             <nk-form-item v-for="(item,index) in this.task.formFields"
                           :key="index"
                           :term="item.label"
@@ -34,13 +34,13 @@
                 <a-select       v-else-if="item.typeName==='enum'"    slot="edit" size="small" style="width: 30%;" v-model="completeTask.form[item.id]" :options="item.options"></a-select>
                 <component     v-else :is="item.typeName"             :editMode=true v-model="completeTask.form[item.id]" :properties="item.properties" :options="item.options"></component>
             </nk-form-item>
-            <nk-form-item title="办理意见" :required="true">
+            <nk-form-item title="办理意见" :required="true" :validate-for="completeTask.comment">
                 <a-input slot="edit" type="textarea" v-model="completeTask.comment" :auto-size="{ minRows: 4, maxRows: 6 }" placeholder="请输入办理意见"></a-input>
             </nk-form-item>
         </nk-form>
 
-        <div slot="actions" style="padding: 0 20px 0;text-align: right">
-            <a-button-group v-if="task">
+        <div v-if="task && completeTask" slot="actions" style="padding: 0 20px 0;text-align: right">
+            <a-button-group>
                 <a-popconfirm v-for="transition in task.transitions"
                               :key="transition.id" :title="`确定${transition.name}?`"
                               :disabled="buttonDisabled"
@@ -108,9 +108,7 @@ export default {
             userIdsOp:[],
             param:{},
             bpmnVisible: false,
-            completeTask: {
-                form:{}
-            },
+            completeTask: undefined,
             modal:{
                 visible:false,
                 title:undefined,
@@ -122,20 +120,22 @@ export default {
         }
     },
     created(){
-        if(this.task.formFields && this.task.formFields.length){
-            let form = {};
-            this.task.formFields.forEach(item=>{
-                form[item.id]=(item.value&&item.value.value) || item.defaultValue;
-            });
-            this.completeTask.form = form;
+        this.initFrom();
+    },
+    watch:{
+        taskId(){
+            this.initFrom();
         }
     },
     computed:{
         ...mapGetters('User',[
             'hasAuthority'
         ]),
+        taskId(){
+            return this.task && this.task.id;
+        },
         buttonDisabled(){
-            return this.editMode || !(this.completeTask.comment && this.completeTask.comment.replace(/\s/g,''));
+            return this.editMode || !(this.completeTask && this.completeTask.comment && this.completeTask.comment.replace(/\s/g,''));
         },
         okButtonDisabled(){
             return this.editMode || !this.modal.accountId || !(this.modal.comment && this.modal.comment.replace(/\s/g,''));
@@ -156,6 +156,17 @@ export default {
         }
     },
     methods:{
+        initFrom(){
+            if(this.task.formFields && this.task.formFields.length){
+                let form = {};
+                this.task.formFields.forEach(item=>{
+                    form[item.id]=(item.value&&item.value.value) || item.defaultValue;
+                });
+                this.completeTask = {form};
+            }else{
+                this.completeTask = {};
+            }
+        },
         completeTaskOk(transition){
 
             let error = undefined;
@@ -174,10 +185,10 @@ export default {
             this.$http.postJSON(`/api/task/complete`,this.completeTask)
                 .then(()=>{
                     this.$emit("complete",true);
-                    this.completeTask = {};
+                    this.completeTask = undefined;
                     this.bpmnVisible = false;
                 })
-                .finally(()=> {
+                .catch(()=> {
                     this.$emit("input",false);
                 });
         },
@@ -201,9 +212,10 @@ export default {
             this.$http.postJSON(`/api/task/forward`,completeTask)
                 .then(()=>{
                     this.$emit("complete",true);
+                    this.completeTask = undefined;
                     this.bpmnVisible = false;
                 })
-                .finally(()=> {
+                .catch(()=> {
                     this.$emit("input",false);
                 });
         },
@@ -213,9 +225,10 @@ export default {
             this.$http.postJSON(`/api/task/delegate`,completeTask)
                 .then(()=>{
                     this.$emit("complete",true);
+                    this.completeTask = undefined;
                     this.bpmnVisible = false;
                 })
-                .finally(()=> {
+                .catch(()=> {
                     this.$emit("input",false);
                 });
         },

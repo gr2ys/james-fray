@@ -480,6 +480,7 @@ export default {
             })
         },
         initData(){
+            this.loading = true
             if(this.contextParams.mode==='create'){
                 this.createMode = true;
                 const req = {
@@ -497,10 +498,10 @@ export default {
                         this.loading = false;
                         this.autoShowDocHelper();
                     }).catch(res=>{
-                    if(res.response.status===403){
-                        this.$emit("close")
-                    }
-                });
+                        if(res.response.status===403){
+                            this.$emit("close")
+                        }
+                    });
             }else if(this.contextParams.mode==='detail'){
                 this.$http.get("/api/doc/detail/"+this.contextParams.docId)
                     .then(response=>{
@@ -510,13 +511,13 @@ export default {
                         this.loading = false
                         this.autoShowDocHelper();
                     }).catch(res=>{
-                    if(res.response.status===403){
-                        this.$emit("close")
-                    }
-                    if(res.response.data.msg==="单据不存在"){
-                        this.$emit("close")
-                    }
-                });
+                        if(res.response.status===403){
+                            this.$emit("close")
+                        }
+                        if(res.response.data.msg==="单据不存在"){
+                            this.$emit("close")
+                        }
+                    });
             }else if(this.contextParams.mode==='snapshot'){
                 this.$http.get("/api/doc/detail/snapshot/"+this.contextParams.docId)
                     .then(response=>{
