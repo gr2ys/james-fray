@@ -23,7 +23,12 @@
                                  slot-scope="i"
                                  @click="itemClick(i)"
                                  :class="i===selected?'selected':''">
-                        {{i.name}}
+                        {{i.name}}<a-badge :count="i.messageCount" :number-style="{
+                            backgroundColor: '#fff',
+                            color: '#999',
+                            marginLeft: '10px',
+                            boxShadow: '0 0 0 1px #d9d9d9 inset',
+                          }"/>
                     </a-list-item>
                 </a-list>
             </a-layout-sider>
@@ -38,7 +43,9 @@
                     </nk-form>
                     <div style="margin-top: 10px;text-align: right;">
                         <a-textarea v-model="payload" placeholder="payload" :rows="3"></a-textarea>
-                        <a-button @click="send" type="link" style="">投递</a-button>
+                        <a-popconfirm @confirm="send" title="确认投递？" placement="topRight" :disabled="!payload">
+                            <a-button type="link" style="" :disabled="!payload">投递</a-button>
+                        </a-popconfirm>
                     </div>
                 </nk-card>
 
@@ -63,8 +70,13 @@
                         </nk-form>
                         <div v-if="index===0
                         && i.properties.headers
-                        && i.properties.headers['x-first-death-queue']" slot="extra" style="border-left: dashed 1px #ccc;">
-                            <a-button type="link" style="height: 100px;" @click="resume">重新投递</a-button>
+                        && i.properties.headers['x-first-death-queue']" slot="extra" style="border-left: dashed 1px #ccc;display: flex;height: 100px;align-items: center;">
+                            <a-popconfirm @confirm="resume" title="确认重新投递？" placement="topRight">
+                                <a-button type="link">重新投递</a-button>
+                            </a-popconfirm>
+                            <a-popconfirm @confirm="discard" title="确认丢弃？" placement="topRight">
+                                <a-button type="link">丢弃</a-button>
+                            </a-popconfirm>
                         </div>
                     </a-list-item>
                 </a-list>
@@ -94,19 +106,34 @@
                     this.queues = res.data;
                     if(this.queues[0]){
                         this.itemClick(this.queues[0]);
+                        this.initMessageCount();
+
                     }else{
                         this.loading=false
                     }
                 })
         },
         methods: {
+            initMessageCount(){
+                for(let i=1;i<this.queues.length;i++){
+                    this.$http.get(`/api/ops/mq/queues/${this.queues[i].name}/get?rows=1`)
+                        .then((res)=>{
+                            if(res.data[0]){
+                                this.$set(this.queues[i],'messageCount', res.data[0].message_count + 1);
+                            }
+                        })
+                }
+            },
             itemClick(i){
                 this.loading=true
                 this.selected = i;
                 this.$http.get(`/api/ops/mq/queues/${i.name}/get`)
                     .then((res)=>{
                         this.messages = res.data;
-                        this.loading=false
+                        if(this.messages[0]){
+                            this.$set(this.selected,'messageCount', this.messages[0].message_count + 1);
+                        }
+                        this.loading=false;
                     })
             },
             resume(){
@@ -114,6 +141,13 @@
                 this.$http.post(`/api/ops/mq/queues/${this.selected.name}/resume`)
                     .then(()=>{
                         this.itemClick(this.selected);
+                    })
+            },
+            discard(){
+                this.loading=true
+                this.$http.post(`/api/ops/mq/queues/${this.selected.name}/discard`)
+                    .then(()=>{
+                      this.itemClick(this.selected);
                     })
             },
             send(){
