@@ -12,6 +12,7 @@
  *	along with ELCube.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'default-passive-events'
 import Vue from 'vue';
 import Vuex from "vuex";
 import VueI18n from "vue-i18n";

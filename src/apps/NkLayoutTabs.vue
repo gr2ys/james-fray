@@ -55,8 +55,12 @@
                         </div>
                     </div>
                     <a-menu ref="contextMenu" slot="overlay" @click="contextClick">
+                        <a-menu-item key="forceRefresh" v-if="!debugId && dropdownConfig.refresh&&hasAuthority('SYS:Debug')">
+                            强制加载
+                        </a-menu-item>
+                        <a-menu-divider                 v-if="!debugId && dropdownConfig.refresh&&hasAuthority('SYS:Debug')" />
                         <a-menu-item key="refresh"      v-if="dropdownConfig.refresh">
-                            重新加载
+                            刷新
                         </a-menu-item>
                         <a-menu-item key="openWin"      v-if="dropdownConfig.refresh">
                             在新页面中打开
@@ -81,6 +85,7 @@
 <script>
 import NkTabItem from "./NkLayoutTabItem";
 import DomUtils from "@/utils/DomUtils";
+import {mapGetters, mapState} from "vuex";
 
 function getElementLeft(element){
     let actualLeft = element.offsetLeft;
@@ -140,6 +145,11 @@ export default {
             }
         }
     },
+    computed:{
+        ...mapState('Debug',[
+            'debugId'
+        ]),
+    },
     created() {
         self = this;
     },
@@ -155,6 +165,9 @@ export default {
         })
     },
     methods:{
+        ...mapGetters('User',[
+            'hasAuthority'
+        ]),
         itemClick(e){
             if(e.path!==this.activePath){
                 this.$router.push(e.route)
@@ -320,6 +333,8 @@ export default {
                     this.$emit('item-refresh',tab)
                 }else if(e.key==='openWin'){
                     window.open(`#${tab.path}`);
+                }else if(e.key==='forceRefresh'){
+                    this.$emit('item-force-refresh',tab)
                 }
             }
         }

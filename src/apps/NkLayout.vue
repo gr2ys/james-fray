@@ -70,6 +70,7 @@
                              @closeOthers="tabCloseAll"
                              @sort="tabSort"
                              @item-refresh="tabItemRefresh"
+                             @item-force-refresh="tabItemRefresh($event,true)"
                     ></nk-tabs>
                     <component v-for="(item) in pages"
                                v-show="item.path===activePage"
@@ -367,9 +368,9 @@ export default {
         tabSort(items){
             this.pages = items;
         },
-        tabItemRefresh(item){
+        tabItemRefresh(item,force){
             new Promise((resolve)=>{
-                if(this.debugId){
+                if(this.debugId||force){
                     this.$sfc.reloadVueResources().then((e)=>{
                         this.$message.info(`Debug: 重新载入Vue组件${e.count}个`)
                         resolve();
