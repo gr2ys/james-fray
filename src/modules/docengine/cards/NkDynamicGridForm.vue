@@ -81,7 +81,7 @@
             <a-spin :spinning="confirmLoading">
                 <nk-form ref="form" :col="def.col||1" :edit="editMode" v-if="selectedItem">
 
-                    <template v-for="(item) in def.items" >
+                    <template v-for="(item) in modalFields" >
                         <nk-form-divider
                             v-if="(item.inputType==='divider'||item.inputType==='-'||item.inputType==='--')"
                             :key="item.key"
@@ -142,7 +142,9 @@ export default {
             confirmLoading:false,
 
             trigger: false,
-            triggerKeys: []
+            triggerKeys: [],
+
+            modalFields: []
         }
     },
     computed:{
@@ -176,9 +178,11 @@ export default {
             this.xTableEdit(this.data[rowIndex],rowIndex+1);
         },
         xTableEdit(row,seq){
+            this.modalFields  = this.def.items||[];
             this.selectedItem = JSON.parse(JSON.stringify(row));
             this.selectedSeq  = seq;
             this.selected     = true;
+            this.itemCalc();
         },
         xTableCancel(){
             this.selectedItem   = undefined;
@@ -217,14 +221,25 @@ export default {
             }
         },
         itemFieldChange(e,item){
-            if(item.calcTrigger){
+            if(item && item.calcTrigger){
                 this.trigger = true;
                 if(this.triggerKeys.indexOf(item.key)===-1){
                     this.triggerKeys.push(item.key);
                 }
+                this.itemCalc();
             }
         },
-
+        itemCalc(){
+            this.confirmLoading = true;
+            this.nk$call({
+                selectedItem:this.selectedItem
+            }).then(res=>{
+                this.selectedItem=res.selectedItem;
+                this.modalFields =res.fieldsDef;
+            }).finally(()=>{
+                this.confirmLoading = false;
+            });
+        },
         obtainSlot(item){
             return this.editMode && item.control > 0?'edit':'default'
         },
