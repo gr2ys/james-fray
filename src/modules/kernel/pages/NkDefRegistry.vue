@@ -203,10 +203,7 @@ export default {
 
                 this.$http.get(`/api/platform/registry/def/value/${e[0]}`).then((res)=>{
                     if(res.data&&res.data.content){
-                        try{
-                            res.data.content = JSON.parse(res.data.content);
-                        }catch (e){//
-                        }
+                        res.data.content = JSON.parse(res.data.content);
                     }
                     this.selectedNode = Object.assign(this.selectedNode,res.data);
                     // 数据类型
@@ -224,9 +221,7 @@ export default {
         saveSelected(){
             this.loading = true;
             const value = Object.assign({},this.selectedNode);
-            if(typeof value.content === 'object'){
-                value.content = JSON.stringify(value.content);
-            }
+            value.content = value.content && JSON.stringify(value.content);
             if(this.selectedNode.isNew){
                 value.regKey  = value.regKey + this.selectedNewKey;
                 if(this.parentNode.children && this.parentNode.children.find(c=>c.regKey === value.regKey)){
