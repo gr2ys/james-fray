@@ -23,10 +23,12 @@ import NkPageProcessInstances from "@/modules/task/pages/NkPageProcessInstances"
 import NkPageProcessDetail from "@/modules/task/pages/NkPageProcessDetail";
 
 import NkBpmTimeline from "@/modules/task/components/NkBpmTimeline";
+import NkBpmnView from "@/modules/task/components/NkDmnView";
 
 const install = function (Vue) {
 
-    Vue.component("nk-bpm-timeline",                NkBpmTimeline);
+    Vue.component("nk-bpm-timeline",            NkBpmTimeline);
+    Vue.component("nk-bpmn-view",               NkBpmnView);
 };
 
 const routes = [

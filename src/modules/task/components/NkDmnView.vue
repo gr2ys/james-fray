@@ -58,8 +58,9 @@ export default {
             this.viewer.importXML(this.bpmnXml)
                 .then(() => {
                     this.viewer._viewers.drd.get("canvas").zoom('fit-viewport',{});
+                    this.viewer._viewers.drd.get('zoomScroll').stepZoom(-1)
                     this.loading = false;
-                    this.viewer._container.getElementsByTagName("a")[0].style.transform='scale(0.6)';
+                    //this.viewer._container.getElementsByTagName("a")[0].style.transform='scale(0.6)';
                     this.$emit("init", this.viewer);
 
                     this.viewer._viewsChanged = ()=>{
@@ -88,7 +89,13 @@ export default {
 <style scoped lang="less">
 .canvas{
     ::v-deep.fired td{
-        background-color: #4d90ff !important;
+        background-color: #ffcc00 !important;
+    }
+    ::v-deep{
+
+        .bjs-powered-by,.powered-by{
+            transform: scale(0.6);
+        }
     }
 }
 </style>

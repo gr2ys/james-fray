@@ -68,7 +68,7 @@ export default {
                         looksBetter(this.viewer,this.taskDefinitionKey)
                     }
                 }).catch((e) => {console.log(e)});
-            this.$refs['js-canvas'].getElementsByTagName("a")[0].style.transform='scale(0.6)';
+            //this.$refs['js-canvas'].getElementsByTagName("a")[0].style.transform='scale(0.6)';
         },
         zoom(flag) {
             console.log(this.taskDefinitionKey)
@@ -81,6 +81,11 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
 
+::v-deep {
+    .bjs-powered-by, .powered-by {
+        transform: scale(0.6);
+    }
+}
 </style>

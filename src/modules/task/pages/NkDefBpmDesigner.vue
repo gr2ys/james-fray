@@ -123,7 +123,7 @@ export default {
                     camunda: extensionModdle
                 },
             });
-            this.canvas.getElementsByTagName("a")[0].style.transform='scale(0.6)';
+            //this.canvas.getElementsByTagName("a")[0].style.transform='scale(0.6)';
             this.init()
         })
     },
@@ -333,6 +333,11 @@ export default {
     }
     100% {
         transform: scale(1);
+    }
+}
+::v-deep {
+    .bjs-powered-by, .powered-by {
+        transform: scale(0.6);
     }
 }
 </style>
