@@ -22,7 +22,7 @@
         <div style="display: flex;width: 100%;">
             <div style="width: 100%;max-height: 600px;overflow-y: auto;">
                 <a-card :title="card.cardName">
-                    <div ref="parent" class="parent" style="width: 100%;" @click="selectItem">
+                    <div ref="parent" class="parent" style="width: 100%;min-height:300px;padding-bottom: 40px;" @click="selectItem">
                         <nk-form :col="def.col||2" :edit="reviewEditMode">
                             <template v-for="(item,seq) in def.items">
                                 <nk-form-divider
