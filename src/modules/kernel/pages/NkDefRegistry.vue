@@ -97,6 +97,7 @@
 <script>
 // import NkUtil from "../../utils/NkUtil";
 import NkRegistryText from "../components/NkRegistryTextEdit";
+import NkRegistryJSON from "../components/NkRegistryJSONEdit";
 import NkRegistrySelectOptions from "../components/NkRegistryJSONEdit";
 import NkRegistryDataSetNote from "../components/NkRegistryJSONEdit";
 import NkRegistryCustomQuery from "../components/NkRegistryTextAreaEdit";
@@ -110,6 +111,9 @@ const dataType = {
     "@DICT":[{
         title:"普通文本",
         value:"NkRegistryText"
+    },{
+        title:"JSON",
+        value:"NkRegistryJSON"
     },{
         title:"下拉选项",
         value:"NkRegistrySelectOptions"
@@ -135,6 +139,7 @@ export default {
     },
     components:{
         NkRegistryText,
+        NkRegistryJSON,
         NkRegistrySelectOptions,
         NkRegistryDataSetNote,
         NkRegistryCustomQuery,
