@@ -94,6 +94,10 @@
                                 <a-select-option :key="-1">隐藏</a-select-option>
                             </a-select>
                         </nk-form-item>
+                        <nk-form-item title="控制 SpEL 表达式">
+                            {{row.spELControl}}
+                            <nk-sp-el-editor slot="edit" v-model="row.spELControl"></nk-sp-el-editor>
+                        </nk-form-item>
                         <nk-form-item title="右对齐">
                             {{row.alignRight?'是':'否'}}
                             <a-switch slot="edit" size="small" v-model="row.alignRight" />
