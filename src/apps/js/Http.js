@@ -48,15 +48,20 @@ export default (Vue) => {
       if(config.headers['Content-Type']){
         if(config.headers['Content-Type'].indexOf('application/x-www-form-urlencoded;')>-1){
           if(config.data){
-            config.data.split('&').forEach(item=>array.push(item))
+            decodeURIComponent(config.data).split('&').forEach(item=>array.push(item))
           }
         }
       }
 
+      let nonce = uuidv1();
+
       array.push(`timestamp=${timestamp}`)
       array.push(`secret=${token}`)
+      array.push(`nonce=${nonce}`)
 
       const unsign = str[0].substr(4)+'?'+array.sort().join('&');
+
+      console.log(unsign)
 
       const signature = crypto.createHash('sha1')
           .update(unsign)
@@ -66,7 +71,7 @@ export default (Vue) => {
       config.headers.common['elcube-client']    = AuthUtils.getClientId(uuidv1);
       config.headers.common['elcube-user']      = AuthUtils.getUsername();
       config.headers.common['elcube-timestamp'] = timestamp;
-      config.headers.common['elcube-nonce']     = uuidv1();
+      config.headers.common['elcube-nonce']     = nonce;
       config.headers.common['elcube-signature'] = signature;
 
     }
@@ -204,12 +209,16 @@ export default (Vue) => {
       return new Promise((resolve,reject)=>{
         targetRequestFunction.apply(self,args)
             .then(resolve)
-            .catch(()=>{
-              reLogin(()=>{
-                targetRequestFunction.apply(self,args)
-                    .then(resolve)
-                    .catch(reject)
-              });
+            .catch((error)=>{
+              if(error.response.status===401){
+                reLogin(()=>{
+                  targetRequestFunction.apply(self,args)
+                      .then(resolve)
+                      .catch(reject)
+                });
+              }else{
+                reject(error);
+              }
             })
       })
     }else{
