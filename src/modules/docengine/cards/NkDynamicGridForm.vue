@@ -56,10 +56,10 @@
             <vxe-column title="" fixed="right" width="60px">
                 <template v-slot="{row, seq,items}">
                     <span v-if="editMode" class="btn" @click="xTableEdit(row,seq)">
-                        <i class="vxe-icon--edit-outline"></i>
+                        <a-icon type="edit" />
                     </span>
                     <span v-else class="btn" @click="xTableEdit(row,seq)">
-                        <i class="vxe-icon--info"></i>
+                        <a-icon type="info-circle" />
                     </span>
                     <span v-if="editMode&&!def.disabledRemove" class="btn" @click="xTableRemove(seq)">
                         <a-icon type="delete" />
