@@ -26,8 +26,7 @@
         <nk-form  ref="form"  v-for="(item,index) in task.formFields" :key="index" >
             <nk-form-item :term="item.label" :required="true"
                           :validateFor="item.id">
-                {{item.value.value}}
-                <a-input size="small" v-model="form[item.id]"></a-input>
+                <a-input size="small" v-model="param[item.id]"></a-input>
             </nk-form-item>
         </nk-form>
 
@@ -97,7 +96,7 @@ export default {
     },
     data(){
         return {
-            form:{},
+            param:{},
             bpmnVisible: false,
             completeTask: {},
             modal:{
@@ -123,9 +122,13 @@ export default {
     },
     methods:{
         completeTaskOk(transition){
+            if(Object.keys(this.param).length != this.task.formFields.length){
+                this.$message.error('请填写参数');
+                return false;
+            }
             this.$emit("input",true);
 
-            this.completeTask = Object.assign(this.completeTask,{taskId:this.task.id,transition,form:this.form,processInstanceId:this.task.processInstanceId});
+            this.completeTask = Object.assign(this.completeTask,{taskId:this.task.id,transition,form:this.param,processInstanceId:this.task.processInstanceId});
 
             this.$http.postJSON(`/api/task/complete`,this.completeTask)
                 .then(()=>{
