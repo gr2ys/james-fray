@@ -96,6 +96,7 @@ export default {
                 {key:'afterCalculated',     name:'[计算]afterCalculated',     ref:'docCycleInterceptor'},
 
                 {key:'beforeUpdate',        name:'[更新]beforeUpdate',        ref:'docCycleInterceptor'},
+                {key:'afterUpdate',         name:'[更新]afterUpdate',         ref:'docCycleInterceptor'},
                 {key:'afterUpdated',        name:'[更新]afterUpdated',        ref:'docCycleInterceptor'},
                 {key:'stateChanged',        name:'[更新]stateChanged',        ref:'docCycleInterceptor'},
                 {key:'afterUpdateCommit',   name:'[更新]afterUpdateCommit',   ref:'docCycleInterceptor'},
