@@ -68,8 +68,10 @@
                                 <pre v-if="t.expressionSummary2">{{t.expressionSummary2}}</pre>
                             </nk-form-item>
                         </nk-form>
-                        <div slot="extra" style="border-left: dashed 1px #ccc;">
-                            <a-button type="link" style="height: 100px;width: 100px;" @click="removeTrigger(t)">移除计划</a-button>
+                        <div slot="extra" style="border-left: dashed 1px #ccc;height:100px;display: flex;align-items: center;">
+                            <a-popconfirm @confirm="removeTrigger(t)" title="确认移除计划？" placement="topRight">
+                                <a-button type="link" >移除计划</a-button>
+                            </a-popconfirm>
                         </div>
                     </a-list-item>
                 </a-list>
