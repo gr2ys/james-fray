@@ -44,6 +44,7 @@
                                              :active="item.path === activePath"
                                              ref="items"
                                              @click="itemClick"
+                                             @dblclick="itemDblClick(item)"
                                              @close="itemClose"
                                              @dragstart="itemDragstart"
                                              @dragover="itemDragover"
@@ -158,6 +159,9 @@ export default {
             if(e.path!==this.activePath){
                 this.$router.push(e.route)
             }
+        },
+        itemDblClick(tab){
+            this.$emit('item-refresh',tab)
         },
         itemClose(e){
             this.$emit("close",e);

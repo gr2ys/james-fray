@@ -23,9 +23,9 @@
          @dragend="dragend">
         <div>
             <a-tooltip v-if="tab.name.length>=10" :title="tab.name">
-                <span @click="click">{{tab.name}}</span>
+                <span @click="click" @dblclick="dblclick">{{tab.name}}</span>
             </a-tooltip>
-            <span v-else @click="click" style="margin: 0 -16px;padding: 0 16px;">
+            <span v-else @click="click" @dblclick="dblclick" style="margin: 0 -16px;padding: 0 16px;">
                 {{tab.name}}
                 <template v-if="tab.subName">[{{tab.subName}}]</template>
             </span>
@@ -66,7 +66,10 @@ export default {
     },
     methods:{
         click(){
-            this.$emit("click",this.tab);
+          this.$emit("click",this.tab);
+        },
+        dblclick(){
+          this.$emit("dblclick",this.tab);
         },
         close(){
             this.$emit("close",this.tab);
