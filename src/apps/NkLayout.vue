@@ -33,7 +33,7 @@
                         <a-icon
                             class="trigger nk-hover-primary-color"
                             :type="collapsed ? 'menu-unfold' : 'menu-fold'"
-                            @click="() => (collapsed = !collapsed)"
+                            @click="doCollapsed"
                         ></a-icon>
                         <span v-if="env&&env[0]" class="env trigger nk-primary-color">{{env[0]}}</span>
                     </div>
@@ -202,6 +202,14 @@ export default {
         defaultPage.route = defaultPage.path
         this.pageCaches[defaultPage.path]=defaultPage;
         this.pages.push(defaultPage);
+
+        let collapsed = localStorage.getItem("$NK-Layout-collapsed");
+        if(!collapsed){
+            this.collapsed = screen.width < 1440;
+            localStorage.setItem("$NK-Layout-collapsed",this.collapsed?"true":"false");
+        }else{
+            this.collapsed = collapsed==='true';
+        }
     },
     mounted() {
         // 添加当前路由页面
@@ -433,6 +441,10 @@ export default {
         },
         loginFormChanged(e){
             this.loginInfo = e;
+        },
+        doCollapsed() {
+            this.collapsed = !this.collapsed
+            localStorage.setItem("$NK-Layout-collapsed",this.collapsed?"true":"false");
         }
     }
 }

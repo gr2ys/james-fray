@@ -28,7 +28,6 @@
                                :edit="editMode && item.control > 0"
                                :width="def.titleWidth"
                                :content-align="item.alignRight?'right':''"
-                               :content-style="item.style"
 
                                :validate-for="data[item.key]"
                                :required="item.required"

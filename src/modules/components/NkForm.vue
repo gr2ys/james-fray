@@ -39,7 +39,7 @@ export default {
         edit:{
             type: Boolean,
             default: false
-        }
+        },
     },
     provide () {
         return {

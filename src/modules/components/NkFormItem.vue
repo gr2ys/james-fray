@@ -91,6 +91,7 @@ export default {
         lenMessage: String,
         patternMessage: String,
         validatorMessage: String,
+        ignoreValidate: Boolean,
     },
     created(){
     },
@@ -142,6 +143,9 @@ export default {
             return arr;
         },
         error(){
+            if(this.ignoreValidate){
+                return undefined;
+            }
             return this.checkError()
         }
     },
