@@ -18,8 +18,10 @@
                 <div :class="{fixed:fixedMenu,collapsed}">
                     <component :is="logo" class="logo"></component>
                     <nk-nav :active-page="activePage" :collapsed="collapsed"></nk-nav>
-                    <div class="copyright" style="width: 256px;" v-if="!collapsed">
-                        elcube&trade; ver. {{version.version}} / {{(env&&env[1])||'0.0.0'}}
+                    <div class="copyright nk-primary-background-color" v-if="!collapsed" :class="{
+                        'dev':version.version.toUpperCase().indexOf('BETA')>-1 || env&&env[1]&&env[1].toUpperCase().indexOf('SNAPSHOT')>-1
+                    }">
+                        elcube&reg; ver. {{version.version}} / {{(env&&env[1])||'0.0.0'}}
                     </div>
                 </div>
             </a-layout-sider>
@@ -553,13 +555,18 @@ export default {
 
     /* 页脚 */
     .copyright{
+        width: 320px;
         text-align: center;
         position: fixed;
-        bottom: 0;
-        left: 0;
+        bottom: -2px;
+        left: -32px;
         color: #2a2a2a;
         user-select: none;
         transform: scale(0.8, 0.8);
+
+        &.dev{
+            background-color: #aa2222;
+        }
     }
 }
 @media screen and ( max-width: 1366px ){
