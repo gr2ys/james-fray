@@ -27,6 +27,8 @@
                                :col="item.col"
                                :edit="editMode && item.control > 0"
                                :width="def.titleWidth"
+                               :content-align="item.alignRight&&'right'"
+                               :content-style="item.style"
 
                                :validate-for="data[item.key]"
                                :required="item.required"
@@ -42,6 +44,7 @@
                                :editMode="editMode && item.control > 0"
                                v-model="data[item.key]"
                                :input-options="item.inputOptions"
+                               :style="item.style"
                                @change="itemChange($event,item)"
                     ></component>
                 </nk-form-item>
