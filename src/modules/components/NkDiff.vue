@@ -31,10 +31,10 @@
                 <div class="code l" :class="{removed:line.removed}">
                     <pre>{{line.lValue}}</pre>
                     <pre class="lineNumber">{{line.lLineNum}}</pre>
-                    <div class="opt" v-if="mergeable && !line.rValueOld" @click="merge(line,index)">
+                    <div class="opt" v-if="mergeable && !line.merged" @click="merge(line,index)">
                         <a-icon v-if="line.removed" type="double-right" />
                     </div>
-                    <div class="opt" v-if="mergeable &&  line.rValueOld" @click="undoMerge(line,index)">
+                    <div class="opt" v-if="mergeable &&  line.merged" @click="undoMerge(line,index)">
                         <a-icon type="undo" />
                     </div>
                 </div>
@@ -118,6 +118,7 @@ export default {
             line.rValue    = line.lValue;
             line.added     = false;
             line.removed   = false;
+            this.$set(line,'merged',true);
             this.$emit("change",this.list.map(item=>item.rValue).join(''));
         },
         undoMerge(line){
@@ -125,6 +126,7 @@ export default {
             line.added     = true;
             line.removed   = true;
             line.rValueOld = undefined;
+            this.$set(line,'merged',false);
             this.$emit("change",this.list.map(item=>item.rValue).join(''));
         }
     }
