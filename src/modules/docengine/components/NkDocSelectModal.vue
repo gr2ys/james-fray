@@ -33,12 +33,15 @@
             </nk-search-box>
         </a-form>
         <vxe-table
+            ref="grid"
             auto-resize
             size="mini"
             border=inner
             highlight-hover-row
             highlight-current-row
             header-cell-class-name="headerCellClassName"
+            :sort-config="sortConfig"
+            @sort-change="vxeSortChanged"
             :data="page.list">
             <vxe-table-column   title="#"        type="seq"               width="8%" ></vxe-table-column>
             <vxe-table-column v-for="column in modal.columns"
@@ -48,6 +51,7 @@
                               :width="column.width"
                               :header-align="column.align"
                               :align="column.align"
+                              :sortable="column.sortable"
                               :formatter="column.formatter">
             </vxe-table-column>
             <vxe-table-column  title="ACTION" >
@@ -124,6 +128,14 @@ export default {
         },
         aggs(){
             return this.page.aggs || {}
+        },
+        sortConfig(){
+            return Object.assign({
+                trigger: 'cell',
+                remote: true,
+                //defaultSort: {field: 'age', order: 'desc'},
+                orders: ['desc', 'asc', null]
+            },this.modal.sortConfig);
         }
     },
     data(){
@@ -164,6 +176,19 @@ export default {
         },
         formSubmit(e){
             e.preventDefault();
+
+            this.$refs.grid.clearSort();
+            this.params.order = undefined;
+            this.params.orderField = undefined;
+            if(this.sortConfig && this.sortConfig.remote && this.sortConfig.defaultSort && this.sortConfig.defaultSort.field){
+                const column = this.modal.columns.find(item=>item.field===this.sortConfig.defaultSort.field);
+                if(column){
+                    this.params.orderField = (column.params&&column.params.orderField)||column.field;
+                    this.params.order = this.sortConfig.defaultSort.order;
+                    this.$refs.grid.sort(this.sortConfig.defaultSort.field, this.params.order);
+                }
+            }
+
             this.params.from = 0;
             this.query();
         },
@@ -180,6 +205,15 @@ export default {
                     this.params.from = 0;
                     this.query();
                 }
+            }
+        },
+        // 排序跳转
+        vxeSortChanged({property,order}){
+            if(this.sortConfig && this.sortConfig.remote){
+                const column = this.modal.columns.find(item=>item.field===property)
+                this.params.orderField = order===null?null:((column.params&&column.params.orderField)||property);
+                this.params.order = order;
+                this.query()
             }
         },
         // 页码跳转

@@ -108,7 +108,7 @@
                 @cell-click="vxeCellClick"
                 @current-change="vxeCurrentChanged"
                 @sort-change="vxeSortChanged"
-                :sort-config="sortConfig"
+                :sort-config="computedSortConfig"
             >
                 <template #tags="e">
                     <a-tag v-for="(item,index) in getRowCustomValue(e)"
@@ -185,15 +185,7 @@ export default {
             default:"inner"
         },
         sortConfig:{
-            type: Object,
-            default(){
-                return {
-                    trigger: 'cell',
-                    remote: true,
-                    defaultSort: {field: 'age', order: 'desc'},
-                    orders: ['desc', 'asc', null]
-                };
-            }
+            type: Object
         },
         exportConfig:Object
     },
@@ -203,6 +195,14 @@ export default {
         },
         availableDataTableColumns(){
             return this.dataTableColumns && this.dataTableColumns.filter(item=>item.ignore!==true);
+        },
+        computedSortConfig(){
+            return Object.assign({
+                trigger: 'cell',
+                remote: true,
+                //defaultSort: {field: 'age', order: 'desc'},
+                orders: ['desc', 'asc', null]
+            },this.sortConfig);
         }
     },
     data(){
@@ -350,9 +350,22 @@ export default {
          */
         formSubmit(e){
             if(e)e.preventDefault();
+
             this.$refs.grid.clearSort();
-            this.params.orderField = null;
-            this.params.order = null;
+            this.params.order = undefined;
+            this.params.orderField = undefined;
+            if(this.computedSortConfig && this.computedSortConfig.remote && this.computedSortConfig.defaultSort && this.computedSortConfig.defaultSort.field){
+                const column = this.dataTableColumns.find(item=>item.field===this.computedSortConfig.defaultSort.field);
+                if(column){
+                    this.params.orderField = (column.params&&column.params.orderField)||column.field;
+                    this.params.order = this.computedSortConfig.defaultSort.order;
+                    this.$refs.grid.sort(this.computedSortConfig.defaultSort.field, this.params.order);
+                }
+            }
+
+            //this.$refs.grid.clearSort();
+            //this.params.orderField = null;
+            //this.params.order = null;
             this.params.from = 0;
             this.params.cursor = undefined;
             this.cursors = [null];
@@ -496,7 +509,7 @@ export default {
         },
         // 排序跳转
         vxeSortChanged({column,property,order}){
-            if(this.sortConfig && this.sortConfig.remote){
+            if(this.computedSortConfig && this.computedSortConfig.remote){
                 this.params.orderField = order===null?null:((column.params&&column.params.orderField)||property);
                 this.params.order = order;
                 this.emitChange()

@@ -10,7 +10,7 @@ export default {
     },
     computed:{
         value(){
-            if(this.el){
+            if(this.el && this.isJson){
                 try{
                     return JSON.stringify(JSON.parse(this.el),null,4)
                 }catch (e){
