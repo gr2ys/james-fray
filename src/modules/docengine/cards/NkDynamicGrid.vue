@@ -155,6 +155,9 @@ export default {
                 row[field.key]=undefined;
             });
             this.data.push(row);
+            if(this.def.items.find(item=>item.calcTrigger)){
+                this.trigger = true;
+            }
             await this.$refs.xTable.loadData(this.data);
             await this.$refs.xTable.setActiveRow(row);
             await this.$refs.xTable.validate(row).catch(errMap => errMap)
