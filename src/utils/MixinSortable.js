@@ -43,7 +43,10 @@ export default ()=>{
                                     Sortable.create(vxeTable.$el.querySelector(".body--wrapper>.vxe-table--body tbody"), {
                                         handle: '.drag-btn',
                                         onEnd:({newIndex,oldIndex})=>{
-                                            vxeTable.data.splice(newIndex, 0, vxeTable.data.splice(oldIndex, 1)[0]);
+                                            if(newIndex!==oldIndex){
+                                                vxeTable.data.splice(newIndex, 0, vxeTable.data.splice(oldIndex, 1)[0]);
+                                                this.nk$Sortend && this.nk$Sortend(vxeTable);
+                                            }
                                         }
                                     })
                                 );

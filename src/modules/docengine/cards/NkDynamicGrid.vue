@@ -24,6 +24,7 @@
             auto-resize
             keep-source
             resizable
+            row-key
             highlight-hover-row
             show-header-overflow="tooltip"
             show-overflow="tooltip"
@@ -32,6 +33,7 @@
             :data="data"
             :loading="loading"
             :edit-rules="tableValidRules"
+            :row-config="{useKey:def.sortable}"
             :edit-config="{trigger: 'click', mode: 'row', showIcon: editMode, activeMethod: xTableActiveMethod, showStatus: true}"
             :sort-config="{trigger: 'cell', remote: false,showIcon: !editMode, orders: ['desc', 'asc', null]}"
             :class="editMode&&'edit-table'"
@@ -168,6 +170,12 @@ export default {
         },
         xTableRemove(data,seq){
             this.$nkSortableRemove(data,seq);
+            if(this.def.items.find(item=>item.calcTrigger)){
+                this.trigger = true;
+                this.xTableEditClosed();
+            }
+        },
+        nk$Sortend(){
             if(this.def.items.find(item=>item.calcTrigger)){
                 this.trigger = true;
                 this.xTableEditClosed();
