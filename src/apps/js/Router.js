@@ -15,6 +15,7 @@ import AuthUtils from "./AuthUtils"
 import NkLayout from "../NkLayout";
 import NkNotFound from "../NkNotFound";
 import NkMe from "../NkMe";
+import NkAbout from "../NkAbout";
 import NkApi from "../NkApi";
 import StateUI from "../stores/StateUI";
 
@@ -46,6 +47,15 @@ export default function(VueRouter,moduleRoutes,loginPage,defaultPage) {
             closable :false,
             meta: {
               title: '欢迎页'
+            },
+          },
+          {
+            name: '关于',
+            path: '/apps/about',
+            component: NkAbout,
+            closable :false,
+            meta: {
+              title: '关于ELCube'
             },
           },
           {

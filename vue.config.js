@@ -4,7 +4,8 @@ const fs = require('fs');
 
 const packageInfo = require("./package.json");
 const version = packageInfo.version;
-fs.writeFileSync(__dirname + '/src/apps/version.json',JSON.stringify({version}));
+const dependencies = packageInfo.dependencies;
+fs.writeFileSync(__dirname + '/src/apps/version.json',JSON.stringify({version,dependencies}));
 
 module.exports = {
   "pages": {

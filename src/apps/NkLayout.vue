@@ -22,7 +22,7 @@
                         <div class="copyright nk-primary-background-color" v-if="!collapsed" :class="{
                             'dev':version.version.toUpperCase().indexOf('BETA')>-1 || env&&env[1]&&env[1].toUpperCase().indexOf('SNAPSHOT')>-1
                         }">
-                            elcube&reg; ver. {{version.version}} / {{(env&&env[1])||'0.0.0'}}
+                            elcube&trade; ver. {{version.version}} / {{(env&&env[1])||'0.0.0'}}
                         </div>
                     </transition>
                 </div>
@@ -60,6 +60,9 @@
                                 </a-menu-item>
                                 <a-menu-item key="2">
                                     <a @click="logout()">安全退出</a>
+                                </a-menu-item>
+                                <a-menu-item key="4">
+                                    <router-link to="/apps/about">关于ELCube</router-link>
                                 </a-menu-item>
                             </a-menu>
                         </a-dropdown>

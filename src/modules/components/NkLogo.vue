@@ -15,7 +15,7 @@
     <div class="nk-application-logo">
         <a href="http://elcube.cn" target="_blank">
             <img :src="logo" alt=""/>
-            <span>ELCube</span>
+            <span>ELCube<sup style="font-size: 14px;">&trade;</sup></span>
         </a>
     </div>
 </template>
