@@ -44,7 +44,7 @@
                                                  }"
                                                  style="cursor: move"
                                                  :title="item.name">
-                                    <a-popconfirm @confirm="$nkSortableRemove(def.items,seq+1)" :title="`移除[${item.name}]?`">
+                                    <a-popconfirm @confirm="remove(def.items,seq+1)" :title="`移除[${item.name}]?`">
                                         <a-icon type="close" v-if="editMode && item._selected" style="position: absolute;right: -25px;top:-15px;cursor: pointer;"/>
                                     </a-popconfirm>
                                 </nk-form-divider>
@@ -77,7 +77,7 @@
                                                :style="item.style"
                                                :designMode="true"
                                     ></component>
-                                    <a-popconfirm :slot="reviewEditMode && item.control > 0?'edit':'default'" @confirm="$nkSortableRemove(def.items,seq+1)" :title="`移除[${item.name}]?`">
+                                    <a-popconfirm :slot="reviewEditMode && item.control > 0?'edit':'default'" @confirm="remove(def.items,seq+1)" :title="`移除[${item.name}]?`">
                                         <a-icon type="close" v-if="editMode && item._selected" style="position: absolute;right: 5px;top:5px;cursor: pointer;z-index: 1000"/>
                                     </a-popconfirm>
                                 </nk-form-item>
@@ -234,7 +234,7 @@ export default {
     mixins:[new MixinDef({
       width:60,
       col:2,
-      titleWidth:140
+      titleWidth:120
     }),MixinSortable(),MixinDynamicDef],
     filters:{
         formatInputType(value,inputTypeDefs){
@@ -300,7 +300,7 @@ export default {
                 if(!this.def.items.find(item => item===this.dropItem)){
                     this.dropItem = {
                         key : 'key'+this.def.items.length,
-                        name: '字段'+this.def.items.length,
+                        name: (inputType.name&&inputType.name.split('|')[1])+this.def.items.length,
                         col:1,
                         width:10,
                         inputType: inputType.value,
@@ -370,6 +370,10 @@ export default {
                 this.$message.warn(`Key:${this.selectedItem.key}已存在`)
                 this.selectedItem.key = this.selectedItem.key+'1';
             }
+        },
+        remove(items,index){
+          this.selectItem();
+          this.$nkSortableRemove(items,index);
         }
     }
 }
