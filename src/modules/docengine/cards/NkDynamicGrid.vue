@@ -174,6 +174,12 @@ export default {
                 this.xTableEditClosed();
             }
         },
+        nk$Sortend(){
+            if(this.def.items.find(item=>item.calcTrigger)){
+                this.trigger = true;
+                this.xTableEditClosed();
+            }
+        },
         itemChange(e,item,scope){
             // 注意：表格不支持单元格编辑联动
 
